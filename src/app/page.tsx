@@ -1,65 +1,93 @@
 import Image from "next/image";
 
+import { HeroVideo } from "@/components/hero-video";
+import { PhoneDemo } from "@/components/phone-demo";
+import { Button } from "@/components/ui/button";
+
 export default function Home() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex w-full max-w-3xl flex-1 flex-col items-center justify-between bg-white px-16 py-32 sm:items-start dark:bg-black">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl leading-10 font-semibold tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-1 flex-col bg-orange-50/40">
+      <header className="flex items-center justify-between px-6 py-5 sm:px-10">
+        <div className="flex items-center gap-2">
+          <Image
+            src="/logo.png"
+            alt="토선생"
+            width={36}
+            height={36}
+            className="size-9"
+          />
+          <span className="text-lg font-bold text-orange-500">토선생</span>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="bg-foreground text-background flex h-12 w-full items-center justify-center gap-2 rounded-full px-5 transition-colors hover:bg-[#383838] md:w-[158px] dark:hover:bg-[#ccc]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
+        <nav className="hidden items-center gap-8 text-sm font-medium text-zinc-600 sm:flex">
+          <a href="#" className="hover:text-orange-500">
+            서비스 소개
           </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] md:w-[158px] dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
+          <a href="#" className="hover:text-orange-500">
+            문의하기
           </a>
+        </nav>
+        <Button
+          size="lg"
+          className="h-11 rounded-full bg-orange-500 px-6 text-base text-white hover:bg-orange-600"
+        >
+          시작하기
+        </Button>
+      </header>
+
+      <main className="mx-auto flex w-full max-w-6xl flex-col items-center gap-10 px-6 pt-10 pb-20 lg:flex-row lg:items-center lg:gap-12">
+        <div className="flex flex-col items-center gap-6 text-center lg:w-1/2 lg:items-start lg:text-left">
+          <h1 className="max-w-xl text-3xl leading-tight font-bold tracking-tight text-zinc-900 sm:text-5xl">
+            토익 스피킹 채점부터 <br className="hidden sm:block" /> 피드백까지,{" "}
+            <span className="text-orange-500">토선생</span>과 함께
+          </h1>
+          <p className="max-w-lg text-base leading-relaxed text-zinc-500 sm:text-lg">
+            토선생은 실제 토익 스피킹 시험과 동일한 유형의 문제로 모의고사를
+            보고, AI가 발음·유창성·문법·어휘를 공식 채점 기준을 사용해 분석해주고 감점된 부분과
+            피드백을 알려주는 서비스예요. 매번 학원이나 첨삭을 기다릴 필요
+            없이, 원할 때마다 실전처럼 연습하고 바로 확인할 수 있어요.
+          </p>
+          <ul className="grid grid-cols-1 gap-2 text-left text-sm text-zinc-600 sm:grid-cols-3 sm:gap-4">
+            <li className="flex items-center gap-1.5">
+              <span className="text-orange-500">✓</span> 감점 포인트 진단
+            </li> 
+            <li className="flex items-center gap-1.5">
+              <span className="text-orange-500">✓</span> 실전과 동일한 유형
+            </li>
+            <li className="flex items-center gap-1.5">
+              <span className="text-orange-500">✓</span> 즉시 피드백 제공
+            </li>
+          </ul>
+          <Button
+            size="lg"
+            className="h-14 rounded-full bg-orange-500 px-9 text-lg text-white hover:bg-orange-600"
+          >
+            지금 당장 모의고사 보기
+          </Button>
+        </div>
+
+        <div className="w-full overflow-hidden rounded-3xl bg-white shadow-sm lg:w-1/2">
+          <HeroVideo />
         </div>
       </main>
+
+      <PhoneDemo />
+
+      <footer className="border-t border-orange-200/60 px-6 py-8 sm:px-10">
+        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 text-sm text-zinc-500 sm:flex-row">
+          <span>© {new Date().getFullYear()} 토선생. All rights reserved.</span>
+          <nav className="flex items-center gap-5">
+            <a href="#" className="hover:text-orange-500">
+              이용약관
+            </a>
+            <a href="#" className="hover:text-orange-500">
+              개인정보처리방침
+            </a>
+            <a href="#" className="hover:text-orange-500">
+              문의하기
+            </a>
+          </nav>
+        </div>
+      </footer>
     </div>
   );
 }
