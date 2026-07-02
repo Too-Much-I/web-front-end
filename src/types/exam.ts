@@ -1,18 +1,51 @@
-export type ExamPart =
-  | "read_aloud"
-  | "describe_picture"
-  | "respond_questions"
-  | "respond_with_info"
-  | "express_opinion";
+export interface ExamTableItem {
+  time: string;
+  session_title: string;
+  speaker?: string | null;
+  note?: string;
+}
+
+export interface ExamTableContext {
+  title: string;
+  location: string;
+  date: string;
+  fee: string;
+  items: ExamTableItem[];
+}
+
+export interface RawExamQuestion {
+  part_number: number;
+  question_number: number;
+  reference_text?: string;
+  image_url?: string;
+  question?: string;
+  table_context?: ExamTableContext;
+  /** Narrated audio of `question`. Mocked locally for now; the real exam will get this from the server. */
+  audio_url?: string;
+}
+
+export interface RawExamSession {
+  mock_exam_id: string;
+  title: string;
+  questions: RawExamQuestion[];
+}
 
 export interface ExamQuestion {
-  id: string;
-  part: ExamPart;
-  order: number;
-  prompt: string;
+  partNumber: number;
+  questionNumber: number;
+  referenceText?: string;
   imageUrl?: string;
-  prepSeconds: number;
-  responseSeconds: number;
+  question?: string;
+  audioUrl?: string;
+  tableContext?: ExamTableContext;
+  prepTimeSec: number;
+  speakTimeSec: number;
+}
+
+export interface ExamSession {
+  examId: string;
+  title: string;
+  questions: ExamQuestion[];
 }
 
 export interface ExamAttempt {
