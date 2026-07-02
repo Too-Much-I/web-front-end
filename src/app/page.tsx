@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import { HeroVideo } from "@/components/hero-video";
 import { PhoneDemo } from "@/components/phone-demo";
@@ -29,6 +30,8 @@ export default function Home() {
         <Button
           size="lg"
           className="h-11 rounded-full bg-orange-500 px-6 text-base text-white hover:bg-orange-600"
+          render={<Link href="/exam/prepare" />}
+          nativeButton={false}
         >
           시작하기
         </Button>
@@ -60,6 +63,8 @@ export default function Home() {
           <Button
             size="lg"
             className="h-14 rounded-full bg-orange-500 px-9 text-lg text-white hover:bg-orange-600"
+            render={<Link href="/exam/prepare" />}
+            nativeButton={false}
           >
             지금 당장 모의고사 보기
           </Button>
