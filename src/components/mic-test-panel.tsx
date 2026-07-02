@@ -147,7 +147,7 @@ export function MicTestPanel() {
           />
         </button>
 
-        <div className="flex h-10 items-end gap-1">
+        <div className="flex h-10 items-center gap-1">
           {Array.from({ length: BAR_COUNT }, (_, i) => (
             <span
               key={i}

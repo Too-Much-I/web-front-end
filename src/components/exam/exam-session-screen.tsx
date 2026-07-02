@@ -30,7 +30,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
 
   const question = questions[index];
 
-  const { startRecording, stopRecording } = useAnswerRecorder();
+  const { startRecording, stopRecording, levelBarRefs } = useAnswerRecorder();
 
   const handlePhaseComplete = useCallback(() => {
     if (phase === "directions") {
@@ -296,16 +296,15 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
             )}
 
             {phase === "speaking" && (
-              <div className="flex h-8 items-end gap-1" aria-hidden>
+              <div className="flex h-8 items-center gap-1" aria-hidden>
                 {Array.from({ length: 24 }, (_, i) => (
                   <span
                     key={i}
-                    className="w-1 rounded-full bg-red-300"
-                    style={{
-                      height: "100%",
-                      animation: `soundwave ${0.6 + (i % 5) * 0.08}s ease-in-out infinite`,
-                      animationDelay: `${(i % 6) * 0.07}s`,
+                    ref={(el) => {
+                      levelBarRefs.current[i] = el;
                     }}
+                    className="w-1 rounded-full bg-red-300 transition-[height] duration-75"
+                    style={{ height: "4px" }}
                   />
                 ))}
               </div>
