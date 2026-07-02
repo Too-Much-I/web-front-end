@@ -9,12 +9,10 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const BAR_COUNT = 24;
-const IDLE_BARS = Array.from({ length: BAR_COUNT }, () => 0);
+const IDLE_BAR_HEIGHT = "4px";
 
 export function MicTestPanel() {
   const [isRecording, setIsRecording] = useState(false);
-  const [level, setLevel] = useState(0);
-  const [barLevels, setBarLevels] = useState<number[]>(IDLE_BARS);
   const [error, setError] = useState<string | null>(null);
 
   const streamRef = useRef<MediaStream | null>(null);
@@ -22,6 +20,15 @@ export function MicTestPanel() {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const dataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const rafRef = useRef<number | null>(null);
+  const barRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const micButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  const resetVisuals = () => {
+    barRefs.current.forEach((el) => {
+      if (el) el.style.height = IDLE_BAR_HEIGHT;
+    });
+    if (micButtonRef.current) micButtonRef.current.style.transform = "";
+  };
 
   const stopRecording = useCallback(() => {
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
@@ -33,8 +40,7 @@ export function MicTestPanel() {
     analyserRef.current = null;
     dataRef.current = null;
     setIsRecording(false);
-    setLevel(0);
-    setBarLevels(IDLE_BARS);
+    resetVisuals();
   }, []);
 
   useEffect(() => stopRecording, [stopRecording]);
@@ -70,12 +76,20 @@ export function MicTestPanel() {
         if (!analyserNode || !data) return;
 
         analyserNode.getByteFrequencyData(data);
-        const bars = Array.from(
-          { length: BAR_COUNT },
-          (_, i) => (data[i * step] ?? 0) / 255,
-        );
-        setBarLevels(bars);
-        setLevel(bars.reduce((sum, v) => sum + v, 0) / bars.length);
+
+        let sum = 0;
+        for (let i = 0; i < BAR_COUNT; i++) {
+          const v = (data[i * step] ?? 0) / 255;
+          sum += v;
+          const el = barRefs.current[i];
+          if (el) el.style.height = `${Math.max(4, v * 40)}px`;
+        }
+
+        if (micButtonRef.current) {
+          const avg = sum / BAR_COUNT;
+          micButtonRef.current.style.transform = `scale(${1 + avg * 0.12})`;
+        }
+
         rafRef.current = requestAnimationFrame(tick);
       };
       tick();
@@ -108,6 +122,7 @@ export function MicTestPanel() {
 
       <div className="flex flex-col items-center gap-5">
         <button
+          ref={micButtonRef}
           type="button"
           onClick={handleToggle}
           aria-pressed={isRecording}
@@ -115,7 +130,6 @@ export function MicTestPanel() {
             "flex size-24 items-center justify-center rounded-full shadow-md transition-transform duration-100",
             isRecording ? "bg-red-500" : "bg-orange-600",
           )}
-          style={{ transform: `scale(${1 + level * 0.12})` }}
         >
           <Image
             src="/mic-icon.png"
@@ -128,14 +142,17 @@ export function MicTestPanel() {
         </button>
 
         <div className="flex h-10 items-end gap-1">
-          {barLevels.map((v, i) => (
+          {Array.from({ length: BAR_COUNT }, (_, i) => (
             <span
               key={i}
+              ref={(el) => {
+                barRefs.current[i] = el;
+              }}
               className={cn(
                 "w-1 rounded-full transition-[height] duration-75",
                 isRecording ? "bg-orange-400" : "bg-orange-200",
               )}
-              style={{ height: `${Math.max(4, v * 40)}px` }}
+              style={{ height: IDLE_BAR_HEIGHT }}
             />
           ))}
         </div>
