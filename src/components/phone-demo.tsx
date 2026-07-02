@@ -91,7 +91,7 @@ export function PhoneDemo() {
         실제 시험처럼 녹음하고, <span className="text-orange-500">바로</span>{" "}
         피드백 받기
       </h2>
-      <p className="max-w-md text-zinc-500">
+      <p className="max-w-lg text-zinc-500">
         핸드폰 화면을 눌러서 녹음 화면과 채점 결과 화면을 직접 확인해보세요.
       </p>
 
