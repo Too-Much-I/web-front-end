@@ -2,6 +2,7 @@
 
 import { Mic } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -12,6 +13,7 @@ const BAR_COUNT = 24;
 const IDLE_BAR_HEIGHT = "4px";
 
 export function MicTestPanel() {
+  const router = useRouter();
   const [isRecording, setIsRecording] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -108,7 +110,7 @@ export function MicTestPanel() {
   };
 
   const handleStartExam = () => {
-    toast.info("모의고사 진행 화면은 아직 준비 중이에요!");
+    router.push("/exam/session");
   };
 
   return (
