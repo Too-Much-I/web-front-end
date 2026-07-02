@@ -53,3 +53,15 @@ export interface ExamAttempt {
   status: "in_progress" | "uploading" | "grading" | "completed" | "failed";
   startedAt: string;
 }
+
+/** GET /api/v1/exams/{examId}/questions/{questionId}/upload-url 의 result */
+export interface ExamAnswerUploadUrl {
+  uploadUrl: string;
+  fileKey: string;
+  expiresIn: number;
+}
+
+/** POST /api/v1/exams/{examId}/questions/{questionId}/submit 의 result */
+export interface ExamAnswerSubmitResult {
+  status: "PROCESSING";
+}
