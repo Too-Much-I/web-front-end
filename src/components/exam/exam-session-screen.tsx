@@ -154,7 +154,10 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
 
   if (phase === "directions") {
     return (
-      <ExamDirectionsScreen partNumber={question.partNumber} onComplete={handlePhaseComplete} />
+      <div className="flex flex-1 flex-col bg-white">
+        <ExamHeader label={`Part ${question.partNumber}`} />
+        <ExamDirectionsScreen partNumber={question.partNumber} onComplete={handlePhaseComplete} />
+      </div>
     );
   }
 
@@ -163,22 +166,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
 
   return (
     <div className="flex flex-1 flex-col bg-white">
-      <header className="relative h-16 overflow-hidden bg-orange-500 sm:h-20">
-        <div
-          className="absolute inset-0 bg-blue-950"
-          style={{ clipPath: "polygon(60% 0%, 100% 0%, 100% 100%, 84% 100%)" }}
-        />
-        <Link
-          href="/"
-          className="absolute top-1/2 left-6 flex -translate-y-1/2 items-center gap-1.5 sm:left-10"
-        >
-          <Image src="/logo.png" alt="" width={28} height={28} className="size-7" />
-          <span className="text-lg font-bold text-white sm:text-xl">토선생</span>
-        </Link>
-        <span className="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center text-lg font-bold text-white sm:text-xl md:text-2xl">
-          Question {index + 1} of {total}
-        </span>
-      </header>
+      <ExamHeader label={`Question ${index + 1} of ${total}`} />
 
       <main className="mx-auto flex w-full min-h-0 max-w-2xl flex-1 flex-col items-center gap-4 overflow-y-auto px-6 pt-8 pb-6 text-center md:max-w-3xl md:gap-6">
         <span className="w-fit shrink-0 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600 sm:text-sm">
@@ -330,6 +318,27 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
         </p>
       </footer>
     </div>
+  );
+}
+
+function ExamHeader({ label }: { label: string }) {
+  return (
+    <header className="relative h-16 overflow-hidden bg-orange-500 sm:h-20">
+      <div
+        className="absolute inset-0 bg-blue-950"
+        style={{ clipPath: "polygon(60% 0%, 100% 0%, 100% 100%, 84% 100%)" }}
+      />
+      <Link
+        href="/"
+        className="absolute top-1/2 left-6 flex -translate-y-1/2 items-center gap-1.5 sm:left-10"
+      >
+        <Image src="/logo.png" alt="" width={28} height={28} className="size-7" />
+        <span className="text-lg font-bold text-white sm:text-xl">토선생</span>
+      </Link>
+      <span className="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center text-lg font-bold text-white sm:text-xl md:text-2xl">
+        {label}
+      </span>
+    </header>
   );
 }
 
