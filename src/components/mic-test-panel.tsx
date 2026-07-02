@@ -51,7 +51,11 @@ export function MicTestPanel() {
     setError(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
+        audio: {
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false,
+        },
       });
       streamRef.current = stream;
 
