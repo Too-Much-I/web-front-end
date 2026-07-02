@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { ExamDirectionsScreen } from "@/components/exam/exam-directions-screen";
 import { Button } from "@/components/ui/button";
@@ -106,6 +106,19 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     `${question?.questionNumber}-speak-cue`,
     phase === "speak-cue",
   );
+
+  useEffect(() => {
+    if (!question) return;
+    // router.push/replace always round-trips to the server in the App Router (no
+    // "shallow routing" like the Pages Router had), so we write the URL directly
+    // via the History API. useSearchParams() still reacts to it, but no request
+    // fires and no history entry/remount happens.
+    const params = new URLSearchParams(window.location.search);
+    params.set("part", String(question.partNumber));
+    params.set("question", String(question.questionNumber));
+    params.set("phase", phase);
+    window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
+  }, [question, phase]);
 
   if (finished) {
     return <ExamCompleteCard />;
