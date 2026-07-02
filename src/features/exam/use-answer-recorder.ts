@@ -2,15 +2,71 @@
 
 import { useCallback, useRef, useState } from "react";
 
+export const ANSWER_LEVEL_BAR_COUNT = 24;
+
 /**
  * 문항별 답변 녹음을 캡처하는 훅.
  * 녹음본은 업로드 전까지 메모리(Blob)에만 잠깐 들고 있는다 — 별도의 로컬 임시 저장소는 두지 않는다.
+ *
+ * 녹음 중에는 AnalyserNode로 실제 마이크 음량을 읽어 levelBarRefs에 등록된 DOM
+ * 엘리먼트의 높이를 직접 갱신한다(리렌더 없이) — mic-test-panel의 파형 표시와 동일한 방식.
  */
 export function useAnswerRecorder() {
   const [isRecording, setIsRecording] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const dataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const levelBarRefs = useRef<(HTMLSpanElement | null)[]>([]);
+
+  const stopVisualizer = useCallback(() => {
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+    audioCtxRef.current?.close();
+    audioCtxRef.current = null;
+    analyserRef.current = null;
+    dataRef.current = null;
+    levelBarRefs.current.forEach((el) => {
+      if (el) el.style.height = "4px";
+    });
+  }, []);
+
+  const startVisualizer = useCallback((stream: MediaStream) => {
+    const audioCtx = new AudioContext();
+    audioCtxRef.current = audioCtx;
+
+    const source = audioCtx.createMediaStreamSource(stream);
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    analyser.smoothingTimeConstant = 0.6;
+    source.connect(analyser);
+
+    analyserRef.current = analyser;
+    dataRef.current = new Uint8Array(new ArrayBuffer(analyser.frequencyBinCount));
+
+    const step = Math.max(1, Math.floor(analyser.frequencyBinCount / ANSWER_LEVEL_BAR_COUNT));
+
+    const tick = () => {
+      const analyserNode = analyserRef.current;
+      const data = dataRef.current;
+      if (!analyserNode || !data) return;
+
+      analyserNode.getByteFrequencyData(data);
+
+      for (let i = 0; i < ANSWER_LEVEL_BAR_COUNT; i++) {
+        const v = (data[i * step] ?? 0) / 255;
+        const el = levelBarRefs.current[i];
+        if (el) el.style.height = `${Math.max(4, v * 32)}px`;
+      }
+
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    tick();
+  }, []);
 
   const startRecording = useCallback(async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -30,10 +86,12 @@ export function useAnswerRecorder() {
     recorderRef.current = recorder;
     recorder.start();
     setIsRecording(true);
-  }, []);
+    startVisualizer(stream);
+  }, [startVisualizer]);
 
   const stopRecording = useCallback((): Promise<Blob> => {
     return new Promise((resolve) => {
+      stopVisualizer();
       const recorder = recorderRef.current;
       if (!recorder) {
         resolve(new Blob());
@@ -51,7 +109,7 @@ export function useAnswerRecorder() {
       };
       recorder.stop();
     });
-  }, []);
+  }, [stopVisualizer]);
 
-  return { isRecording, startRecording, stopRecording };
+  return { isRecording, startRecording, stopRecording, levelBarRefs };
 }
