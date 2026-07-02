@@ -26,15 +26,26 @@ export function useAudioCue(
     }
 
     const audio = new Audio(src);
-    const finish = () => onEndedRef.current();
+    let fallbackTimeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    const finish = () => {
+      clearTimeout(fallbackTimeoutId);
+      onEndedRef.current();
+    };
+    // Playback failed (bad format, 404, decode error, autoplay block, ...): don't skip
+    // the screen instantly, show it for the same fallback duration as a missing src.
+    const onError = () => {
+      fallbackTimeoutId = setTimeout(finish, fallbackDurationMs);
+    };
 
     audio.addEventListener("ended", finish);
-    audio.addEventListener("error", finish);
-    audio.play().catch(finish);
+    audio.addEventListener("error", onError);
+    audio.play().catch(onError);
 
     return () => {
       audio.removeEventListener("ended", finish);
-      audio.removeEventListener("error", finish);
+      audio.removeEventListener("error", onError);
+      clearTimeout(fallbackTimeoutId);
       audio.pause();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
