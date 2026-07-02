@@ -6,8 +6,10 @@ import { useCallback, useEffect, useState } from "react";
 
 import { ExamDirectionsScreen } from "@/components/exam/exam-directions-screen";
 import { Button } from "@/components/ui/button";
+// import { uploadExamAnswer } from "@/features/exam/api/exam-answer-upload"; // TODO: 서버 배포 후 주석 해제
 import { AUDIO_CUES } from "@/features/exam/audio-cues";
 import { getExamPartMeta } from "@/features/exam/part-meta";
+import { useAnswerRecorder } from "@/features/exam/use-answer-recorder";
 import { useAudioCue } from "@/features/exam/use-audio-cue";
 import { useAudioSequence } from "@/features/exam/use-audio-sequence";
 import { formatSeconds, usePhaseCountdown } from "@/features/exam/use-phase-countdown";
@@ -27,6 +29,8 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
   const [finished, setFinished] = useState(false);
 
   const question = questions[index];
+
+  const { startRecording, stopRecording } = useAnswerRecorder();
 
   const handlePhaseComplete = useCallback(() => {
     if (phase === "directions") {
@@ -106,6 +110,28 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     `${question?.questionNumber}-speak-cue`,
     phase === "speak-cue",
   );
+
+  useEffect(() => {
+    if (!question || phase !== "speaking") return;
+
+    startRecording().catch((err) => {
+      console.error("마이크 접근에 실패했어요", err);
+    });
+
+    return () => {
+      void stopRecording();
+      // stopRecording()이 반환하는 Blob은 서버가 배포된 뒤 uploadExamAnswer로 전달하면 된다.
+      // 서버가 아직 배포되지 않아 실제 업로드 호출은 막아둠.
+      // 배포 후 위 import와 아래 호출의 주석을 해제하면
+      // 녹음 종료 → S3 업로드 → AI 채점 요청까지 자동으로 이어진다.
+      // stopRecording().then((audioBlob) => {
+      //   uploadExamAnswer(session.examId, String(question.questionNumber), audioBlob).catch(
+      //     (err) => console.error("답변 업로드에 실패했어요", err),
+      //   );
+      // });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, question]);
 
   useEffect(() => {
     if (!question) return;
