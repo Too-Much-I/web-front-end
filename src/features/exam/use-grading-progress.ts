@@ -12,7 +12,7 @@ const POLL_INTERVAL_MS = 3000;
 /** 100%로 채워지는 트랜지션이 끝난 뒤 페이지를 이동시키기까지의 여유 시간. */
 const COMPLETE_TRANSITION_MS = 700;
 /** 이 시간 동안 계속 실패해야 진짜 문제로 간주한다. 그 전까지는 일시적인 네트워크 오류로 보고 조용히 재시도한다. */
-const NETWORK_ERROR_TIMEOUT_MS = 90_000;
+const NETWORK_ERROR_TIMEOUT_MS = 120_000;
 
 export function useGradingProgress(examId: string, onComplete: () => void) {
   const [progress, setProgress] = useState(0);
