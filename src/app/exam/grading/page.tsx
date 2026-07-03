@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
-import { ExamHeader } from "@/components/exam/exam-session-screen";
+import { ExamHeader } from "@/components/exam/exam-header";
 import { GradingWaitScreen } from "@/components/exam/grading-wait-screen";
 
 function ExamGradingContent() {
