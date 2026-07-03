@@ -35,6 +35,7 @@ export function useGradingProgress(examId: string, onComplete: () => void) {
     }, 300);
 
     let completeTimeoutId: ReturnType<typeof setTimeout> | null = null;
+    let pollTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const checkStatus = async () => {
       if (settled) return;
@@ -45,13 +46,11 @@ export function useGradingProgress(examId: string, onComplete: () => void) {
         if (status.overallStatus === "COMPLETED") {
           settled = true;
           clearInterval(progressId);
-          clearInterval(pollId);
           setProgress(100);
           completeTimeoutId = setTimeout(() => onCompleteRef.current(), COMPLETE_TRANSITION_MS);
         } else if (status.overallStatus === "FAILED") {
           settled = true;
           clearInterval(progressId);
-          clearInterval(pollId);
           setFailed(true);
         }
       } catch (err) {
@@ -61,19 +60,24 @@ export function useGradingProgress(examId: string, onComplete: () => void) {
           console.error("채점 상태 조회가 계속 실패했어요", err);
           settled = true;
           clearInterval(progressId);
-          clearInterval(pollId);
           setFailed(true);
         }
       }
     };
 
-    const pollId = setInterval(checkStatus, POLL_INTERVAL_MS);
-    void checkStatus();
+    // setInterval 대신, 이전 요청이 끝난 뒤에야 다음 요청을 예약하는 순차 루프를 사용한다.
+    // 그래야 요청이 겹쳐서 firstErrorAt을 서로 다른 응답이 경쟁적으로 덮어쓰는 일이 없다.
+    const runPoll = async () => {
+      await checkStatus();
+      if (settled) return;
+      pollTimeoutId = setTimeout(runPoll, POLL_INTERVAL_MS);
+    };
+    void runPoll();
 
     return () => {
       settled = true;
       clearInterval(progressId);
-      clearInterval(pollId);
+      if (pollTimeoutId) clearTimeout(pollTimeoutId);
       if (completeTimeoutId) clearTimeout(completeTimeoutId);
     };
   }, [examId]);
