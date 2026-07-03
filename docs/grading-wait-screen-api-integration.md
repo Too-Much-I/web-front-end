@@ -45,10 +45,18 @@
 
 ### 채택안
 
-첫 실패 시각(`firstErrorAt`)만 기록해두고, 이후 요청이 한 번이라도 성공하면 초기화한다. **연속으로 90초(`NETWORK_ERROR_TIMEOUT_MS`) 이상 실패가 이어질 때만** `console.error`를 한 번 찍고 `failed` 상태로 전환해 에러 UI를 보여준다. 서버가 명시적으로 내려주는 `overallStatus === "FAILED"`는 이 유예 없이 즉시 반영한다 — 이건 네트워크 문제가 아니라 서버가 확정적으로 알려준 실패이기 때문이다.
+첫 실패 시각(`firstErrorAt`)만 기록해두고, 이후 요청이 한 번이라도 성공하면 초기화한다. **연속으로 120초(`NETWORK_ERROR_TIMEOUT_MS`) 이상 실패가 이어질 때만** `console.error`를 한 번 찍고 `failed` 상태로 전환해 에러 UI를 보여준다. 서버가 명시적으로 내려주는 `overallStatus === "FAILED"`는 이 유예 없이 즉시 반영한다 — 이건 네트워크 문제가 아니라 서버가 확정적으로 알려준 실패이기 때문이다.
 
 ## 5. 남은 과제
 
 - `/exam/grading`, `/exam/result` 모두 `examId` 문자열 자체를 서버에 검증하지 않는다. 존재하지 않는 `examId`로 들어왔을 때 서버가 404/400을 주면, 그에 맞는 에러 UI가 아직 없다.
 - `/exam/result`는 `GET /api/v1/exams/{examId}/results` 응답을 그대로 JSON으로 찍어주는 자리표시(placeholder) 화면이다. 실제 결과/피드백 UI로 교체 필요.
 - 개발 서버에서 백엔드 없이 대기 화면만 확인하려면 `/exam/grading?examId=아무값`으로 직접 접근하면 된다(상태 조회는 실패하지만 진행률 타이머는 클라이언트에서 독립적으로 돈다). 다만 `COMPLETED` 응답이 없으므로 결과 페이지로의 전환까지는 이 방법으로 확인할 수 없다.
+
+## 6. CodeRabbit 리뷰 반영 (PR #8)
+
+- **폴링 언마운트 후 늦은 응답 처리** (`use-grading-progress.ts`): `checkStatus`가 `await` 중일 때 `examId` 변경이나 언마운트로 effect가 정리되면, 응답이 늦게 도착해도 상태 업데이트나 `onComplete` 콜백(페이지 이동)이 실행되지 않도록 `await` 직후에도 `settled`를 재확인하도록 수정. 완료 트랜지션용 `setTimeout`도 `completeTimeoutId`로 추적해 cleanup에서 `clearTimeout`하도록 변경.
+- **문서 오타 수정**: 위 4절의 네트워크 에러 유예 시간을 코드(`NETWORK_ERROR_TIMEOUT_MS`)와 동일한 120초로 정정(기존 90초로 잘못 기재됨).
+- **`/exam/result` 로딩/경쟁 상태 처리**: fetch가 끝날 때까지 화면이 비어 보이던 문제를 `isLoading`(파생 상태)으로 표시. 또한 `examId`가 바뀌기 전에 시작된 요청이 뒤늦게 도착해 최신 상태를 덮어쓰지 않도록 `cancelled` 플래그를 추가.
+- **`ApiEnvelope<T>` 타입 공통화**: `exam-grading-status.ts`와 `exam-grading-result.ts`에 중복 정의되어 있던 응답 envelope 타입을 `src/types/api.ts`로 추출.
+- **`ExamHeader` 컴포넌트 분리**: `exam-session-screen.tsx`(녹음/오디오/타이머 등 무거운 클라이언트 로직 포함)에 있던 `ExamHeader`를 `src/components/exam/exam-header.tsx`로 분리해, `/exam/grading`·`/exam/result`가 시험 진행 화면의 의존성을 불필요하게 가져오지 않도록 정리.
