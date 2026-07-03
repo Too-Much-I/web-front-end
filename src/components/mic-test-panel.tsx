@@ -12,14 +12,19 @@ import { cn } from "@/lib/utils";
 const BAR_COUNT = 24;
 const IDLE_BAR_HEIGHT = "4px";
 /** 평균 음량이 이 값을 넘는 상태가 VOICE_SUSTAIN_MS만큼 끊기지 않고 이어지면 마이크 입력이 정상인 것으로 판단한다. */
-const VOICE_THRESHOLD = 0.15;
-const VOICE_SUSTAIN_MS = 1000;
+const VOICE_THRESHOLD = 0.08;
+const VOICE_SUSTAIN_MS = 200;
+/** 녹음을 시작하고 이 시간이 지나도 통과하지 못하면 안내 문구를 보여준다. */
+const HINT_DELAY_MS = 3000;
+const HINT_VOLUME_TOO_LOW = "목소리를 조금 더 크게 내주세요.";
+const HINT_TOO_SHORT = "조금 더 길게 이야기해주세요.";
 
 export function MicTestPanel() {
   const router = useRouter();
   const [isRecording, setIsRecording] = useState(false);
   const [voiceVerified, setVoiceVerified] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hint, setHint] = useState<string | null>(null);
 
   const streamRef = useRef<MediaStream | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -30,6 +35,12 @@ export function MicTestPanel() {
   const micButtonRef = useRef<HTMLButtonElement | null>(null);
   /** 음량이 임계값을 넘기 시작한 시각. 끊기면 null로 리셋된다. */
   const voiceStreakStartRef = useRef<number | null>(null);
+  /** 녹음을 시작한 시각. 안내 문구를 보여줄 시점을 계산하는 데 사용한다. */
+  const recordingStartRef = useRef(0);
+  /** 녹음 중 한 번이라도 임계 음량을 넘겼는지 여부. 음량 문제와 지속시간 문제를 구분하는 데 사용한다. */
+  const everExceededThresholdRef = useRef(false);
+  /** 마지막으로 화면에 표시한 안내 문구. 매 프레임 동일한 값으로 setState하는 것을 방지한다. */
+  const shownHintRef = useRef<string | null>(null);
 
   const resetVisuals = () => {
     barRefs.current.forEach((el) => {
@@ -48,6 +59,8 @@ export function MicTestPanel() {
     analyserRef.current = null;
     dataRef.current = null;
     setIsRecording(false);
+    setHint(null);
+    shownHintRef.current = null;
     resetVisuals();
   }, []);
 
@@ -56,7 +69,11 @@ export function MicTestPanel() {
   const startRecording = useCallback(async () => {
     setError(null);
     setVoiceVerified(false);
+    setHint(null);
     voiceStreakStartRef.current = null;
+    everExceededThresholdRef.current = false;
+    shownHintRef.current = null;
+    recordingStartRef.current = performance.now();
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -105,14 +122,33 @@ export function MicTestPanel() {
           micButtonRef.current.style.transform = `scale(${1 + avg * 0.12})`;
         }
 
+        let verified = false;
         if (avg >= VOICE_THRESHOLD) {
+          everExceededThresholdRef.current = true;
           if (voiceStreakStartRef.current === null) {
             voiceStreakStartRef.current = performance.now();
           } else if (performance.now() - voiceStreakStartRef.current >= VOICE_SUSTAIN_MS) {
+            verified = true;
             setVoiceVerified(true);
           }
         } else {
           voiceStreakStartRef.current = null;
+        }
+
+        if (verified) {
+          shownHintRef.current = null;
+          setHint(null);
+        } else if (
+          performance.now() - recordingStartRef.current >=
+          HINT_DELAY_MS
+        ) {
+          const nextHint = everExceededThresholdRef.current
+            ? HINT_TOO_SHORT
+            : HINT_VOLUME_TOO_LOW;
+          if (shownHintRef.current !== nextHint) {
+            shownHintRef.current = nextHint;
+            setHint(nextHint);
+          }
         }
 
         rafRef.current = requestAnimationFrame(tick);
@@ -140,10 +176,15 @@ export function MicTestPanel() {
     <section className="flex w-full flex-col gap-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-zinc-100">
       <div className="flex flex-col items-center gap-1 text-center">
         <h2 className="text-base font-bold text-orange-500">마이크 테스트</h2>
-        <p className="text-sm text-zinc-500">
+        <p
+          className={cn(
+            "text-sm",
+            hint && !voiceVerified ? "text-orange-500" : "text-zinc-500",
+          )}
+        >
           {voiceVerified
             ? "마이크 테스트를 완료했어요!"
-            : "목소리가 잘 녹음되는지 확인해보세요."}
+            : hint ?? "목소리가 잘 녹음되는지 확인해보세요."}
         </p>
       </div>
 
