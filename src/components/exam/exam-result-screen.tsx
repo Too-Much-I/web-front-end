@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
+import { ExamFeedbackSurvey } from "@/components/exam/exam-feedback-survey";
+import { SurveyHintBubble } from "@/components/exam/survey-hint-bubble";
 import { TargetGradeMascot } from "@/components/exam/target-grade-mascot";
 import {
   getStoredTargetGradeId,
@@ -26,9 +28,20 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
   );
 
   const [targetGrade, setTargetGrade] = useState<TargetGradeOption | null>(null);
+  const [showSurveyHint, setShowSurveyHint] = useState(false);
 
   useEffect(() => {
     setTargetGrade(getTargetGradeOption(getStoredTargetGradeId()));
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY <= 0) return;
+      setShowSurveyHint(true);
+      window.removeEventListener("scroll", handleScroll);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const scoreGap = targetGrade ? targetGrade.score - result.totalScore : null;
@@ -187,6 +200,12 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
           ))}
         </ol>
       </section>
+
+      <ExamFeedbackSurvey />
+
+      {showSurveyHint && (
+        <SurveyHintBubble onDismiss={() => setShowSurveyHint(false)} />
+      )}
     </>
   );
 }
