@@ -60,3 +60,5 @@
 - **`/exam/result` 로딩/경쟁 상태 처리**: fetch가 끝날 때까지 화면이 비어 보이던 문제를 `isLoading`(파생 상태)으로 표시. 또한 `examId`가 바뀌기 전에 시작된 요청이 뒤늦게 도착해 최신 상태를 덮어쓰지 않도록 `cancelled` 플래그를 추가.
 - **`ApiEnvelope<T>` 타입 공통화**: `exam-grading-status.ts`와 `exam-grading-result.ts`에 중복 정의되어 있던 응답 envelope 타입을 `src/types/api.ts`로 추출.
 - **`ExamHeader` 컴포넌트 분리**: `exam-session-screen.tsx`(녹음/오디오/타이머 등 무거운 클라이언트 로직 포함)에 있던 `ExamHeader`를 `src/components/exam/exam-header.tsx`로 분리해, `/exam/grading`·`/exam/result`가 시험 진행 화면의 의존성을 불필요하게 가져오지 않도록 정리.
+- **폴링 순차 실행 + 요청 타임아웃 추가**: 기존에는 `setInterval`로 3초마다 무조건 `checkStatus`를 실행해, 요청 하나가 오래 걸리면 다음 요청과 겹칠 수 있었다. 이 경우 `firstErrorAt`(4절)을 서로 다른 요청이 동시에 건드리면서 "얼마나 오래 실패가 이어졌는지" 판단이 꼬일 수 있었다. `setInterval` 대신 이전 `checkStatus` 호출이 끝난 뒤에만 다음 호출을 `setTimeout`으로 예약하는 순차 루프(`runPoll`)로 바꿔, 한 번에 요청이 하나만 떠 있도록 보장했다.
+  - 이와 함께 `apiFetch`(`src/lib/api/client.ts`)에 `AbortController` 기반 요청 타임아웃(기본 10초)을 추가했다. 순차 루프로 바꾸면서 요청 하나가 서버 무응답으로 영원히 멈추면(hang) 전체 폴링이 그 자리에서 멈춰버리는 새로운 위험이 생기기 때문에, 반드시 타임아웃과 함께 적용해야 한다 — 타임아웃 없이 순차 루프만 적용하면 오히려 기존보다 더 나쁜 상태(폴링 완전 정지)가 될 수 있다.
