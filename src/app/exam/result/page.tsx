@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
 import { ExamHeader } from "@/components/exam/exam-header";
+import { ExamResultScreen } from "@/components/exam/exam-result-screen";
 import { getExamGradingResult } from "@/features/exam/api/exam-grading-result";
 import type { ExamGradingResult } from "@/types/exam";
 
@@ -35,16 +36,20 @@ function ExamResultContent() {
   return (
     <div className="flex flex-1 flex-col bg-white">
       <ExamHeader label="채점 결과" />
-      <div className="flex flex-1 flex-col items-center gap-4 px-6 py-10">
-        {!examId && <p className="text-sm text-zinc-500">잘못된 접근이에요. examId가 없어요.</p>}
-        {isLoading && <p className="text-sm text-zinc-500">불러오는 중이에요...</p>}
-        {error && <p className="text-sm text-red-500">{error}</p>}
-        {result && (
-          <pre className="w-full max-w-2xl overflow-x-auto rounded-xl bg-zinc-50 p-6 text-left text-xs text-zinc-700 ring-1 ring-zinc-200">
-            {JSON.stringify(result, null, 2)}
-          </pre>
-        )}
-      </div>
+      {!examId && (
+        <p className="flex flex-1 items-center justify-center text-sm text-zinc-500">
+          잘못된 접근이에요. examId가 없어요.
+        </p>
+      )}
+      {isLoading && (
+        <p className="flex flex-1 items-center justify-center text-sm text-zinc-500">
+          불러오는 중이에요...
+        </p>
+      )}
+      {error && (
+        <p className="flex flex-1 items-center justify-center text-sm text-red-500">{error}</p>
+      )}
+      {result && <ExamResultScreen result={result} />}
     </div>
   );
 }
