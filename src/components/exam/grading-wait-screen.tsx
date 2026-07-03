@@ -34,6 +34,18 @@ const MASCOTS = [
   { src: "/mascots/waiting_bird.png", alt: "TOEIC Speaking 팻말을 든 앵무새 캐릭터" },
 ];
 
+/**
+ * 말풍선 꼬리가 가리킬 위치. sm 이상에서는 4열로 나열된 마스코트 각각의 중심을,
+ * 그 아래(2열 2행으로 줄바꿈되는 구간)에서는 상단 2명만 번갈아 말하는 것처럼
+ * 좌/우 2개 지점만 사용한다.
+ */
+const TAIL_POSITION_CLASSES = [
+  "left-[25%] sm:left-[12.5%]",
+  "left-[75%] sm:left-[37.5%]",
+  "left-[25%] sm:left-[62.5%]",
+  "left-[75%] sm:left-[87.5%]",
+];
+
 export function GradingWaitScreen({
   examId,
   estimatedWaitLabel = "약 45초",
@@ -66,18 +78,26 @@ export function GradingWaitScreen({
   }, []);
 
   const clampedProgress = Math.min(100, Math.max(0, progress));
+  const speakerIndex = tipIndex % MASCOTS.length;
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-orange-50/40 px-6 py-10 text-center">
-      <span className="w-fit rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600 sm:text-sm">
-        토익 스피킹 꿀팁
-      </span>
-      <p
-        key={tipIndex}
-        className="animate-in fade-in mt-3 max-w-3xl text-base leading-relaxed font-medium text-blue-950 duration-500 sm:text-lg"
-      >
-        {SPEAKING_TIPS[tipIndex]}
-      </p>
+    <div className="flex flex-1 flex-col items-center justify-center bg-[#ffe0b2] px-6 py-10 text-center">
+      <div className="relative w-full max-w-4xl rounded-3xl bg-white p-6 shadow-md sm:p-8">
+        <span className="w-fit rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600 sm:text-sm">
+          토익 스피킹 꿀팁
+        </span>
+        <p
+          key={tipIndex}
+          className="animate-in fade-in mt-3 text-base leading-relaxed font-medium text-blue-950 duration-500 sm:text-lg"
+        >
+          {SPEAKING_TIPS[tipIndex]}
+        </p>
+        <div
+          aria-hidden
+          className={`absolute bottom-0 size-5 bg-white transition-[left] duration-500 ${TAIL_POSITION_CLASSES[speakerIndex]}`}
+          style={{ transform: "translate(-50%, 50%) rotate(45deg)" }}
+        />
+      </div>
 
       <div className="mt-10 grid w-full max-w-4xl grid-cols-2 items-end justify-items-center gap-x-4 gap-y-8 sm:grid-cols-4 sm:gap-x-8 md:gap-x-14">
         {MASCOTS.map((mascot, i) => (
