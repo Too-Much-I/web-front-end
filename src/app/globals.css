@@ -195,6 +195,17 @@
   display: none;
 }
 
+[data-sonner-toast][data-styled='true'].toast-face-icon [data-icon] {
+  height: 40px !important;
+  width: 40px !important;
+}
+
+[data-sonner-toast].toast-face-icon [data-icon] img {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
