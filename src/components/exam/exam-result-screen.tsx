@@ -1,5 +1,13 @@
-import Image from "next/image";
+"use client";
 
+import Image from "next/image";
+import { useEffect, useState } from "react";
+
+import {
+  getStoredTargetGradeId,
+  getTargetGradeOption,
+  type TargetGradeOption,
+} from "@/features/exam/target-grade";
 import type { ExamGradingResult } from "@/types/exam";
 
 const PART_MASCOTS = [
@@ -15,6 +23,14 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
     100,
     Math.max(0, (result.totalScore / result.maxScore) * 100),
   );
+
+  const [targetGrade, setTargetGrade] = useState<TargetGradeOption | null>(null);
+
+  useEffect(() => {
+    setTargetGrade(getTargetGradeOption(getStoredTargetGradeId()));
+  }, []);
+
+  const scoreGap = targetGrade ? targetGrade.score - result.totalScore : null;
 
   return (
     <>
@@ -48,6 +64,20 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
                 style={{ width: `${scorePercent}%` }}
               />
             </div>
+
+            {targetGrade && (
+              <div className="mt-4 rounded-xl bg-orange-50 p-3">
+                {scoreGap !== null && scoreGap > 0 ? (
+                  <p className="text-sm font-semibold text-orange-700">
+                    목표 등급 {targetGrade.levelLabel}까지 {scoreGap}점 남았어요
+                  </p>
+                ) : (
+                  <p className="text-sm font-semibold text-orange-700">
+                    목표 등급 {targetGrade.levelLabel}을 달성했어요!
+                  </p>
+                )}
+              </div>
+            )}
 
             <p className="mt-6 text-sm leading-relaxed text-zinc-600">
               {result.summary}
