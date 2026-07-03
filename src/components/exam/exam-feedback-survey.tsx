@@ -2,12 +2,11 @@
 
 import { Star } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { SatisfactionStars } from "@/components/exam/satisfaction-stars";
 import { cn } from "@/lib/utils";
-
-const SATISFACTION_OPTIONS = [1, 2, 3, 4, 5];
 
 const PRICE_OPTIONS = [
   { id: "0", label: "0원 (무료가 아니면 이용하지 않을 것 같아요)" },
@@ -29,13 +28,23 @@ const CONFETTI = Array.from({ length: 8 }, (_, i) => {
   };
 });
 
-export function ExamFeedbackSurvey() {
+export function ExamFeedbackSurvey({
+  initialSatisfaction = null,
+}: {
+  initialSatisfaction?: number | null;
+}) {
   const [contact, setContact] = useState("");
-  const [satisfaction, setSatisfaction] = useState<number | null>(null);
+  const [satisfaction, setSatisfaction] = useState<number | null>(
+    initialSatisfaction,
+  );
   const [opinion, setOpinion] = useState("");
   const [priceId, setPriceId] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [isPopping, setIsPopping] = useState(false);
+
+  useEffect(() => {
+    if (initialSatisfaction !== null) setSatisfaction(initialSatisfaction);
+  }, [initialSatisfaction]);
 
   const handleGiftClick = () => {
     if (isPopping) return;
@@ -48,6 +57,16 @@ export function ExamFeedbackSurvey() {
     setSubmitted(true);
     toast.success("설문 제출 완료!", {
       description: "프리미엄형 모의고사 1회 응시권을 곧 보내드릴게요.",
+      className: "toast-face-icon",
+      icon: (
+        <Image
+          src="/mascots/rabbit_face.png"
+          alt=""
+          width={40}
+          height={40}
+          className="object-contain"
+        />
+      ),
     });
   };
 
@@ -139,8 +158,12 @@ export function ExamFeedbackSurvey() {
 
         <div className="relative mx-auto mt-2 h-16 w-full max-w-md sm:h-24">
           <Image
-            src="/mascots/please.png"
-            alt="설문을 부탁하는 토선생 캐릭터들"
+            src={submitted ? "/mascots/smile.png" : "/mascots/please.png"}
+            alt={
+              submitted
+                ? "웃고 있는 토선생 캐릭터들"
+                : "설문을 부탁하는 토선생 캐릭터들"
+            }
             fill
             sizes="400px"
             className="object-contain"
@@ -184,33 +207,12 @@ export function ExamFeedbackSurvey() {
               <span className="text-sm font-semibold text-blue-950">
                 만족도 <span className="font-normal text-orange-500">(필수)</span>
               </span>
-              <div role="radiogroup" aria-label="만족도" className="flex gap-1">
-                {SATISFACTION_OPTIONS.map((score) => {
-                  const filled = satisfaction !== null && score <= satisfaction;
-                  return (
-                    <button
-                      key={score}
-                      type="button"
-                      role="radio"
-                      aria-checked={satisfaction === score}
-                      aria-label={`${score}점`}
-                      onClick={() =>
-                        setSatisfaction((prev) => (prev === score ? null : score))
-                      }
-                      className="rounded-full p-1 transition-transform hover:scale-110"
-                    >
-                      <Star
-                        className={cn(
-                          "size-8 transition-colors",
-                          filled
-                            ? "fill-amber-400 text-amber-400"
-                            : "fill-transparent text-zinc-300",
-                        )}
-                      />
-                    </button>
-                  );
-                })}
-              </div>
+              <SatisfactionStars
+                value={satisfaction}
+                onChange={(score) =>
+                  setSatisfaction((prev) => (prev === score ? null : score))
+                }
+              />
             </div>
 
             <div className="flex flex-col gap-1.5">
