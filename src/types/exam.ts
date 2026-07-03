@@ -65,3 +65,13 @@ export interface ExamAnswerUploadUrl {
 export interface ExamAnswerSubmitResult {
   status: "PROCESSING";
 }
+
+/** GET /api/v1/exams/{examId}/status 의 result */
+export interface ExamGradingStatus {
+  examId: string;
+  overallStatus: "PROCESSING" | "COMPLETED" | "FAILED";
+  progressPercent: number;
+}
+
+/** GET /api/v1/exams/{examId}/results 의 result. 서버 스펙 확정 전까지는 형태를 고정하지 않는다. */
+export type ExamGradingResult = Record<string, unknown>;
