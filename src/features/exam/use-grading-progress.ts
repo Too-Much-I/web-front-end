@@ -34,17 +34,20 @@ export function useGradingProgress(examId: string, onComplete: () => void) {
       setProgress(Math.min(PROGRESS_CAP_PERCENT, (elapsed / PROGRESS_DURATION_MS) * 100));
     }, 300);
 
+    let completeTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
     const checkStatus = async () => {
       if (settled) return;
       try {
         const status = await getExamGradingStatus(examId);
+        if (settled) return;
         firstErrorAt = null;
         if (status.overallStatus === "COMPLETED") {
           settled = true;
           clearInterval(progressId);
           clearInterval(pollId);
           setProgress(100);
-          setTimeout(() => onCompleteRef.current(), COMPLETE_TRANSITION_MS);
+          completeTimeoutId = setTimeout(() => onCompleteRef.current(), COMPLETE_TRANSITION_MS);
         } else if (status.overallStatus === "FAILED") {
           settled = true;
           clearInterval(progressId);
@@ -52,6 +55,7 @@ export function useGradingProgress(examId: string, onComplete: () => void) {
           setFailed(true);
         }
       } catch (err) {
+        if (settled) return;
         firstErrorAt ??= Date.now();
         if (Date.now() - firstErrorAt >= NETWORK_ERROR_TIMEOUT_MS) {
           console.error("채점 상태 조회가 계속 실패했어요", err);
@@ -70,6 +74,7 @@ export function useGradingProgress(examId: string, onComplete: () => void) {
       settled = true;
       clearInterval(progressId);
       clearInterval(pollId);
+      if (completeTimeoutId) clearTimeout(completeTimeoutId);
     };
   }, [examId]);
 
