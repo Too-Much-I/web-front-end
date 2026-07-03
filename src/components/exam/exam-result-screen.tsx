@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
+import { TargetGradeMascot } from "@/components/exam/target-grade-mascot";
 import {
   getStoredTargetGradeId,
   getTargetGradeOption,
@@ -35,12 +36,20 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
   return (
     <>
       <section className="mx-auto w-full max-w-5xl px-6 py-10">
-        <p className="text-sm font-semibold tracking-wide text-orange-600">
-          SESSION ANALYSIS
-        </p>
-        <h1 className="mt-1 text-2xl font-bold text-blue-950 sm:text-3xl">
-          채점 결과 리포트
-        </h1>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold tracking-wide text-orange-600">
+              SESSION ANALYSIS
+            </p>
+            <h1 className="mt-1 text-2xl font-bold text-blue-950 sm:text-3xl">
+              채점 결과 리포트
+            </h1>
+          </div>
+
+          {targetGrade && scoreGap !== null && (
+            <TargetGradeMascot targetGrade={targetGrade} scoreGap={scoreGap} />
+          )}
+        </div>
 
         <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
@@ -64,20 +73,6 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
                 style={{ width: `${scorePercent}%` }}
               />
             </div>
-
-            {targetGrade && (
-              <div className="mt-4 rounded-xl bg-orange-50 p-3">
-                {scoreGap !== null && scoreGap > 0 ? (
-                  <p className="text-sm font-semibold text-orange-700">
-                    목표 등급 {targetGrade.levelLabel}까지 {scoreGap}점 남았어요
-                  </p>
-                ) : (
-                  <p className="text-sm font-semibold text-orange-700">
-                    목표 등급 {targetGrade.levelLabel}을 달성했어요!
-                  </p>
-                )}
-              </div>
-            )}
 
             <p className="mt-6 text-sm leading-relaxed text-zinc-600">
               {result.summary}
