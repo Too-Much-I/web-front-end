@@ -1,12 +1,6 @@
 import { apiFetch } from "@/lib/api/client";
+import type { ApiEnvelope } from "@/types/api";
 import type { ExamGradingStatus } from "@/types/exam";
-
-interface ApiEnvelope<T> {
-  isSuccess: boolean;
-  code: string;
-  message: string;
-  result: T;
-}
 
 /** 채점 진행 상태를 조회한다. */
 export async function getExamGradingStatus(examId: string): Promise<ExamGradingStatus> {
