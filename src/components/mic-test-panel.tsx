@@ -11,10 +11,14 @@ import { cn } from "@/lib/utils";
 
 const BAR_COUNT = 24;
 const IDLE_BAR_HEIGHT = "4px";
+/** 평균 음량이 이 값을 넘는 상태가 VOICE_SUSTAIN_MS만큼 끊기지 않고 이어지면 마이크 입력이 정상인 것으로 판단한다. */
+const VOICE_THRESHOLD = 0.15;
+const VOICE_SUSTAIN_MS = 1000;
 
 export function MicTestPanel() {
   const router = useRouter();
   const [isRecording, setIsRecording] = useState(false);
+  const [voiceVerified, setVoiceVerified] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const streamRef = useRef<MediaStream | null>(null);
@@ -24,6 +28,8 @@ export function MicTestPanel() {
   const rafRef = useRef<number | null>(null);
   const barRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const micButtonRef = useRef<HTMLButtonElement | null>(null);
+  /** 음량이 임계값을 넘기 시작한 시각. 끊기면 null로 리셋된다. */
+  const voiceStreakStartRef = useRef<number | null>(null);
 
   const resetVisuals = () => {
     barRefs.current.forEach((el) => {
@@ -49,6 +55,8 @@ export function MicTestPanel() {
 
   const startRecording = useCallback(async () => {
     setError(null);
+    setVoiceVerified(false);
+    voiceStreakStartRef.current = null;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -91,9 +99,20 @@ export function MicTestPanel() {
           if (el) el.style.height = `${Math.max(4, v * 40)}px`;
         }
 
+        const avg = sum / BAR_COUNT;
+
         if (micButtonRef.current) {
-          const avg = sum / BAR_COUNT;
           micButtonRef.current.style.transform = `scale(${1 + avg * 0.12})`;
+        }
+
+        if (avg >= VOICE_THRESHOLD) {
+          if (voiceStreakStartRef.current === null) {
+            voiceStreakStartRef.current = performance.now();
+          } else if (performance.now() - voiceStreakStartRef.current >= VOICE_SUSTAIN_MS) {
+            setVoiceVerified(true);
+          }
+        } else {
+          voiceStreakStartRef.current = null;
         }
 
         rafRef.current = requestAnimationFrame(tick);
@@ -118,34 +137,48 @@ export function MicTestPanel() {
   };
 
   return (
-    <section className="flex w-full flex-col gap-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-zinc-100 lg:w-1/2">
+    <section className="flex w-full flex-col gap-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-zinc-100">
       <div className="flex flex-col items-center gap-1 text-center">
         <h2 className="text-base font-bold text-orange-500">마이크 테스트</h2>
         <p className="text-sm text-zinc-500">
-          목소리가 잘 녹음되는지 확인해보세요.
+          {voiceVerified
+            ? "마이크 테스트를 완료했어요!"
+            : "목소리가 잘 녹음되는지 확인해보세요."}
         </p>
       </div>
 
       <div className="flex flex-col items-center gap-5">
-        <button
-          ref={micButtonRef}
-          type="button"
-          onClick={handleToggle}
-          aria-pressed={isRecording}
-          className={cn(
-            "flex size-24 items-center justify-center rounded-full shadow-md transition-transform duration-100",
-            isRecording ? "bg-red-500" : "bg-orange-600",
-          )}
-        >
-          <Image
-            src="/mic-icon.png"
-            alt=""
-            width={985}
-            height={706}
-            className="w-12"
-            priority
-          />
-        </button>
+        {voiceVerified ? (
+          <button type="button" onClick={handleStartExam} className="flex items-center justify-center">
+            <Image
+              src="/mascots/mike_test_ok.png"
+              alt="마이크 테스트 성공"
+              width={400}
+              height={220}
+              className="w-64 sm:w-72"
+            />
+          </button>
+        ) : (
+          <button
+            ref={micButtonRef}
+            type="button"
+            onClick={handleToggle}
+            aria-pressed={isRecording}
+            className={cn(
+              "flex size-24 items-center justify-center rounded-full shadow-md transition-transform duration-100",
+              isRecording ? "bg-red-500" : "bg-orange-600",
+            )}
+          >
+            <Image
+              src="/mic-icon.png"
+              alt=""
+              width={985}
+              height={706}
+              className="w-12"
+              priority
+            />
+          </button>
+        )}
 
         <div className="flex h-10 items-center gap-1">
           {Array.from({ length: BAR_COUNT }, (_, i) => (
@@ -166,29 +199,33 @@ export function MicTestPanel() {
         {error && <p className="text-center text-xs text-red-500">{error}</p>}
       </div>
 
-      <Button
-        variant="outline"
-        size="lg"
-        onClick={handleToggle}
-        className="h-12 w-full border-orange-300 text-base text-orange-600 hover:bg-orange-50"
-      >
-        <Mic className="size-4" />
-        {isRecording ? "녹음 테스트 중지" : "녹음 테스트 시작"}
-      </Button>
-
       <div className="flex flex-col gap-2">
-        <Button
-          size="lg"
-          onClick={handleStartExam}
-          className="h-14 w-full flex-col gap-0.5 rounded-full bg-orange-500 text-white hover:bg-orange-600"
-        >
-          <span className="text-base font-semibold">시험 시작하기</span>
-          <span className="text-xs font-normal opacity-80">
-            Start Test Now
-          </span>
-        </Button>
+        {voiceVerified ? (
+          <Button
+            size="lg"
+            onClick={handleStartExam}
+            className="h-14 w-full flex-col gap-0.5 rounded-full bg-orange-500 text-white hover:bg-orange-600"
+          >
+            <span className="text-base font-semibold">모의고사 시작하기</span>
+            <span className="text-xs font-normal opacity-80">
+              Start Test Now
+            </span>
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={handleToggle}
+            className="h-12 w-full border-orange-300 text-base text-orange-600 hover:bg-orange-50"
+          >
+            <Mic className="size-4" />
+            {isRecording ? "녹음 테스트 중지" : "녹음 테스트 시작"}
+          </Button>
+        )}
         <p className="text-center text-xs text-zinc-400">
-          클릭 시 약 20분간의 모의고사가 즉시 시작됩니다.
+          {voiceVerified
+            ? "클릭 시 약 20분간의 모의고사가 즉시 시작됩니다."
+            : "마이크 테스트가 완료되면 모의고사를 시작할 수 있어요."}
         </p>
       </div>
     </section>
