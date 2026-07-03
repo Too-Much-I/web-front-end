@@ -73,5 +73,53 @@ export interface ExamGradingStatus {
   progressPercent: number;
 }
 
-/** GET /api/v1/exams/{examId}/results 의 result. 서버 스펙 확정 전까지는 형태를 고정하지 않는다. */
-export type ExamGradingResult = Record<string, unknown>;
+/** AI 채점 에이전트가 파트별로 내려주는 피드백. part1~part5 고정 키. */
+export interface RawExamPartFeedback {
+  part1: string;
+  part2: string;
+  part3: string;
+  part4: string;
+  part5: string;
+}
+
+/** GET /api/v1/exams/{examId}/results 의 result. AI 채점 에이전트가 내려주는 mock 응답 스펙을 그대로 따른다. */
+export interface RawExamGradingResult {
+  _id: string;
+  user_id: string;
+  mock_exam_id: string;
+  item_count: number;
+  expected_item_count: number;
+  source_evaluation_item_ids: string[];
+  suggested_total_score: number;
+  /** 예: "0-200" */
+  score_scale: string;
+  level_estimate: string;
+  summary: string;
+  overall_feedback: string;
+  part_feedback: RawExamPartFeedback;
+  strengths: string[];
+  weaknesses: string[];
+  recommended_practice: string[];
+  missing_questions: string[];
+  model_reasoning_summary: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ExamPartFeedback {
+  partNumber: number;
+  feedback: string;
+}
+
+export interface ExamGradingResult {
+  examId: string;
+  totalScore: number;
+  maxScore: number;
+  levelEstimate: string;
+  summary: string;
+  overallFeedback: string;
+  partFeedback: ExamPartFeedback[];
+  strengths: string[];
+  weaknesses: string[];
+  recommendedPractice: string[];
+}
