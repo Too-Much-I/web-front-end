@@ -137,6 +137,56 @@
   }
 }
 
+@keyframes gift-wiggle {
+  0%,
+  100% {
+    transform: rotate(6deg);
+  }
+  25% {
+    transform: rotate(-4deg);
+  }
+  75% {
+    transform: rotate(10deg);
+  }
+}
+
+@keyframes gift-pop {
+  0% {
+    transform: scale(1) rotate(6deg);
+  }
+  40% {
+    transform: scale(1.35) rotate(-10deg);
+  }
+  70% {
+    transform: scale(0.9) rotate(4deg);
+  }
+  100% {
+    transform: scale(1) rotate(6deg);
+  }
+}
+
+@keyframes hint-pop-in {
+  0% {
+    transform: translateY(12px) scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes confetti-burst {
+  0% {
+    transform: translate(-50%, -50%) translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(0);
+    opacity: 0;
+  }
+}
+
 .no-scrollbar {
   scrollbar-width: none;
   -ms-overflow-style: none;
