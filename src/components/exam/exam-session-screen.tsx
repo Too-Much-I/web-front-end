@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { ExamDirectionsScreen } from "@/components/exam/exam-directions-screen";
-import { Button } from "@/components/ui/button";
 // import { uploadExamAnswer } from "@/features/exam/api/exam-answer-upload"; // TODO: 서버 배포 후 주석 해제
 import { AUDIO_CUES } from "@/features/exam/audio-cues";
 import { getExamPartMeta } from "@/features/exam/part-meta";
@@ -23,10 +23,10 @@ const CUE_FALLBACK_MS = 2000;
 export function ExamSessionScreen({ session }: { session: ExamSession }) {
   const { questions } = session;
   const total = questions.length;
+  const router = useRouter();
 
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("directions");
-  const [finished, setFinished] = useState(false);
 
   const question = questions[index];
 
@@ -64,9 +64,9 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
         setPhase(nextQuestion.question ? "question-audio" : "prep-cue");
       }
     } else {
-      setFinished(true);
+      router.replace(`/exam/grading?examId=${encodeURIComponent(session.examId)}`);
     }
-  }, [phase, index, total, questions, question]);
+  }, [phase, index, total, questions, question, router, session.examId]);
 
   const isCounting = phase === "prep" || phase === "speaking";
   const isPrepGroup = phase === "prep-cue" || phase === "prep";
@@ -145,10 +145,6 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     params.set("phase", phase);
     window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
   }, [question, phase]);
-
-  if (finished) {
-    return <ExamCompleteCard />;
-  }
 
   if (!question) return null;
 
@@ -320,7 +316,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
   );
 }
 
-function ExamHeader({ label }: { label: string }) {
+export function ExamHeader({ label }: { label: string }) {
   return (
     <header className="relative h-16 overflow-hidden bg-orange-500 sm:h-20">
       <div
@@ -341,35 +337,3 @@ function ExamHeader({ label }: { label: string }) {
   );
 }
 
-function ExamCompleteCard() {
-  return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-6 bg-orange-50/40 px-6 py-10 text-center">
-      <div className="relative h-32 w-32">
-        <Image
-          src="/mascots/rabbit.png"
-          alt="토끼 캐릭터"
-          fill
-          sizes="128px"
-          className="object-contain"
-          priority
-        />
-      </div>
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold text-zinc-900">
-          모의고사를 모두 완료했어요!
-        </h1>
-        <p className="text-sm text-zinc-500">
-          수고하셨어요. 답변을 분석해서 결과를 준비하고 있어요.
-        </p>
-      </div>
-      <Button
-        size="lg"
-        className="h-12 rounded-full bg-orange-500 px-8 text-base text-white hover:bg-orange-600"
-        render={<Link href="/" />}
-        nativeButton={false}
-      >
-        홈으로 돌아가기
-      </Button>
-    </div>
-  );
-}
