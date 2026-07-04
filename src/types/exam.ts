@@ -121,4 +121,5 @@ export interface ExamGradingResult {
   strengths: string[];
   weaknesses: string[];
   recommendedPractice: string[];
+  partScores: ExamPartScores;
 }
