@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
+import { ExamPartScoreRadar } from "@/components/exam/exam-part-score-radar";
 import { ScrollSatisfactionPopup } from "@/components/exam/scroll-satisfaction-popup";
 import { TargetGradeMascot } from "@/components/exam/target-grade-mascot";
 import {
@@ -80,40 +81,42 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
             </p>
           </div>
 
-          <div className="rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
-            <span className="text-sm font-bold text-blue-950">
-              강점 &amp; 약점
-            </span>
+          <ExamPartScoreRadar partScores={result.partScores} />
+        </div>
 
-            <div className="mt-4">
-              <p className="text-xs font-semibold text-emerald-600">강점</p>
-              <ul className="mt-2 flex flex-col gap-1.5">
-                {result.strengths.map((item, i) => (
-                  <li
-                    key={i}
-                    className="flex gap-2 text-sm leading-relaxed text-zinc-700"
-                  >
-                    <span className="text-emerald-500">+</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
+        <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
+          <span className="text-sm font-bold text-blue-950">
+            강점 &amp; 약점
+          </span>
 
-            <div className="mt-5">
-              <p className="text-xs font-semibold text-rose-600">약점</p>
-              <ul className="mt-2 flex flex-col gap-1.5">
-                {result.weaknesses.map((item, i) => (
-                  <li
-                    key={i}
-                    className="flex gap-2 text-sm leading-relaxed text-zinc-700"
-                  >
-                    <span className="text-rose-500">−</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div className="mt-4">
+            <p className="text-xs font-semibold text-emerald-600">강점</p>
+            <ul className="mt-2 flex flex-col gap-1.5">
+              {result.strengths.map((item, i) => (
+                <li
+                  key={i}
+                  className="flex gap-2 text-sm leading-relaxed text-zinc-700"
+                >
+                  <span className="text-emerald-500">+</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mt-5">
+            <p className="text-xs font-semibold text-rose-600">약점</p>
+            <ul className="mt-2 flex flex-col gap-1.5">
+              {result.weaknesses.map((item, i) => (
+                <li
+                  key={i}
+                  className="flex gap-2 text-sm leading-relaxed text-zinc-700"
+                >
+                  <span className="text-rose-500">−</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
