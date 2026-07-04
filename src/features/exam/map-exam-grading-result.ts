@@ -1,11 +1,7 @@
-import type { ExamGradingResult, RawExamGradingResult, RawExamPartFeedback } from "@/types/exam";
+import type { ExamGradingResult, RawExamPartFeedback, RawExamSummaryResult } from "@/types/exam";
 
-const DEFAULT_MAX_SCORE = 200;
-
-function parseMaxScore(scoreScale: string): number {
-  const max = Number(scoreScale.split("-")[1]);
-  return Number.isFinite(max) ? max : DEFAULT_MAX_SCORE;
-}
+/** TOEIC Speaking 만점 기준 */
+const TOEIC_SPEAKING_MAX_SCORE = 200;
 
 function mapPartFeedback(raw: RawExamPartFeedback) {
   return ([1, 2, 3, 4, 5] as const)
@@ -16,17 +12,17 @@ function mapPartFeedback(raw: RawExamPartFeedback) {
     .filter((part) => Boolean(part.feedback));
 }
 
-export function mapExamGradingResult(raw: RawExamGradingResult): ExamGradingResult {
+export function mapExamGradingResult(raw: RawExamSummaryResult): ExamGradingResult {
   return {
-    examId: raw.mock_exam_id,
-    totalScore: raw.suggested_total_score,
-    maxScore: parseMaxScore(raw.score_scale),
-    levelEstimate: raw.level_estimate,
+    examId: raw.examId,
+    totalScore: raw.totalScore,
+    maxScore: TOEIC_SPEAKING_MAX_SCORE,
+    levelEstimate: raw.levelEstimate,
     summary: raw.summary,
-    overallFeedback: raw.overall_feedback,
-    partFeedback: mapPartFeedback(raw.part_feedback),
+    overallFeedback: raw.overallFeedback,
+    partFeedback: mapPartFeedback(raw.partFeedback),
     strengths: raw.strengths,
     weaknesses: raw.weaknesses,
-    recommendedPractice: raw.recommended_practice,
+    recommendedPractice: raw.recommendedPractice,
   };
 }
