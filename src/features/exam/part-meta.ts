@@ -17,3 +17,16 @@ export const EXAM_PART_META: Record<number, ExamPartMeta> = {
 export function getExamPartMeta(part: number): ExamPartMeta {
   return EXAM_PART_META[part] ?? { titleKo: `Part ${part}`, titleEn: `Part ${part}` };
 }
+
+/** 파트별 문제 번호. 토익 스피킹 정규 구성(Part1~2: 2문제, Part3~4: 3문제, Part5: 1문제) 기준. */
+export const EXAM_PART_QUESTION_NUMBERS: Record<number, number[]> = {
+  1: [1, 2],
+  2: [3, 4],
+  3: [5, 6, 7],
+  4: [8, 9, 10],
+  5: [11],
+};
+
+export function getExamPartQuestionNumbers(part: number): number[] {
+  return EXAM_PART_QUESTION_NUMBERS[part] ?? [];
+}
