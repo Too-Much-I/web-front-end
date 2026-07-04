@@ -82,28 +82,27 @@ export interface RawExamPartFeedback {
   part5: string;
 }
 
-/** GET /api/v1/exams/{examId}/results 의 result. AI 채점 에이전트가 내려주는 mock 응답 스펙을 그대로 따른다. */
-export interface RawExamGradingResult {
-  _id: string;
-  user_id: string;
-  mock_exam_id: string;
-  item_count: number;
-  expected_item_count: number;
-  source_evaluation_item_ids: string[];
-  suggested_total_score: number;
-  /** 예: "0-200" */
-  score_scale: string;
-  level_estimate: string;
+/** 파트별 세부 점수. 채점 대상 파트만 내려온다 (예: 재응시한 파트만 포함). */
+export interface ExamPartScores {
+  part1?: number;
+  part2?: number;
+  part3?: number;
+  part4?: number;
+  part5?: number;
+}
+
+/** GET /api/v1/exams/{examId}/summary 의 result */
+export interface RawExamSummaryResult {
+  examId: string;
+  totalScore: number;
+  levelEstimate: string;
   summary: string;
-  overall_feedback: string;
-  part_feedback: RawExamPartFeedback;
+  overallFeedback: string;
+  partFeedback: RawExamPartFeedback;
   strengths: string[];
   weaknesses: string[];
-  recommended_practice: string[];
-  missing_questions: string[];
-  model_reasoning_summary: string;
-  created_at: string;
-  updated_at: string;
+  recommendedPractice: string[];
+  partScores: ExamPartScores;
 }
 
 export interface ExamPartFeedback {
