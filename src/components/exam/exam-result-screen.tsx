@@ -1,11 +1,14 @@
 "use client";
 
+import { ChevronRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { ExamPartScoreRadar } from "@/components/exam/exam-part-score-radar";
 import { ScrollSatisfactionPopup } from "@/components/exam/scroll-satisfaction-popup";
 import { TargetGradeMascot } from "@/components/exam/target-grade-mascot";
+import { getExamPartQuestionNumbers } from "@/features/exam/part-meta";
 import {
   getStoredTargetGradeId,
   getTargetGradeOption,
@@ -160,13 +163,23 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
                       {part.feedback}
                     </p>
 
-                    <button
-                      type="button"
-                      className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-sky-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-sky-600"
-                    >
-                      문제별 피드백 보기
-                      <span aria-hidden>→</span>
-                    </button>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <span className="text-xs font-semibold text-sky-700">
+                        문제별 피드백 보기
+                      </span>
+                      {getExamPartQuestionNumbers(part.partNumber).map((questionNumber) => (
+                        <Link
+                          key={questionNumber}
+                          href={`/exam/result/question?examId=${result.examId}&questionNumber=${questionNumber}`}
+                          className="group inline-flex items-center gap-1.5 rounded-full bg-sky-500 py-1.5 pr-1.5 pl-4 text-sm font-semibold text-white transition-colors hover:bg-sky-600"
+                        >
+                          Q{questionNumber}
+                          <span className="flex size-5 items-center justify-center rounded-full bg-white/25 transition-transform duration-200 group-hover:translate-x-0.5">
+                            <ChevronRight className="size-3.5" aria-hidden />
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                 </div>
               );

@@ -123,3 +123,60 @@ export interface ExamGradingResult {
   recommendedPractice: string[];
   partScores: ExamPartScores;
 }
+
+/** GET /api/v1/exams/{examId}/questions/{questionNumber} 의 result.question.feedback */
+export interface RawExamQuestionFeedback {
+  summary: string;
+  level: string;
+  strengths: string[];
+  weaknesses: string[];
+  pronunciation: string;
+  fluency: string;
+  content: string;
+  pronunciation_fluency_score: number;
+  content_relevance_score: number;
+  grammar_vocabulary: string;
+  action_items: string[];
+}
+
+/** GET /api/v1/exams/{examId}/questions/{questionNumber} 의 result.question */
+export interface RawExamQuestionDetail {
+  partNumber: number;
+  questionNumber: number;
+  audioUrl: string;
+  score: number;
+  maxScore: number;
+  transcript: string;
+  feedback: RawExamQuestionFeedback;
+}
+
+/** GET /api/v1/exams/{examId}/questions/{questionNumber} 의 result */
+export interface RawExamQuestionDetailResult {
+  examId: string;
+  question: RawExamQuestionDetail;
+}
+
+export interface ExamQuestionFeedback {
+  summary: string;
+  level: string;
+  strengths: string[];
+  weaknesses: string[];
+  pronunciation: string;
+  fluency: string;
+  content: string;
+  pronunciationFluencyScore: number;
+  contentRelevanceScore: number;
+  grammarVocabulary: string;
+  actionItems: string[];
+}
+
+export interface ExamQuestionDetail {
+  examId: string;
+  partNumber: number;
+  questionNumber: number;
+  audioUrl: string;
+  score: number;
+  maxScore: number;
+  transcript: string;
+  feedback: ExamQuestionFeedback;
+}
