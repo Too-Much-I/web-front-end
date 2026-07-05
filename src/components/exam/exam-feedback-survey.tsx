@@ -196,6 +196,18 @@ export function ExamFeedbackSurvey({
           >
             <div className="flex flex-col gap-1.5">
               <span className="text-sm font-semibold text-blue-950">
+                만족도 <span className="font-normal text-orange-500">(필수)</span>
+              </span>
+              <SatisfactionStars
+                value={satisfaction}
+                onChange={(score) =>
+                  setSatisfaction((prev) => (prev === score ? null : score))
+                }
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm font-semibold text-blue-950">
                 이전에 실제로 응시했던 토익스피킹 등급{" "}
                 <span className="font-normal text-zinc-400">(선택)</span>
               </span>
@@ -231,18 +243,6 @@ export function ExamFeedbackSurvey({
                 선택해 주세요. 응시한 적이 없다면 &apos;안 봄&apos;을
                 선택해 주세요.
               </p>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <span className="text-sm font-semibold text-blue-950">
-                만족도 <span className="font-normal text-orange-500">(필수)</span>
-              </span>
-              <SatisfactionStars
-                value={satisfaction}
-                onChange={(score) =>
-                  setSatisfaction((prev) => (prev === score ? null : score))
-                }
-              />
             </div>
 
             <div className="flex flex-col gap-1.5">
