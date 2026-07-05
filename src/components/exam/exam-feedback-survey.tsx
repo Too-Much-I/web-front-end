@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { SatisfactionStars } from "@/components/exam/satisfaction-stars";
+import { TARGET_GRADE_OPTIONS } from "@/features/exam/target-grade";
 import { cn } from "@/lib/utils";
 
 const PRICE_OPTIONS = [
@@ -14,6 +15,14 @@ const PRICE_OPTIONS = [
   { id: "5000", label: "5,000원" },
   { id: "10000", label: "10,000원" },
   { id: "15000", label: "15,000원 이상" },
+];
+
+const PREVIOUS_GRADE_OPTIONS = [
+  ...TARGET_GRADE_OPTIONS.map((option) => ({
+    id: option.id,
+    label: option.levelLabel,
+  })),
+  { id: "none", label: "안 봄" },
 ];
 
 const CONFETTI_COLORS = ["#fbbf24", "#f9a8d4", "#7dd3fc", "#6ee7b7", "#fdba74"];
@@ -39,6 +48,7 @@ export function ExamFeedbackSurvey({
   );
   const [opinion, setOpinion] = useState("");
   const [priceId, setPriceId] = useState<string | null>(null);
+  const [previousGradeId, setPreviousGradeId] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [isPopping, setIsPopping] = useState(false);
 
@@ -185,21 +195,41 @@ export function ExamFeedbackSurvey({
             className="relative mt-6 flex flex-col gap-5 rounded-2xl bg-white p-5 text-zinc-900 shadow-lg sm:p-6"
           >
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="survey-contact" className="text-sm font-semibold text-blue-950">
-                전화번호 또는 이메일{" "}
+              <span className="text-sm font-semibold text-blue-950">
+                이전에 실제로 응시했던 토익스피킹 등급{" "}
                 <span className="font-normal text-zinc-400">(선택)</span>
-              </label>
-              <input
-                id="survey-contact"
-                type="text"
-                value={contact}
-                onChange={(e) => setContact(e.target.value)}
-                placeholder="010-0000-0000 또는 example@email.com"
-                className="rounded-xl px-3 py-2 text-sm text-zinc-900 ring-1 ring-zinc-200 placeholder:text-zinc-400 focus:ring-2 focus:ring-orange-300 focus:outline-none"
-              />
+              </span>
+              <div
+                role="radiogroup"
+                aria-label="이전 실제 응시 등급"
+                className="flex flex-wrap gap-2"
+              >
+                {PREVIOUS_GRADE_OPTIONS.map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={previousGradeId === option.id}
+                    onClick={() =>
+                      setPreviousGradeId((prev) =>
+                        prev === option.id ? null : option.id,
+                      )
+                    }
+                    className={cn(
+                      "rounded-full px-3.5 py-1.5 text-sm font-semibold ring-1 transition-colors",
+                      previousGradeId === option.id
+                        ? "bg-orange-50 text-orange-600 ring-orange-300"
+                        : "text-zinc-600 ring-zinc-200 hover:bg-zinc-50",
+                    )}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
               <p className="text-xs text-zinc-400">
-                응시권을 보내드릴 연락처예요. 남기지 않으면 응시권을 보내드릴
-                수 없어요.
+                토익 스피킹을 이미 응시해 본 적이 있다면 실제로 받았던 등급을
+                선택해 주세요. 응시한 적이 없다면 &apos;안 봄&apos;을
+                선택해 주세요.
               </p>
             </div>
 
@@ -212,20 +242,6 @@ export function ExamFeedbackSurvey({
                 onChange={(score) =>
                   setSatisfaction((prev) => (prev === score ? null : score))
                 }
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="survey-opinion" className="text-sm font-semibold text-blue-950">
-                의견 <span className="font-normal text-zinc-400">(선택)</span>
-              </label>
-              <textarea
-                id="survey-opinion"
-                value={opinion}
-                onChange={(e) => setOpinion(e.target.value)}
-                rows={3}
-                placeholder="개선했으면 하는 점이나 느낀 점을 자유롭게 남겨주세요"
-                className="resize-none rounded-xl px-3 py-2 text-sm text-zinc-900 ring-1 ring-zinc-200 placeholder:text-zinc-400 focus:ring-2 focus:ring-orange-300 focus:outline-none"
               />
             </div>
 
@@ -255,6 +271,38 @@ export function ExamFeedbackSurvey({
                   </button>
                 ))}
               </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="survey-opinion" className="text-sm font-semibold text-blue-950">
+                의견 <span className="font-normal text-zinc-400">(선택)</span>
+              </label>
+              <textarea
+                id="survey-opinion"
+                value={opinion}
+                onChange={(e) => setOpinion(e.target.value)}
+                rows={3}
+                placeholder="개선했으면 하는 점이나 느낀 점을 자유롭게 남겨주세요"
+                className="resize-none rounded-xl px-3 py-2 text-sm text-zinc-900 ring-1 ring-zinc-200 placeholder:text-zinc-400 focus:ring-2 focus:ring-orange-300 focus:outline-none"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="survey-contact" className="text-sm font-semibold text-blue-950">
+                전화번호 또는 이메일{" "}
+                <span className="font-normal text-zinc-400">(선택)</span>
+              </label>
+              <input
+                id="survey-contact"
+                type="text"
+                value={contact}
+                onChange={(e) => setContact(e.target.value)}
+                placeholder="010-0000-0000 또는 example@email.com"
+                className="rounded-xl px-3 py-2 text-sm text-zinc-900 ring-1 ring-zinc-200 placeholder:text-zinc-400 focus:ring-2 focus:ring-orange-300 focus:outline-none"
+              />
+              <p className="text-xs font-semibold text-orange-500">
+                남기지 않으면 응시권을 보내드릴 수 없으니 꼭 남겨주세요!
+              </p>
             </div>
 
             <button
