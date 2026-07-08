@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { ExamDirectionsScreen } from "@/components/exam/exam-directions-screen";
 import { ExamHeader } from "@/components/exam/exam-header";
-// import { uploadExamAnswer } from "@/features/exam/api/exam-answer-upload"; // TODO: 서버 배포 후 주석 해제
+import { uploadExamAnswer } from "@/features/exam/api/exam-answer-upload"; // TODO: 서버 배포 후 주석 해제
 import { AUDIO_CUES } from "@/features/exam/audio-cues";
 import { getExamPartMeta } from "@/features/exam/part-meta";
 import { useAnswerRecorder } from "@/features/exam/use-answer-recorder";
@@ -112,26 +112,32 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
   );
 
   useEffect(() => {
-    if (!question || phase !== "speaking") return;
+    // 💡 녹음 시작 시점의 questionNumber를 변수에 고정해둡니다.
+    const currentQuestion = question; 
+    
+    if (!currentQuestion || phase !== "speaking") return;
 
     startRecording().catch((err) => {
       console.error("마이크 접근에 실패했어요", err);
     });
 
     return () => {
-      void stopRecording();
-      // stopRecording()이 반환하는 Blob은 서버가 배포된 뒤 uploadExamAnswer로 전달하면 된다.
-      // 서버가 아직 배포되지 않아 실제 업로드 호출은 막아둠.
-      // 배포 후 위 import와 아래 호출의 주석을 해제하면
-      // 녹음 종료 → S3 업로드 → AI 채점 요청까지 자동으로 이어진다.
-      // stopRecording().then((audioBlob) => {
-      //   uploadExamAnswer(session.examId, String(question.questionNumber), audioBlob).catch(
-      //     (err) => console.error("답변 업로드에 실패했어요", err),
-      //   );
-      // });
+      stopRecording().then((audioBlob) => {
+        if (!audioBlob) return;
+
+        console.log("session =", session);
+        console.log("examId =", session.examId);
+        console.log("currentQuestion =", currentQuestion);
+        console.log("questionNumber =", currentQuestion.questionNumber);
+
+        uploadExamAnswer(
+          session.examId,
+          String(currentQuestion.questionNumber),
+          audioBlob
+        ).catch(console.error);
+      });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, question]);
+  }, [phase, question, session.examId, startRecording, stopRecording]); // 의존성 배열 유지
 
   useEffect(() => {
     if (!question) return;

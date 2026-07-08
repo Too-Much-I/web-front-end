@@ -25,29 +25,29 @@ function getTiming(partNumber: number, isFirstInPart: boolean, isLastInPart: boo
 export function mapExamSession(raw: RawExamSession): ExamSession {
   const partGroups = new Map<number, RawExamQuestion[]>();
   for (const q of raw.questions) {
-    const group = partGroups.get(q.part_number) ?? [];
+    const group = partGroups.get(q.part) ?? [];
     group.push(q);
-    partGroups.set(q.part_number, group);
+    partGroups.set(q.part, group);
   }
 
   const questions = raw.questions.map((q) => {
-    const group = partGroups.get(q.part_number) ?? [q];
+    const group = partGroups.get(q.part) ?? [q];
     const positionInPart = group.indexOf(q);
 
     return {
-      partNumber: q.part_number,
-      questionNumber: q.question_number,
-      referenceText: q.reference_text,
-      imageUrl: q.image_url,
-      question: q.question,
-      audioUrl: q.audio_url,
-      tableContext: q.table_context,
-      ...getTiming(q.part_number, positionInPart === 0, positionInPart === group.length - 1),
+      partNumber: q.part,
+      questionNumber: q.questionNumber,
+      referenceText: q.referenceText,
+      imageUrl: q.imageUrl,
+      question: q.text,
+      audioUrl: q.audioUrl,
+      tableContext: q.tableContext,
+      ...getTiming(q.part, positionInPart === 0, positionInPart === group.length - 1),
     };
   });
 
   return {
-    examId: raw.mock_exam_id,
+    examId: raw.examId,
     title: raw.title,
     questions,
   };
