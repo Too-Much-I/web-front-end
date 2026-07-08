@@ -2,6 +2,11 @@ import { google } from "googleapis";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import {
+  VOICE_CONSENT_ITEM,
+  VOICE_CONSENT_VERSION,
+} from "@/features/consent/consent-content";
+
 /**
  * 동의 기록 1건을 구글 시트에 한 행으로 추가한다.
  * 구글 서비스 계정 자격증명은 서버 전용 env로만 다룬다 (NEXT_PUBLIC_* 아님 — 클라이언트 번들에 노출 금지).
@@ -17,13 +22,40 @@ import { z } from "zod";
 
 const consentRecordSchema = z.object({
   anonymousId: z.string().min(1),
-  consentItem: z.string().min(1),
-  consentVersion: z.string().min(1),
-  consentedAt: z.string().min(1),
+  consentItem: z.literal(VOICE_CONSENT_ITEM),
+  consentVersion: z.literal(VOICE_CONSENT_VERSION),
+  consentedAt: z.iso.datetime(),
   method: z.literal("web_checkbox"),
 });
 
+// 단일 인스턴스 기준 IP당 요청 제한 (PoC 배포 범위 한정 — 다중 인스턴스 환경에서는 공유 스토어로 교체 필요)
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 5;
+const requestTimestampsByIp = new Map<string, number[]>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const recent = (requestTimestampsByIp.get(ip) ?? []).filter(
+    (timestamp) => now - timestamp < RATE_LIMIT_WINDOW_MS,
+  );
+  recent.push(now);
+  requestTimestampsByIp.set(ip, recent);
+  return recent.length > RATE_LIMIT_MAX_REQUESTS;
+}
+
+function getClientIp(request: Request): string {
+  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+}
+
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  if (isRateLimited(ip)) {
+    return NextResponse.json(
+      { message: "요청이 너무 많습니다. 잠시 후 다시 시도해주세요." },
+      { status: 429 },
+    );
+  }
+
   const parsed = consentRecordSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json(
