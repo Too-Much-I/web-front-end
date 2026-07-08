@@ -19,10 +19,10 @@ export function mapExamQuestionDetail(raw: RawExamQuestionDetailResult): ExamQue
       pronunciation: question.feedback.pronunciation,
       fluency: question.feedback.fluency,
       content: question.feedback.content,
-      pronunciationFluencyScore: question.feedback.pronunciation_fluency_score,
-      contentRelevanceScore: question.feedback.content_relevance_score,
-      grammarVocabulary: question.feedback.grammar_vocabulary,
-      actionItems: question.feedback.action_items,
+      pronunciationFluencyScore: question.feedback.pronunciationFluencyScore,
+      contentRelevanceScore: question.feedback.contentRelevanceScore,
+      grammarVocabulary: question.feedback.grammarVocabulary,
+      actionItems: question.feedback.actionItems,
     },
   };
 }
