@@ -1,14 +1,18 @@
 "use client";
 
 import { HelpCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { TargetGradeSelect } from "@/components/exam/target-grade-select";
 import { MicTestPanel } from "@/components/mic-test-panel";
+import { SoundCheckPanel } from "@/components/sound-check-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+
+type PrepareDialogStep = "mic" | "sound" | null;
 
 const CHECKLIST = [
   "주변 소음이 차단된 조용한 환경에서 응시해 주세요.",
@@ -17,7 +21,8 @@ const CHECKLIST = [
 ];
 
 export function ExamPrepareFlow() {
-  const [showMicTest, setShowMicTest] = useState(false);
+  const router = useRouter();
+  const [dialogStep, setDialogStep] = useState<PrepareDialogStep>(null);
 
   return (
     <>
@@ -72,7 +77,7 @@ export function ExamPrepareFlow() {
 
           <Button
             size="lg"
-            onClick={() => setShowMicTest(true)}
+            onClick={() => setDialogStep("mic")}
             className="mt-auto h-12 w-full rounded-full bg-orange-500 text-white hover:bg-orange-600"
           >
             다음 (마이크 테스트)
@@ -80,9 +85,17 @@ export function ExamPrepareFlow() {
         </section>
       </div>
 
-      <Dialog open={showMicTest} onOpenChange={setShowMicTest}>
+      <Dialog
+        open={dialogStep !== null}
+        onOpenChange={(open) => setDialogStep(open ? "mic" : null)}
+      >
         <DialogContent className="max-w-none border-none bg-transparent p-0 ring-0 sm:max-w-xl">
-          <MicTestPanel />
+          {dialogStep === "mic" && (
+            <MicTestPanel onVerified={() => setDialogStep("sound")} />
+          )}
+          {dialogStep === "sound" && (
+            <SoundCheckPanel onCompleted={() => router.push("/exam/session")} />
+          )}
         </DialogContent>
       </Dialog>
     </>

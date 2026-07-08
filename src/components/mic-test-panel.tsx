@@ -2,7 +2,6 @@
 
 import { Mic } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -11,18 +10,33 @@ import { cn } from "@/lib/utils";
 
 const BAR_COUNT = 24;
 const IDLE_BAR_HEIGHT = "4px";
-/** 평균 음량이 이 값을 넘는 상태가 VOICE_SUSTAIN_MS만큼 끊기지 않고 이어지면 마이크 입력이 정상인 것으로 판단한다. */
+/** 평균 음량이 이 값을 넘어야 목소리로 후보군에 들어간다. */
 const VOICE_THRESHOLD = 0.08;
 /** 사람 목소리 에너지가 몰려있는 대역(Hz). 스펙트럼 평탄도 계산에 이 대역만 사용한다. */
 const SPEECH_BAND_HZ: [number, number] = [300, 3400];
-/** 스펙트럼 평탄도(기하평균/산술평균) 임계값. 0에 가까울수록 목소리처럼 특정 대역에 에너지가 몰려있고, 1에 가까울수록 백색소음처럼 평평하다. */
-const SPECTRAL_FLATNESS_THRESHOLD = 0.5;
-const VOICE_SUSTAIN_MS = 200;
+/**
+ * 스펙트럼 평탄도(기하평균/산술평균) 임계값. 0에 가까울수록 목소리처럼 특정 대역에 에너지가 몰려있고,
+ * 1에 가까울수록 백색소음처럼 평평하다. autoGainControl을 꺼서 신호가 약한 이 구성에서는 또렷하게 말해도
+ * 실측 평탄도가 0.95~0.96대까지 나오는 걸 확인해, 실제 목소리를 잡음으로 오판하지 않도록 0.97로 완화했다.
+ */
+const SPECTRAL_FLATNESS_THRESHOLD = 0.97;
+/**
+ * 목소리로 판정된 시간을 누적한 합이 이 값을 넘으면 통과 처리한다. 자음·숨쉬기·문장 사이 pause처럼
+ * 자연스러운 발화에 포함된 끊김은 매번 초기화하지 않고 그대로 건너뛴 채 누적만 이어간다("연속 200ms"가
+ * 아니라 "총합 200ms"). 짧은 문장을 읽어도 대부분 이 정도는 금방 채워진다.
+ */
+const VOICE_SUSTAIN_MS = 700;
 /** 녹음을 시작하고 이 시간이 지나도 통과하지 못하면 안내 문구를 보여준다. */
 const HINT_DELAY_MS = 3000;
 const HINT_VOLUME_TOO_LOW = "목소리를 조금 더 크게 내주세요.";
 const HINT_NOISE_DETECTED = "주변 소음이 감지돼요. 조용한 곳에서 다시 시도해주세요.";
 const HINT_TOO_SHORT = "조금 더 길게 이야기해주세요.";
+/**
+ * 마이크 테스트 중 사용자가 읽을 문장. 토익 스피킹 실제 문제와 비슷한 톤을 유지하되, 숫자·약어·쉼표를
+ * 줄여 막힘 없이 술술 읽히도록 쉬운 단어 위주로 구성했다.
+ */
+const READING_PROMPT =
+  "Welcome to our service. We hope you enjoy your studying experience today.";
 
 /** 지정한 주파수 빈 구간의 스펙트럼 평탄도를 계산한다. */
 function spectralFlatness(bins: Uint8Array, loBin: number, hiBin: number): number {
@@ -41,12 +55,18 @@ function spectralFlatness(bins: Uint8Array, loBin: number, hiBin: number): numbe
   return geometricMean / arithmeticMean;
 }
 
-export function MicTestPanel() {
-  const router = useRouter();
+export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
   const [isRecording, setIsRecording] = useState(false);
   const [voiceVerified, setVoiceVerified] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hint, setHint] = useState<string | null>(null);
+  /** TODO: 임계값 튜닝이 끝나면 제거할 임시 디버그 표시용 상태. */
+  const [debugInfo, setDebugInfo] = useState<{
+    avg: number;
+    flatness: number;
+    isVoiceLike: boolean;
+    accumulatedMs: number;
+  } | null>(null);
 
   const streamRef = useRef<MediaStream | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -55,8 +75,10 @@ export function MicTestPanel() {
   const rafRef = useRef<number | null>(null);
   const barRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const micButtonRef = useRef<HTMLButtonElement | null>(null);
-  /** 음량이 임계값을 넘기 시작한 시각. 끊기면 null로 리셋된다. */
-  const voiceStreakStartRef = useRef<number | null>(null);
+  /** 목소리로 판정된(isVoiceLike) 시간의 누적 합(ms). 끊김이 있어도 리셋되지 않고 계속 쌓인다. */
+  const voiceAccumulatedMsRef = useRef(0);
+  /** 직전 프레임 시각. 프레임 간 실제 경과 시간(delta)을 구해 누적치에 더하는 데 쓴다. */
+  const lastTickAtRef = useRef<number | null>(null);
   /** 녹음을 시작한 시각. 안내 문구를 보여줄 시점을 계산하는 데 사용한다. */
   const recordingStartRef = useRef(0);
   /** 녹음 중 한 번이라도 임계 음량을 넘겼는지 여부. 음량 문제와 지속시간/잡음 문제를 구분하는 데 사용한다. */
@@ -65,6 +87,8 @@ export function MicTestPanel() {
   const everVoiceLikeRef = useRef(false);
   /** 마지막으로 화면에 표시한 안내 문구. 매 프레임 동일한 값으로 setState하는 것을 방지한다. */
   const shownHintRef = useRef<string | null>(null);
+  /** 디버그 표시를 마지막으로 갱신한 시각. 매 프레임 setState하지 않도록 쓰로틀링한다. */
+  const lastDebugUpdateRef = useRef(0);
 
   const resetVisuals = () => {
     barRefs.current.forEach((el) => {
@@ -84,6 +108,7 @@ export function MicTestPanel() {
     dataRef.current = null;
     setIsRecording(false);
     setHint(null);
+    setDebugInfo(null);
     shownHintRef.current = null;
     resetVisuals();
   }, []);
@@ -94,7 +119,8 @@ export function MicTestPanel() {
     setError(null);
     setVoiceVerified(false);
     setHint(null);
-    voiceStreakStartRef.current = null;
+    voiceAccumulatedMsRef.current = 0;
+    lastTickAtRef.current = null;
     everExceededThresholdRef.current = false;
     everVoiceLikeRef.current = false;
     shownHintRef.current = null;
@@ -139,6 +165,10 @@ export function MicTestPanel() {
 
         analyserNode.getByteFrequencyData(data);
 
+        const now = performance.now();
+        const dt = lastTickAtRef.current === null ? 0 : now - lastTickAtRef.current;
+        lastTickAtRef.current = now;
+
         let sum = 0;
         for (let i = 0; i < BAR_COUNT; i++) {
           const v = (data[i * step] ?? 0) / 255;
@@ -163,23 +193,27 @@ export function MicTestPanel() {
         let verified = false;
         if (isVoiceLike) {
           everVoiceLikeRef.current = true;
-          if (voiceStreakStartRef.current === null) {
-            voiceStreakStartRef.current = performance.now();
-          } else if (performance.now() - voiceStreakStartRef.current >= VOICE_SUSTAIN_MS) {
+          voiceAccumulatedMsRef.current += dt;
+          if (voiceAccumulatedMsRef.current >= VOICE_SUSTAIN_MS) {
             verified = true;
             setVoiceVerified(true);
           }
-        } else {
-          voiceStreakStartRef.current = null;
+        }
+
+        if (now - lastDebugUpdateRef.current >= 100) {
+          lastDebugUpdateRef.current = now;
+          setDebugInfo({
+            avg,
+            flatness,
+            isVoiceLike,
+            accumulatedMs: voiceAccumulatedMsRef.current,
+          });
         }
 
         if (verified) {
           shownHintRef.current = null;
           setHint(null);
-        } else if (
-          performance.now() - recordingStartRef.current >=
-          HINT_DELAY_MS
-        ) {
+        } else if (now - recordingStartRef.current >= HINT_DELAY_MS) {
           const nextHint = !everExceededThresholdRef.current
             ? HINT_VOLUME_TOO_LOW
             : !everVoiceLikeRef.current
@@ -208,8 +242,8 @@ export function MicTestPanel() {
     }
   };
 
-  const handleStartExam = () => {
-    router.push("/exam/session");
+  const handleNext = () => {
+    onVerified();
   };
 
   return (
@@ -228,9 +262,20 @@ export function MicTestPanel() {
         </p>
       </div>
 
+      {!voiceVerified && (
+        <div className="rounded-xl bg-zinc-50 p-4 text-center">
+          <p className="mb-1 text-xs font-medium text-zinc-400">
+            아래 문장을 소리 내어 읽어보세요
+          </p>
+          <p className="text-sm leading-relaxed text-zinc-700">
+            {READING_PROMPT}
+          </p>
+        </div>
+      )}
+
       <div className="flex flex-col items-center gap-5">
         {voiceVerified ? (
-          <button type="button" onClick={handleStartExam} className="flex items-center justify-center">
+          <button type="button" onClick={handleNext} className="flex items-center justify-center">
             <Image
               src="/mascots/mike_test_ok.png"
               alt="마이크 테스트 성공"
@@ -284,12 +329,12 @@ export function MicTestPanel() {
         {voiceVerified ? (
           <Button
             size="lg"
-            onClick={handleStartExam}
+            onClick={handleNext}
             className="h-14 w-full flex-col gap-0.5 rounded-full bg-orange-500 text-white hover:bg-orange-600"
           >
-            <span className="text-base font-semibold">모의고사 시작하기</span>
+            <span className="text-base font-semibold">다음: 사운드 체크</span>
             <span className="text-xs font-normal opacity-80">
-              Start Test Now
+              Next: Sound Check
             </span>
           </Button>
         ) : (
@@ -305,8 +350,8 @@ export function MicTestPanel() {
         )}
         <p className="text-center text-xs text-zinc-400">
           {voiceVerified
-            ? "클릭 시 약 20분간의 모의고사가 즉시 시작됩니다."
-            : "마이크 테스트가 완료되면 모의고사를 시작할 수 있어요."}
+            ? "이어서 소리가 잘 들리는지 확인할게요."
+            : "마이크 테스트가 완료되면 사운드 체크로 넘어가요."}
         </p>
       </div>
     </section>
