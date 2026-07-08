@@ -223,7 +223,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
           </div>
         )}
 
-        {question.question && (
+        {question.question && question.partNumber !== 4 && (
           <p className="text-lg leading-relaxed font-medium text-blue-950 sm:text-xl md:text-2xl">
             {question.question}
           </p>
