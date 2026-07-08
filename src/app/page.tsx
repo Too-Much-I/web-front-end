@@ -66,7 +66,7 @@ export default function Home() {
             render={<Link href="/exam/prepare" />}
             nativeButton={false}
           >
-            지금 당장 모의고사 보기
+            실제 시험 전, 무료 모의고사 체험하기 
           </Button>
         </div>
 

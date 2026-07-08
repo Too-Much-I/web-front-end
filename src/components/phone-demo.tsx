@@ -13,35 +13,17 @@ import {
 
 const WAVE_BARS = [18, 32, 24, 40, 28, 20, 36, 26, 42, 22, 34, 18];
 
-const RADAR_DATA = [
-  { subject: "발음", score: 85 },
-  { subject: "억양", score: 74 },
-  { subject: "유창성", score: 78 },
-  { subject: "문법", score: 90 },
-  { subject: "어휘", score: 82 },
+const PART_RADAR_DATA = [
+  { part: "Part 1", percent: 83 },
+  { part: "Part 2", percent: 67 },
+  { part: "Part 3", percent: 78 },
+  { part: "Part 4", percent: 89 },
+  { part: "Part 5", percent: 80 },
 ];
 
-const DETAIL_CARDS = [
-  {
-    icon: "🗣️",
-    label: "발음",
-    grade: "Good",
-    tone: "emerald" as const,
-    note: "일부 단어에서 강세 위치가 부정확해요",
-  },
-  {
-    icon: "⏱️",
-    label: "유창성",
-    grade: "Fair",
-    tone: "amber" as const,
-    note: "답변 사이 침묵이 다소 길어요 (평균 1.8초)",
-  },
-];
+const STRENGTHS = ["답변 구조가 논리적이고 명확해요", "핵심 어휘 사용이 적절해요"];
 
-const BADGE_STYLES = {
-  emerald: "bg-emerald-50 text-emerald-600",
-  amber: "bg-amber-50 text-amber-600",
-};
+const WEAKNESSES = ["일부 단어에서 강세 위치가 부정확해요", "답변 사이 침묵이 다소 길어요"];
 
 export function PhoneDemo() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -165,40 +147,40 @@ export function PhoneDemo() {
               ) : (
                 <div className="no-scrollbar h-full space-y-5 overflow-y-auto bg-white px-5 py-7 text-center">
                   <div>
-                    <span className="text-[11px] font-medium text-zinc-400">
-                      토익 스피킹 예상 점수
+                    <span className="inline-block rounded-full bg-orange-50 px-2.5 py-0.5 text-[10px] font-semibold text-orange-600">
+                      예상 총점
                     </span>
-                    <div className="mt-1 flex items-end justify-center gap-1">
-                      <span className="text-5xl font-extrabold text-orange-500">
+                    <div className="mt-1.5 flex items-end justify-center gap-1">
+                      <span className="text-5xl font-extrabold text-orange-600">
                         160
                       </span>
                       <span className="pb-1.5 text-sm text-zinc-400">
                         / 200
                       </span>
                     </div>
-                    <span className="mt-1.5 inline-block rounded-full bg-orange-50 px-2.5 py-0.5 text-[10px] font-semibold text-orange-500">
+                    <p className="mt-1 text-xs font-semibold text-blue-950">
                       Intermediate High
-                    </span>
+                    </p>
 
-                    <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
+                    <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-orange-100">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-orange-300 to-orange-500"
+                        className="h-full rounded-full bg-orange-500"
                         style={{ width: "80%" }}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <h3 className="text-left text-xs font-semibold text-zinc-700">
-                      역량 분석
+                    <h3 className="text-left text-xs font-bold text-blue-950">
+                      파트별 점수
                     </h3>
                     <div className="mx-auto h-36 w-full max-w-[220px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <RadarChart data={RADAR_DATA} outerRadius="70%">
+                        <RadarChart data={PART_RADAR_DATA} outerRadius="70%">
                           <PolarGrid stroke="#f0f0f0" />
                           <PolarAngleAxis
-                            dataKey="subject"
-                            tick={{ fontSize: 9, fill: "#a1a1aa" }}
+                            dataKey="part"
+                            tick={{ fontSize: 9, fill: "#71717a" }}
                           />
                           <PolarRadiusAxis
                             domain={[0, 100]}
@@ -206,7 +188,7 @@ export function PhoneDemo() {
                             axisLine={false}
                           />
                           <Radar
-                            dataKey="score"
+                            dataKey="percent"
                             stroke="#f97316"
                             fill="#f97316"
                             fillOpacity={0.35}
@@ -217,41 +199,77 @@ export function PhoneDemo() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <h3 className="text-left text-xs font-semibold text-zinc-700">
-                      상세 피드백
-                    </h3>
-                    {DETAIL_CARDS.map(({ icon, label, grade, tone, note }) => (
-                      <div
-                        key={label}
-                        className="rounded-2xl bg-zinc-50 p-3 text-left"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="flex items-center gap-1.5 text-xs font-medium text-zinc-700">
-                            <span>{icon}</span>
-                            {label}
-                          </span>
-                          <span
-                            className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${BADGE_STYLES[tone]}`}
-                          >
-                            {grade}
-                          </span>
-                        </div>
-                        <p className="mt-1.5 text-[10px] leading-relaxed text-zinc-500">
-                          {note}
-                        </p>
-                      </div>
-                    ))}
+                  <div className="rounded-2xl bg-zinc-50 p-3 text-left">
+                    <p className="text-[10px] font-bold text-emerald-600">
+                      강점
+                    </p>
+                    <ul className="mt-1 space-y-1">
+                      {STRENGTHS.map((item) => (
+                        <li
+                          key={item}
+                          className="flex gap-1.5 text-[10px] leading-relaxed text-zinc-600"
+                        >
+                          <span className="text-emerald-500">+</span>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+
+                    <p className="mt-2.5 text-[10px] font-bold text-rose-600">
+                      약점
+                    </p>
+                    <ul className="mt-1 space-y-1">
+                      {WEAKNESSES.map((item) => (
+                        <li
+                          key={item}
+                          className="flex gap-1.5 text-[10px] leading-relaxed text-zinc-600"
+                        >
+                          <span className="text-rose-500">−</span>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
 
                   <div className="rounded-2xl border-l-4 border-orange-400 bg-orange-50/60 p-3 text-left">
-                    <span className="text-[10px] font-semibold text-orange-500">
-                      총평
+                    <span className="text-[10px] font-semibold text-orange-600">
+                      종합 피드백
                     </span>
                     <p className="mt-1 text-[11px] leading-relaxed text-zinc-600">
                       논리적 구성은 훌륭해요! 발음 강세만 조금 더 연습하면
                       다음엔 더 높은 점수를 받을 수 있어요.
                     </p>
+                  </div>
+
+                  <div className="rounded-2xl bg-gradient-to-br from-orange-500 to-orange-300 p-3">
+                    <p className="text-center text-xs font-extrabold text-white">
+                      파트별 피드백
+                    </p>
+                    <div className="relative mt-3 rounded-xl bg-white p-3 text-left">
+                      <div className="absolute -top-4 right-2 size-9">
+                        <Image
+                          src="/mascots/mike.png"
+                          alt="마이크를 든 앵무새 캐릭터"
+                          fill
+                          sizes="36px"
+                          className="object-contain drop-shadow-sm"
+                        />
+                      </div>
+                      <span className="text-[10px] font-extrabold text-orange-600">
+                        Part 3
+                      </span>
+                      <p className="mt-1 rounded-lg bg-sky-50 p-2 text-[10px] leading-relaxed text-sky-900 ring-1 ring-sky-100">
+                        질문 의도 파악은 좋았지만, 답변 길이가 조금 짧아요.
+                      </p>
+                      <div className="mt-2 flex gap-1.5">
+                        <span className="inline-flex items-center rounded-full bg-sky-500 px-2 py-0.5 text-[9px] font-semibold text-white">
+                          Q5
+                        </span>
+                        <span className="inline-flex items-center rounded-full bg-sky-500 px-2 py-0.5 text-[9px] font-semibold text-white">
+                          Q6
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
