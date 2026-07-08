@@ -10,17 +10,16 @@ export interface TargetGradeOption {
 
 /** ETS 공식 토익스피킹 능숙도 등급별 점수대. 등급마다 한 행씩만 존재한다. */
 export const TARGET_GRADE_OPTIONS: TargetGradeOption[] = [
-  { id: "ah", levelLabel: "AH", scoreLabel: "200점", score: 200 },
-  { id: "am", levelLabel: "AM", scoreLabel: "180~190점", score: 180 },
-  { id: "al", levelLabel: "AL", scoreLabel: "160~170점", score: 160 },
-  { id: "ih", levelLabel: "IH", scoreLabel: "130~150점", score: 130 },
-  { id: "im3", levelLabel: "IM3", scoreLabel: "120점", score: 120 },
-  { id: "im2", levelLabel: "IM2", scoreLabel: "110점", score: 110 },
-  { id: "im1", levelLabel: "IM1", scoreLabel: "100점", score: 100 },
-  { id: "il", levelLabel: "IL", scoreLabel: "80~90점", score: 80 },
-  { id: "nh", levelLabel: "NH", scoreLabel: "60~70점", score: 60 },
-  { id: "nm", levelLabel: "NM", scoreLabel: "40~50점", score: 40 },
-  { id: "nl", levelLabel: "NL", scoreLabel: "0~30점", score: 0 },
+  { id: "ah", levelLabel: "Advanced High", scoreLabel: "200점", score: 200 },
+  { id: "am", levelLabel: "Advanced Mid", scoreLabel: "180~190점", score: 180 },
+  { id: "al", levelLabel: "Advanced Low", scoreLabel: "160~170점", score: 160 },
+  { id: "ih", levelLabel: "Intermediate High", scoreLabel: "140~150점", score: 140 },
+  { id: "im3", levelLabel: "Intermediate Mid 3", scoreLabel: "130점", score: 130 },
+  { id: "im2", levelLabel: "Intermediate Mid 2", scoreLabel: "120점", score: 120 },
+  { id: "im1", levelLabel: "Intermediate Mid 1", scoreLabel: "110점", score: 110 },
+  { id: "il", levelLabel: "Intermediate Low", scoreLabel: "90~100점", score: 90 },
+  { id: "nh", levelLabel: "Novice High", scoreLabel: "60~80점", score: 60 },
+  { id: "nml", levelLabel: "Novice Mid / Low", scoreLabel: "0~50점", score: 0 },
 ];
 
 const STORAGE_KEY = "toeic-target-grade-id";
