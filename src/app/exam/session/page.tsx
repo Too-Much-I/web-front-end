@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ExamSessionScreen } from "@/components/exam/exam-session-screen";
 import { apiFetch } from "@/lib/api/client";
 import { mapExamSession } from "@/features/exam/map-exam-session";
@@ -17,9 +17,14 @@ interface ApiEnvelope<T> {
 export default function ExamSessionPage() {
   const [session, setSession] = useState<ExamSession | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const requestedRef = useRef(false);
 
   useEffect(() => {
     // 💡 화면이 켜지자마자 백엔드로 세션 생성(POST /api/v1/exams)을 요청합니다!
+    // StrictMode에서 effect가 두 번 실행돼도 세션이 중복 생성되지 않도록 가드합니다.
+    if (requestedRef.current) return;
+    requestedRef.current = true;
+
     async function createExam() {
       try {
         const response = await apiFetch<ApiEnvelope<RawExamSession>>('/api/v1/exams', {
