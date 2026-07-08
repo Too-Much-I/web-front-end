@@ -132,10 +132,10 @@ export interface RawExamQuestionFeedback {
   pronunciation: string;
   fluency: string;
   content: string;
-  pronunciation_fluency_score: number;
-  content_relevance_score: number;
-  grammar_vocabulary: string;
-  action_items: string[];
+  pronunciationFluencyScore: number;
+  contentRelevanceScore: number;
+  grammarVocabulary: string;
+  actionItems: string[];
 }
 
 /** GET /api/v1/exams/{examId}/questions/{questionNumber} 의 result.question */
