@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { ExamDirectionsScreen } from "@/components/exam/exam-directions-screen";
 import { ExamHeader } from "@/components/exam/exam-header";
+import { ExamQaNavBar } from "@/components/exam/exam-qa-nav-bar";
 import { uploadExamAnswer } from "@/features/exam/api/exam-answer-upload"; // TODO: 서버 배포 후 주석 해제
 import { AUDIO_CUES } from "@/features/exam/audio-cues";
 import { getExamPartMeta } from "@/features/exam/part-meta";
@@ -67,6 +68,37 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
       router.replace(`/exam/grading?examId=${encodeURIComponent(session.examId)}`);
     }
   }, [phase, index, total, questions, question, router, session.examId]);
+
+  // 💡 QA/멘토 검수용: 화면을 자유롭게 넘나들기 위한 이동 함수들. 실제 시험 흐름(handlePhaseComplete)과는
+  // 별개로 index/phase를 직접 지정한다. 검수 후 ExamQaNavBar와 함께 제거 예정.
+  const jumpToQuestion = useCallback(
+    (targetIndex: number, options?: { showDirections?: boolean }) => {
+      if (targetIndex < 0 || targetIndex >= total) return;
+      const targetQuestion = questions[targetIndex];
+      setIndex(targetIndex);
+      setPhase(
+        options?.showDirections
+          ? "directions"
+          : targetQuestion.question
+            ? "question-audio"
+            : "prep-cue",
+      );
+    },
+    [questions, total],
+  );
+
+  const jumpToPart = useCallback(
+    (partNumber: number) => {
+      const targetIndex = questions.findIndex((q) => q.partNumber === partNumber);
+      if (targetIndex === -1) return;
+      jumpToQuestion(targetIndex, { showDirections: true });
+    },
+    [questions, jumpToQuestion],
+  );
+
+  const availableParts = Array.from(new Set(questions.map((q) => q.partNumber))).sort(
+    (a, b) => a - b,
+  );
 
   const isCounting = phase === "prep" || phase === "speaking";
   const isPrepGroup = phase === "prep-cue" || phase === "prep";
@@ -149,11 +181,31 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
 
   if (!question) return null;
 
+  const qaNavBar = (
+    <ExamQaNavBar
+      currentIndex={index}
+      total={total}
+      currentPartNumber={question.partNumber}
+      availableParts={availableParts}
+      onPrev={() => jumpToQuestion(index - 1)}
+      onNext={() => jumpToQuestion(index + 1)}
+      onJumpToPart={jumpToPart}
+      onSkipPhase={handlePhaseComplete}
+      onGoToGrading={() =>
+        router.push(`/exam/grading?examId=${encodeURIComponent(session.examId)}`)
+      }
+      onGoToResult={() =>
+        router.push(`/exam/result?examId=${encodeURIComponent(session.examId)}`)
+      }
+    />
+  );
+
   if (phase === "directions") {
     return (
       <div className="flex flex-1 flex-col bg-white">
         <ExamHeader label={`Part ${question.partNumber}`} />
         <ExamDirectionsScreen partNumber={question.partNumber} onComplete={handlePhaseComplete} />
+        {qaNavBar}
       </div>
     );
   }
@@ -313,6 +365,8 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
           다음 문제로 자동으로 전환됩니다. 시험 도중 중단하거나 뒤로 갈 수 없어요.
         </p>
       </footer>
+
+      {qaNavBar}
     </div>
   );
 }
