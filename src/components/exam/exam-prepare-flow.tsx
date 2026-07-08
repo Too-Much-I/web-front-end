@@ -2,7 +2,7 @@
 
 import { HelpCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { TargetGradeSelect } from "@/components/exam/target-grade-select";
 import { MicTestPanel } from "@/components/mic-test-panel";
@@ -23,6 +23,16 @@ const CHECKLIST = [
 export function ExamPrepareFlow() {
   const router = useRouter();
   const [dialogStep, setDialogStep] = useState<PrepareDialogStep>(null);
+
+  useEffect(() => {
+    // router.push/replace always round-trips to the server in the App Router (no
+    // "shallow routing" like the Pages Router had), so we write the URL directly
+    // via the History API. This keeps Clarity able to tell "목표 설정" vs
+    // "마이크 테스트" vs "사운드 체크" drop-offs apart without remounting anything.
+    const params = new URLSearchParams(window.location.search);
+    params.set("step", dialogStep ?? "grade");
+    window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
+  }, [dialogStep]);
 
   return (
     <>
