@@ -25,12 +25,12 @@ export default function ExamPreparePage() {
         </Link>
       </header>
 
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 py-10">
+      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 py-10">
         <ExamPrepareFlow />
       </main>
 
       <footer className="border-t border-orange-200/60 px-6 py-8 sm:px-10">
-        <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-between gap-4 text-sm text-zinc-500 sm:flex-row">
+        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 text-sm text-zinc-500 sm:flex-row">
           <span>
             © {new Date().getFullYear()} 토선생. All rights reserved.
           </span>
