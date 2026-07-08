@@ -2,17 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ExamSessionScreen } from "@/components/exam/exam-session-screen";
-import { apiFetch } from "@/lib/api/client";
-import { mapExamSession } from "@/features/exam/map-exam-session";
-import type { ExamSession, RawExamSession } from "@/types/exam";
-
-// 백엔드 API 응답 규격
-interface ApiEnvelope<T> {
-  isSuccess: boolean;
-  code: string;
-  message: string;
-  result: T;
-}
+import { createExamSession } from "@/features/exam/api/exam-session-create";
+import type { ExamSession } from "@/types/exam";
 
 export default function ExamSessionPage() {
   const [session, setSession] = useState<ExamSession | null>(null);
@@ -25,22 +16,14 @@ export default function ExamSessionPage() {
     if (requestedRef.current) return;
     requestedRef.current = true;
 
-    async function createExam() {
-      try {
-        const response = await apiFetch<ApiEnvelope<RawExamSession>>('/api/v1/exams', {
-          method: 'POST',
-        });
-        
-        // 백엔드에서 받은 실제 데이터를 프론트엔드 규격에 맞게 변환
-        const realSession = mapExamSession(response.result);
+    createExamSession()
+      .then((realSession) => {
         setSession(realSession);
-      } catch (err) {
+      })
+      .catch((err) => {
         console.error("시험 생성 API 호출 에러:", err);
         setError("백엔드 서버에서 모의고사를 불러오는 데 실패했습니다.");
-      }
-    }
-
-    createExam();
+      });
   }, []);
 
   // API 응답을 기다리는 동안 보여줄 화면

@@ -260,7 +260,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
                       {item.time}
                     </td>
                     <td className="px-4 py-2 text-zinc-800">
-                      {item.session_title}
+                      {item.sessionTitle}
                       {item.note && (
                         <span className="block text-zinc-400">({item.note})</span>
                       )}

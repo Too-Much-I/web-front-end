@@ -1,6 +1,6 @@
 export interface ExamTableItem {
   time: string;
-  session_title: string;
+  sessionTitle: string;
   speaker?: string | null;
   note?: string;
 }
