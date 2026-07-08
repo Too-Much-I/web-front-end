@@ -14,18 +14,17 @@ export interface ExamTableContext {
 }
 
 export interface RawExamQuestion {
-  part_number: number;
-  question_number: number;
-  reference_text?: string;
-  image_url?: string;
-  question?: string;
-  table_context?: ExamTableContext;
-  /** Narrated audio of `question`. Mocked locally for now; the real exam will get this from the server. */
-  audio_url?: string;
+  part: number;
+  questionNumber: number;
+  referenceText?: string;
+  imageUrl?: string;
+  text?: string;
+  tableContext?: ExamTableContext;
+  audioUrl?: string;
 }
 
 export interface RawExamSession {
-  mock_exam_id: string;
+  examId: string;
   title: string;
   questions: RawExamQuestion[];
 }
