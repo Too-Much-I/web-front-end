@@ -123,12 +123,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
 
     return () => {
       stopRecording().then((audioBlob) => {
-        if (!audioBlob) return;
-
-        console.log("session =", session);
-        console.log("examId =", session.examId);
-        console.log("currentQuestion =", currentQuestion);
-        console.log("questionNumber =", currentQuestion.questionNumber);
+        if (audioBlob.size === 0) return;
 
         uploadExamAnswer(
           session.examId,
