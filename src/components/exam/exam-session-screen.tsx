@@ -17,7 +17,15 @@ import { formatSeconds, usePhaseCountdown } from "@/features/exam/use-phase-coun
 import { cn } from "@/lib/utils";
 import type { ExamSession } from "@/types/exam";
 
-type Phase = "directions" | "question-audio" | "prep-cue" | "prep" | "speak-cue" | "speaking";
+type Phase =
+  | "directions"
+  | "question-audio"
+  | "repeat-cue"
+  | "question-audio-repeat"
+  | "prep-cue"
+  | "prep"
+  | "speak-cue"
+  | "speaking";
 
 const CUE_FALLBACK_MS = 2000;
 
@@ -39,6 +47,15 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
       return;
     }
     if (phase === "question-audio") {
+      // Part 4의 마지막 문제(Q10)는 "다시 들려줄게요" 안내 후 질문을 한 번 더 들려준다.
+      setPhase(question?.partNumber === 4 && question?.isLastInPart ? "repeat-cue" : "prep-cue");
+      return;
+    }
+    if (phase === "repeat-cue") {
+      setPhase("question-audio-repeat");
+      return;
+    }
+    if (phase === "question-audio-repeat") {
       setPhase("prep-cue");
       return;
     }
@@ -103,6 +120,8 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
   const isCounting = phase === "prep" || phase === "speaking";
   const isPrepGroup = phase === "prep-cue" || phase === "prep";
   const isSpeakGroup = phase === "speak-cue" || phase === "speaking";
+  const isListeningPhase =
+    phase === "question-audio" || phase === "repeat-cue" || phase === "question-audio-repeat";
 
   const durationSec = question ? (isPrepGroup ? question.prepTimeSec : question.speakTimeSec) : 0;
 
@@ -124,6 +143,22 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     phase === "question-audio",
   );
 
+  useAudioCue(
+    AUDIO_CUES.nowListenAgain,
+    CUE_FALLBACK_MS,
+    handlePhaseComplete,
+    `${question?.questionNumber}-repeat-cue`,
+    phase === "repeat-cue",
+  );
+
+  useAudioCue(
+    question?.audioUrl,
+    questionAudioFallbackMs,
+    handlePhaseComplete,
+    `${question?.questionNumber}-question-audio-repeat`,
+    phase === "question-audio-repeat",
+  );
+
   useAudioSequence(
     [AUDIO_CUES.beep, AUDIO_CUES.beginPreparing],
     CUE_FALLBACK_MS,
@@ -132,11 +167,15 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     phase === "prep-cue",
   );
 
+  const speakCueClip =
+    question?.partNumber === 1
+      ? AUDIO_CUES.beginReadingAloud
+      : question?.partNumber === 3 || question?.partNumber === 4
+        ? AUDIO_CUES.beginResponding
+        : AUDIO_CUES.beginSpeaking;
+
   useAudioSequence(
-    [
-      AUDIO_CUES.beep,
-      question?.partNumber === 1 ? AUDIO_CUES.beginReadingAloud : AUDIO_CUES.beginSpeaking,
-    ],
+    [AUDIO_CUES.beep, speakCueClip],
     CUE_FALLBACK_MS,
     handlePhaseComplete,
     `${question?.questionNumber}-speak-cue`,
@@ -283,13 +322,19 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
       </main>
 
       <footer className="mt-auto flex flex-col items-center gap-3 pb-10">
-        {phase === "question-audio" ? (
+        {isListeningPhase ? (
           <div className="flex items-center gap-2 text-blue-950">
             <span className="relative flex size-2.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
               <span className="relative inline-flex size-2.5 rounded-full bg-blue-600" />
             </span>
-            <span className="text-sm font-semibold sm:text-base">질문을 듣고 있어요</span>
+            <span className="text-sm font-semibold sm:text-base">
+              {phase === "repeat-cue"
+                ? "다시 들려드릴게요"
+                : phase === "question-audio-repeat"
+                  ? "질문을 다시 듣고 있어요"
+                  : "질문을 듣고 있어요"}
+            </span>
           </div>
         ) : (
           <>

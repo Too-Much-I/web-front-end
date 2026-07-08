@@ -39,6 +39,8 @@ export interface ExamQuestion {
   tableContext?: ExamTableContext;
   prepTimeSec: number;
   speakTimeSec: number;
+  /** 같은 파트의 마지막 문제인지. Part 4의 마지막 문제(Q10)는 질문 오디오를 두 번 들려준다. */
+  isLastInPart: boolean;
 }
 
 export interface ExamSession {
