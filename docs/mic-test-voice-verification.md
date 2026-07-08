@@ -40,6 +40,115 @@
 
 ## 6. 남은 과제
 
-- `SPECTRAL_FLATNESS_THRESHOLD`(0.5)와 `VOICE_SUSTAIN_MS`(200ms)는 실측 튜닝 없이 정한 초기값이라, 실사용자 테스트(다양한 화자의 음높이, 마이크 기종, 배경 소음 종류)를 거쳐 조정이 필요할 수 있다.
-- 지금은 이 두 값과 `VOICE_THRESHOLD`가 서로 다른 상수로 흩어져 있는데, 추후 잡음 유형별 오탐/오거부 사례가 쌓이면 재조정 기준을 마련해야 한다.
+- ~~`SPECTRAL_FLATNESS_THRESHOLD`(0.5)와 `VOICE_SUSTAIN_MS`(200ms)는 실측 튜닝 없이 정한 초기값이라, 실사용자 테스트(다양한 화자의 음높이, 마이크 기종, 배경 소음 종류)를 거쳐 조정이 필요할 수 있다.~~ → `SPECTRAL_FLATNESS_THRESHOLD`는 0.8로, 아래 7절의 문제로 `VOICE_SUSTAIN_MS` 대신 `VOICE_GAP_TOLERANCE_MS`를 도입해 조정했다.
+- 지금은 이 값들과 `VOICE_THRESHOLD`가 서로 다른 상수로 흩어져 있는데, 추후 잡음 유형별 오탐/오거부 사례가 쌓이면 재조정 기준을 마련해야 한다.
 - 정확도를 더 높여야 한다면 3절에서 기각한 VAD 라이브러리 도입을 다시 검토할 수 있다(다만 13MB 에셋 비용을 감수할 만한 근거가 필요하다).
+
+## 7. 후속 문제: "연속 200ms" 조건이 실제 발화 패턴보다 지나치게 엄격함
+
+### 7.1 증상
+
+실사용 중 볼륨과 목소리 판정(`isVoiceLike`)을 모두 통과하는 순간이 분명히 있는데도 "조금 더 길게 이야기해주세요"(`HINT_TOO_SHORT`) 안내가 계속 사라지지 않는 케이스가 보고됐다.
+
+### 7.2 원인
+
+기존 스트릭 로직은 `isVoiceLike`가 `false`인 프레임이 **단 한 번**만 나와도 `voiceStreakStartRef`를 즉시 `null`로 리셋했다.
+
+```js
+if (isVoiceLike) {
+  // ...스트릭 누적...
+} else {
+  voiceStreakStartRef.current = null; // 단 한 프레임만 실패해도 완전 리셋
+}
+```
+
+`requestAnimationFrame`은 약 16ms 주기로 도는데, `VOICE_SUSTAIN_MS`(200ms) 동안 끊김 없이 연속으로 `isVoiceLike`가 유지돼야 통과되는 구조였다. 그런데 실제 사람의 발화는:
+
+- /s/, /f/, /h/, /ㅍ/, /ㅌ/, /ㅋ/ 같은 무성음 구간에서 스펙트럼이 순간적으로 평탄해져 `isVoiceLike`가 잠깐 `false`가 되고,
+- 음절 사이, 숨쉬는 순간에도 아주 짧은 끊김이 자연스럽게 생긴다.
+
+즉 "총 발화 시간"은 200ms를 훨씬 넘겨도 "완벽하게 끊김 없는 200ms"는 좀처럼 만들어지지 않아, 실제로는 정상적으로 말하고 있는데도 스트릭이 계속 0부터 다시 시작되는 문제였다.
+
+### 7.3 검토한 해결 방안
+
+- **A안: 짧은 끊김에 유예 시간을 두고 스트릭 리셋을 지연 (채택)** — 아래 7.4절.
+- **B안: 롤링 윈도우 비율 판정** — "연속성" 요건 자체를 버리고, 최근 N ms(예: 1000ms) 동안의 프레임 중 voice-like 비율이 일정 % 이상이면 통과시키는 방식. 자연스러운 발화 패턴에 더 잘 맞고 근본적인 해결에 가깝다고 판단했으나, 링 버퍼 관리가 추가되고 `RATIO_WINDOW_MS`/`RATIO_THRESHOLD` 두 값을 새로 튜닝해야 해 변경 범위가 더 컸다. 우선 구현 리스크가 작은 A안을 적용하고, A안으로도 충분하지 않다는 게 확인되면 재검토하기로 했다.
+
+### 7.4 채택안: 유예 시간(grace period)
+
+`voiceStreakStartRef`를 매 프레임 실패마다 리셋하는 대신, 마지막으로 voice-like 판정을 받은 시각(`lastVoiceLikeAtRef`)을 기준으로 `VOICE_GAP_TOLERANCE_MS`(80ms) 이내의 끊김은 스트릭을 유지한 채 넘어가고, 그보다 긴 침묵만 진짜 끊김으로 간주해 리셋한다(`src/components/mic-test-panel.tsx`).
+
+```js
+if (isVoiceLike) {
+  lastVoiceLikeAtRef.current = performance.now();
+  if (voiceStreakStartRef.current === null) {
+    voiceStreakStartRef.current = performance.now();
+  } else if (performance.now() - voiceStreakStartRef.current >= VOICE_SUSTAIN_MS) {
+    verified = true;
+  }
+} else if (
+  lastVoiceLikeAtRef.current === null ||
+  performance.now() - lastVoiceLikeAtRef.current > VOICE_GAP_TOLERANCE_MS
+) {
+  voiceStreakStartRef.current = null;
+}
+```
+
+기존 "연속 판정" 모델 자체는 그대로 두고 리셋 조건만 완화하는 최소 변경이라 구현 리스크가 작다. 다만 근본적으로 여전히 "거의 끊김 없는 200ms"를 요구하는 모델이라는 한계는 남아 있고, `VOICE_GAP_TOLERANCE_MS`(80ms) 값도 실측 없이 정한 초기값이다.
+
+### 7.5 남은 과제 (→ 8절에서 해소)
+
+- ~~`VOICE_GAP_TOLERANCE_MS`(80ms)는 실사용자 테스트를 거쳐 조정이 필요할 수 있다.~~
+- ~~A안 적용 후에도 특정 화자·마이크 조합에서 통과가 어렵다는 피드백이 반복되면, 7.3절에서 보류한 B안(롤링 윈도우 비율 판정)을 재검토한다.~~ → 실제로 재현되어 8절에서 A안을 폐기하고 다른 방식으로 전환했다.
+
+## 8. A안 폐기와 최종 채택안: 누적(비연속) 판정
+
+### 8.1 A안이 실패한 이유
+
+`VOICE_GAP_TOLERANCE_MS`를 80ms → 120ms로 올리고, 마이크 테스트 화면에 읽을 문장(`READING_PROMPT`, 7.6절이 아니라 이 시점에 추가)까지 보여줘서 발화 길이를 충분히 확보했는데도 실사용 테스트에서 스트릭이 184ms까지 쌓였다가 다시 0으로 끊기는 현상이 재현됐다. 화면에 임시로 추가한 디버그 표시(`avg`/`flatness`/streak 값 실시간 표시)로 확인해보니 `avg`와 `flatness`는 발화 중 대부분 조건을 만족하고 있었다 — 즉 문제는 음량이나 스펙트럼 판정이 아니라 여전히 "연속성" 그 자체였다.
+
+원인은 A안의 구조적 한계였다. 그레이스 기간을 아무리 늘려도, A안은 결국 "한 번이라도 유예 시간을 넘는 침묵이 있으면 스트릭이 0부터 다시 시작"하는 모델이다. 그런데 실제 발화에는:
+
+- 무성음 파열음(/p/, /t/, /k/ 등)의 완전 무음 폐쇄 구간
+- 문장 내 쉼표·마침표에서의 자연스러운 pause
+- 숨쉬기
+
+가 반복적으로 섞여 있고, 이런 침묵 각각이 100~150ms를 넘는 경우가 드물지 않았다. 즉 문장을 길게 읽어도 "그 안에 끊김 없는 200ms 구간이 최소 한 번은 나온다"는 보장이 없었다 — 시행 횟수(문장 길이)를 늘려도 매 시행의 성공 확률 자체가 낮으면 결과는 크게 나아지지 않는다는 것이 실측으로 확인된 셈이다.
+
+### 8.2 채택안: 누적 판정 (연속성 요건 제거)
+
+"연속으로 끊기지 않아야 한다"는 요건을 아예 없애고, **목소리로 판정된(`isVoiceLike`) 시간의 총합**이 `VOICE_SUSTAIN_MS`(200ms)를 넘으면 통과시키는 방식으로 바꿨다(`src/components/mic-test-panel.tsx`). 이는 7.3절에서 검토했던 B안(롤링 윈도우 비율 판정)과 문제의식은 같지만, 윈도우·비율 두 값을 새로 튜닝해야 하는 B안보다 더 단순한 형태다 — 윈도우 없이 "녹음을 시작한 뒤로 지금까지 쌓인 총 발화 시간"만 본다.
+
+```js
+const now = performance.now();
+const dt = lastTickAtRef.current === null ? 0 : now - lastTickAtRef.current;
+lastTickAtRef.current = now;
+
+if (isVoiceLike) {
+  voiceAccumulatedMsRef.current += dt;
+  if (voiceAccumulatedMsRef.current >= VOICE_SUSTAIN_MS) {
+    verified = true;
+  }
+}
+```
+
+리셋 로직 자체가 없으므로 `voiceStreakStartRef`, `lastVoiceLikeAtRef`, `VOICE_GAP_TOLERANCE_MS`는 모두 제거했다. 프레임마다 `requestAnimationFrame`의 실제 경과 시간(`dt`)을 구해 누적하는 이유는, rAF 주기가 정확히 일정하지 않아 "프레임 수 × 고정 간격"으로 계산하면 실제 경과 시간과 오차가 누적될 수 있기 때문이다.
+
+이 방식은 끊김이 몇 번 있든, 얼마나 길든 전혀 페널티가 없다. 대신 통과 기준이 "총 200ms 이상 목소리로 판정된 적이 있는가"로 완전히 느슨해지므로, 노이즈를 걸러내는 역할은 이제 전적으로 6절의 음량(`VOICE_THRESHOLD`)·스펙트럼 평탄도(`SPECTRAL_FLATNESS_THRESHOLD`) 게이트에 달려 있다. 다만 두 게이트가 이미 "볼륨은 큰데 목소리가 아님"(노이즈)과 "목소리가 아예 없음"을 구분하고 있어서, 연속성 요건을 없앤다고 해서 오탐(false positive)이 새로 생기는 건 아니라고 판단했다.
+
+### 8.3 함께 추가한 보조 장치: 읽을 문장(`READING_PROMPT`)
+
+마이크 테스트 화면에 토익 스피킹 실제 문제와 비슷한 톤의 영어 안내문(`READING_PROMPT`, 예: "Thank you for calling Riverside Electronics. ...")을 보여주고 소리 내어 읽게 했다. "아무 말이나 해보세요"보다 사용자가 실제로 몇 초간 이어 말하게 유도하는 효과가 있고, 토익 스피킹 앱이라는 맥락과도 자연스럽게 맞아 함께 채택했다. 다만 8.1절에서 확인했듯 이것만으로는 A안의 구조적 문제를 해결하지 못했고, 8.2절의 판정 방식 전환이 실제 해결책이었다.
+
+### 8.4 남은 과제
+
+- `VOICE_SUSTAIN_MS`(200ms)는 연속성 요건이 사라지면서 사실상 문턱이 더 낮아진 셈이라, 너무 쉽게 통과되지 않는지 재검토가 필요할 수 있다(예: 300~500ms로 상향).
+- 마이크 테스트 화면에 남겨둔 실시간 디버그 표시(`avg`/`flatness`/누적 ms)는 진단용 임시 코드이므로, 임계값들이 실사용 기준으로 충분히 검증되면 제거한다.
+
+## 9. 실측 기반 재조정: `SPECTRAL_FLATNESS_THRESHOLD` 0.8 → 0.97
+
+8절까지 적용한 뒤에도 실사용 테스트에서 "주변 소음이 감지돼요"가 계속 뜨는 문제가 재현됐다. 디버그 표시로 실제 값을 확인해보니 `avg`는 0.124로 임계값(0.08)을 여유 있게 넘었지만, `flatness`는 또렷하게 말하는 상황에서도 0.957 정도로 임계값(0.8)을 한참 웃돌았다.
+
+`getUserMedia`에서 `autoGainControl: false`로 마이크 자동 증폭을 꺼둔 구성상 캡처되는 신호 자체가 약해서, 목소리 피크와 배경 잡음 바닥의 상대적 대비가 작고, 그 결과 실제 목소리를 읽어도 스펙트럼 평탄도가 백색소음에 가까운 값으로 나온다는 게 실측으로 확인된 것이다. 이 구성에서 사람 목소리의 실측 평탄도가 0.95~0.96대라는 근거가 생겼으므로, 임계값을 `0.8` → `0.97`로 올려 실제 목소리를 잡음으로 오판하지 않도록 했다. 노이즈 판별 여력이 줄어드는 트레이드오프는 있지만, 애초에 이 값을 실측 없이 잡았던(6절 "남은 과제") 초기값이었던 만큼 실측치를 반영해 재조정한 것이다.
+
+동시에 마이크 테스트에서 읽는 문장(`READING_PROMPT`)도 숫자·약어("a.m.", "p.m.")·쉼표가 많아 읽다가 자주 끊기던 것을, 쉬운 단어 위주의 두 문장("Welcome to our store. We hope you enjoy your shopping experience today.")으로 바꿔 막힘 없이 읽기 쉽게 했다.
