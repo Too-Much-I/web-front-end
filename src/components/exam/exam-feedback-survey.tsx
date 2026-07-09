@@ -6,7 +6,9 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { SatisfactionStars } from "@/components/exam/satisfaction-stars";
+import { getOrCreateAnonymousId } from "@/features/consent/anonymous-id";
 import { TARGET_GRADE_OPTIONS } from "@/features/exam/target-grade";
+import { submitExamSurvey } from "@/features/survey/api/submit-exam-survey";
 import { cn } from "@/lib/utils";
 
 const PRICE_OPTIONS = [
@@ -50,6 +52,7 @@ export function ExamFeedbackSurvey({
   const [priceId, setPriceId] = useState<string | null>(null);
   const [previousGradeId, setPreviousGradeId] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [isPopping, setIsPopping] = useState(false);
 
   useEffect(() => {
@@ -62,22 +65,40 @@ export function ExamFeedbackSurvey({
     setTimeout(() => setIsPopping(false), 600);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    toast.success("설문 제출 완료!", {
-      description: "프리미엄형 모의고사 1회 응시권을 곧 보내드릴게요.",
-      className: "toast-face-icon",
-      icon: (
-        <Image
-          src="/mascots/rabbit_face.png"
-          alt=""
-          width={40}
-          height={40}
-          className="object-contain"
-        />
-      ),
-    });
+    if (satisfaction === null || submitting) return;
+
+    setSubmitting(true);
+    try {
+      await submitExamSurvey({
+        anonymousId: getOrCreateAnonymousId(),
+        satisfaction,
+        previousGrade: previousGradeId,
+        priceWillingness: priceId,
+        opinion,
+        contact,
+        submittedAt: new Date().toISOString(),
+      });
+      setSubmitted(true);
+      toast.success("설문 제출 완료!", {
+        description: "프리미엄형 모의고사 1회 응시권을 곧 보내드릴게요.",
+        className: "toast-face-icon",
+        icon: (
+          <Image
+            src="/mascots/rabbit_face.png"
+            alt=""
+            width={40}
+            height={40}
+            className="object-contain"
+          />
+        ),
+      });
+    } catch {
+      toast.error("설문 제출에 실패했어요. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -307,10 +328,10 @@ export function ExamFeedbackSurvey({
 
             <button
               type="submit"
-              disabled={satisfaction === null}
+              disabled={satisfaction === null || submitting}
               className="mt-1 rounded-full bg-orange-400 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-orange-500 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400 disabled:hover:bg-zinc-200"
             >
-              설문 제출하고 응시권 받기
+              {submitting ? "제출 중..." : "설문 제출하고 응시권 받기"}
             </button>
           </form>
         )}

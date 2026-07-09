@@ -1,0 +1,20 @@
+/**
+ * 시험 후 만족도 설문 1건의 기록.
+ * 개인정보로는 연락처(전화번호/이메일)만 선택적으로 포함하며, 그 외는 익명 식별자로 연결한다.
+ */
+export interface ExamSurveyRecord {
+  /** 개인정보를 포함하지 않는 익명 사용자 식별자 (브라우저 localStorage에 저장된 UUID). */
+  anonymousId: string;
+  /** 만족도 별점 (1~5, 필수). */
+  satisfaction: number;
+  /** 이전 실제 응시 등급 id (TARGET_GRADE_OPTIONS의 id 또는 "none"). 미선택 시 null. */
+  previousGrade: string | null;
+  /** 지불 의향 금액 id (PRICE_OPTIONS의 id). 미선택 시 null. */
+  priceWillingness: string | null;
+  /** 자유 의견. 미입력 시 빈 문자열. */
+  opinion: string;
+  /** 응시권 발송용 연락처 (전화번호 또는 이메일). 미입력 시 빈 문자열. */
+  contact: string;
+  /** 제출한 정확한 시각 (ISO 8601, UTC). */
+  submittedAt: string;
+}
