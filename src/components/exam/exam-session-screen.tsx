@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { ExamDirectionsScreen } from "@/components/exam/exam-directions-screen";
+import { ExamExitConfirmPopup } from "@/components/exam/exam-exit-confirm-popup";
 import { ExamHeader } from "@/components/exam/exam-header";
 import { ExamQaNavBar } from "@/components/exam/exam-qa-nav-bar";
 import { uploadExamAnswer } from "@/features/exam/api/exam-answer-upload"; // TODO: 서버 배포 후 주석 해제
@@ -36,6 +37,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
 
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("directions");
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   const question = questions[index];
 
@@ -117,7 +119,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     (a, b) => a - b,
   );
 
-  const isCounting = phase === "prep" || phase === "speaking";
+  const isCounting = (phase === "prep" || phase === "speaking") && !showExitConfirm;
   const isPrepGroup = phase === "prep-cue" || phase === "prep";
   const isSpeakGroup = phase === "speak-cue" || phase === "speaking";
   const isListeningPhase =
@@ -140,7 +142,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     questionAudioFallbackMs,
     handlePhaseComplete,
     `${question?.questionNumber}-question-audio`,
-    phase === "question-audio",
+    phase === "question-audio" && !showExitConfirm,
   );
 
   useAudioCue(
@@ -148,7 +150,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     CUE_FALLBACK_MS,
     handlePhaseComplete,
     `${question?.questionNumber}-repeat-cue`,
-    phase === "repeat-cue",
+    phase === "repeat-cue" && !showExitConfirm,
   );
 
   useAudioCue(
@@ -156,7 +158,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     questionAudioFallbackMs,
     handlePhaseComplete,
     `${question?.questionNumber}-question-audio-repeat`,
-    phase === "question-audio-repeat",
+    phase === "question-audio-repeat" && !showExitConfirm,
   );
 
   useAudioSequence(
@@ -164,7 +166,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     CUE_FALLBACK_MS,
     handlePhaseComplete,
     `${question?.questionNumber}-prep-cue`,
-    phase === "prep-cue",
+    phase === "prep-cue" && !showExitConfirm,
   );
 
   const speakCueClip =
@@ -179,7 +181,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     CUE_FALLBACK_MS,
     handlePhaseComplete,
     `${question?.questionNumber}-speak-cue`,
-    phase === "speak-cue",
+    phase === "speak-cue" && !showExitConfirm,
   );
 
   useEffect(() => {
@@ -218,6 +220,42 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
   }, [question, phase]);
 
+  useEffect(() => {
+    // 시험 도중 브라우저/제스처 "뒤로가기"를 누르면 곧장 준비 화면으로 이동해버려
+    // 진행 중이던 시험이 그대로 날아간다. 더미 history 엔트리를 하나 쌓아두고
+    // popstate가 발생할 때마다 다시 쌓아서, 실제로 URL이 바뀌는 대신 확인 다이얼로그를
+    // 띄울 기회를 확보한다.
+    window.history.pushState(null, "", window.location.href);
+    const handlePopState = () => {
+      window.history.pushState(null, "", window.location.href);
+      setShowExitConfirm(true);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  const handleConfirmExit = useCallback(() => {
+    router.replace("/exam/prepare");
+  }, [router]);
+
+  // 현재 index의 문제는 directions~speaking 전 구간에서 아직 "응시 완료"가 아니다.
+  // (녹음/제출은 speaking이 끝나야 이루어지고, 그래야 index가 다음으로 넘어간다.)
+  // 그래서 팝업에는 index 이전까지, 즉 실제로 답변을 마친 마지막 문제를 보여준다.
+  const lastAnsweredQuestion = index > 0 ? questions[index - 1] : null;
+
+  const exitConfirmDialog = showExitConfirm && (
+    <ExamExitConfirmPopup
+      lastAnsweredQuestion={
+        lastAnsweredQuestion
+          ? { questionNumber: lastAnsweredQuestion.questionNumber }
+          : null
+      }
+      totalQuestions={total}
+      onStay={() => setShowExitConfirm(false)}
+      onExit={handleConfirmExit}
+    />
+  );
+
   if (!question) return null;
 
   const qaNavBar = (
@@ -245,6 +283,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
         <ExamHeader label={`Part ${question.partNumber}`} />
         <ExamDirectionsScreen partNumber={question.partNumber} onComplete={handlePhaseComplete} />
         {qaNavBar}
+        {exitConfirmDialog}
       </div>
     );
   }
@@ -412,6 +451,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
       </footer>
 
       {qaNavBar}
+      {exitConfirmDialog}
     </div>
   );
 }
