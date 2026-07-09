@@ -16,6 +16,8 @@ export function SoundCheckPanel({ onCompleted }: { onCompleted: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  const showQuietNotice = hasPlayed && !isPlaying;
+
   useEffect(() => {
     const audio = new Audio(SOUND_CHECK_SRC);
     audioRef.current = audio;
@@ -63,7 +65,7 @@ export function SoundCheckPanel({ onCompleted }: { onCompleted: () => void }) {
             error ? "text-orange-500" : "text-zinc-500",
           )}
         >
-          {error ?? (hasPlayed ? "소리가 잘 들렸나요?" : "재생 버튼을 눌러 소리를 확인해보세요.")}
+          {error ?? (showQuietNotice ? "소리가 잘 들렸나요? 주변 소음이 없는 조용한 곳에서 준비해주세요" : "재생 버튼을 눌러 소리를 확인해보세요.")}
         </p>
       </div>
 
@@ -75,8 +77,8 @@ export function SoundCheckPanel({ onCompleted }: { onCompleted: () => void }) {
           className="flex items-center justify-center"
         >
           <Image
-            src="/mascots/sound_check.png"
-            alt="사운드 체크"
+            src={showQuietNotice ? "/mascots/shh.png" : "/mascots/sound_check.png"}
+            alt={showQuietNotice ? "조용한 환경에서 응시해주세요" : "사운드 체크"}
             width={400}
             height={208}
             className={cn(
@@ -106,7 +108,9 @@ export function SoundCheckPanel({ onCompleted }: { onCompleted: () => void }) {
           disabled={!hasPlayed}
           className="h-14 w-full flex-col gap-0.5 rounded-full bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-40"
         >
-          <span className="text-base font-semibold">모의고사 시작하기</span>
+          <span className="text-base font-semibold">
+            {showQuietNotice ? "조용한 환경에서 모의고사 응시하기" : "모의고사 시작하기"}
+          </span>
           <span className="text-xs font-normal opacity-80">
             Start Test Now
           </span>
