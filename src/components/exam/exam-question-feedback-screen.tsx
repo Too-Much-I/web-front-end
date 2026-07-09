@@ -4,7 +4,10 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 import { AnswerAudioPlayer } from "@/components/exam/answer-audio-player";
-import { getExamPartMeta } from "@/features/exam/part-meta";
+import {
+  getExamPartMeta,
+  getExamPartTimingByQuestionNumber,
+} from "@/features/exam/part-meta";
 import type { ExamQuestionDetail } from "@/types/exam";
 
 function clampPercent(ratio: number): number {
@@ -51,6 +54,10 @@ export function ExamQuestionFeedbackScreen({
   const partMeta = getExamPartMeta(detail.partNumber);
   const scorePercent = clampPercent(
     detail.maxScore > 0 ? detail.score / detail.maxScore : 0,
+  );
+  const { speakTimeSec } = getExamPartTimingByQuestionNumber(
+    detail.partNumber,
+    detail.questionNumber,
   );
 
   return (
@@ -107,7 +114,10 @@ export function ExamQuestionFeedbackScreen({
         <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
           <span className="text-sm font-bold text-blue-950">내 답변 음성</span>
           <div className="mt-3">
-            <AnswerAudioPlayer audioUrl={detail.audioUrl} />
+            <AnswerAudioPlayer
+              audioUrl={detail.audioUrl}
+              durationSec={speakTimeSec}
+            />
           </div>
         </div>
       )}
