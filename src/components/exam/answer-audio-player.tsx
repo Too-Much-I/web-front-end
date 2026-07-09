@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown, Pause, Play } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 const PLAYBACK_RATES = [0.75, 1, 1.25, 1.5, 2] as const;
@@ -10,6 +11,10 @@ const FALLBACK_RAW_PEAKS = Array(RAW_PEAK_COUNT).fill(0.3);
 /** 막대 1개가 차지하는 최소 폭(간격 포함, px). 좁은 화면에서 막대가 0px로 찌그러지지 않도록 이 값 기준으로 막대 수를 줄인다. */
 const MIN_BAR_SLOT_PX = 4;
 const MIN_BAR_COUNT = 12;
+/** 말하는 토끼 아이콘 크기를 파형 트랙 실측 폭에 비례해 정한다 — 화면이 넓을수록 커지고, 좁을수록 최소 크기로 수렴한다. */
+const RABBIT_SIZE_RATIO = 0.11;
+const MIN_RABBIT_SIZE_PX = 26;
+const MAX_RABBIT_SIZE_PX = 56;
 
 function resamplePeaks(rawPeaks: number[], targetCount: number): number[] {
   if (targetCount <= 0 || rawPeaks.length === 0) return [];
@@ -98,6 +103,7 @@ export function AnswerAudioPlayer({
   const [isRateMenuOpen, setIsRateMenuOpen] = useState(false);
   const [peaks, setPeaks] = useState<number[] | null>(null);
   const [barCount, setBarCount] = useState(RAW_PEAK_COUNT);
+  const [trackWidth, setTrackWidth] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -119,6 +125,7 @@ export function AnswerAudioPlayer({
         Math.floor(width / MIN_BAR_SLOT_PX),
       );
       setBarCount(Math.min(RAW_PEAK_COUNT, nextBarCount));
+      setTrackWidth(width);
     });
     observer.observe(el);
     return () => observer.disconnect();
@@ -156,8 +163,15 @@ export function AnswerAudioPlayer({
     audio.currentTime = ratio * durationSec;
   }
 
-  const progressRatio = durationSec > 0 ? currentTime / durationSec : 0;
+  const progressRatio =
+    durationSec > 0 ? Math.min(1, Math.max(0, currentTime / durationSec)) : 0;
   const bars = resamplePeaks(peaks ?? FALLBACK_RAW_PEAKS, barCount);
+  const rabbitSize = Math.round(
+    Math.min(
+      MAX_RABBIT_SIZE_PX,
+      Math.max(MIN_RABBIT_SIZE_PX, trackWidth * RABBIT_SIZE_RATIO),
+    ),
+  );
 
   return (
     <div className="flex items-center gap-4 rounded-2xl bg-zinc-50 p-4 ring-1 ring-zinc-100">
@@ -185,27 +199,43 @@ export function AnswerAudioPlayer({
         )}
       </button>
 
-      <button
-        ref={waveformRef}
-        type="button"
-        onClick={handleSeek}
-        aria-label="재생 위치 선택"
-        className="flex h-8 min-w-0 flex-1 items-center gap-[2px]"
-      >
-        {bars.map((peak, i) => {
-          const heightPercent = Math.max(12, peak * 100);
-          const isPlayed = i / bars.length < progressRatio;
-          return (
-            <span
-              key={i}
-              className={`flex-1 rounded-full transition-colors ${
-                isPlayed ? "bg-orange-500" : "bg-zinc-300"
-              }`}
-              style={{ height: `${heightPercent}%` }}
-            />
-          );
-        })}
-      </button>
+      <div className="relative h-8 min-w-0 flex-1">
+        <button
+          ref={waveformRef}
+          type="button"
+          onClick={handleSeek}
+          aria-label="재생 위치 선택"
+          className="flex h-8 w-full items-center gap-[2px]"
+        >
+          {bars.map((peak, i) => {
+            const heightPercent = Math.max(12, peak * 100);
+            const isPlayed = i / bars.length < progressRatio;
+            return (
+              <span
+                key={i}
+                className={`flex-1 rounded-full transition-colors ${
+                  isPlayed ? "bg-orange-500" : "bg-zinc-300"
+                }`}
+                style={{ height: `${heightPercent}%` }}
+              />
+            );
+          })}
+        </button>
+
+        {currentTime > 0 && (
+          <Image
+            src="/mascots/speaking_rabbit_v2.png"
+            alt="말하는 토끼 캐릭터"
+            width={rabbitSize}
+            height={rabbitSize}
+            className="pointer-events-none absolute top-1/2 z-10 drop-shadow-sm transition-[left,width,height] duration-150 ease-linear"
+            style={{
+              left: `${progressRatio * 100}%`,
+              transform: "translate(-50%, -50%)",
+            }}
+          />
+        )}
+      </div>
 
       <span className="shrink-0 text-xs text-zinc-400 tabular-nums">
         {formatTime(currentTime)} / {formatTime(durationSec)}
