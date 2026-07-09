@@ -6,6 +6,7 @@ import {
   VOICE_CONSENT_ITEM,
   VOICE_CONSENT_VERSION,
 } from "@/features/consent/consent-content";
+import { createIpRateLimiter } from "@/lib/rate-limit";
 
 /**
  * 동의 기록 1건을 구글 시트에 한 행으로 추가한다.
@@ -29,19 +30,10 @@ const consentRecordSchema = z.object({
 });
 
 // 단일 인스턴스 기준 IP당 요청 제한 (PoC 배포 범위 한정 — 다중 인스턴스 환경에서는 공유 스토어로 교체 필요)
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX_REQUESTS = 5;
-const requestTimestampsByIp = new Map<string, number[]>();
+const rateLimiter = createIpRateLimiter({ windowMs: 60_000, maxRequests: 5 });
 
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const recent = (requestTimestampsByIp.get(ip) ?? []).filter(
-    (timestamp) => now - timestamp < RATE_LIMIT_WINDOW_MS,
-  );
-  recent.push(now);
-  requestTimestampsByIp.set(ip, recent);
-  return recent.length > RATE_LIMIT_MAX_REQUESTS;
-}
+// 구글 시트 API 응답이 지연될 때 서버리스 함수가 무기한 붙잡혀 있지 않도록 상한을 둔다.
+const GOOGLE_SHEETS_TIMEOUT_MS = 8_000;
 
 function getClientIp(request: Request): string {
   return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
@@ -49,7 +41,7 @@ function getClientIp(request: Request): string {
 
 export async function POST(request: Request) {
   const ip = getClientIp(request);
-  if (isRateLimited(ip)) {
+  if (rateLimiter.isRateLimited(ip)) {
     return NextResponse.json(
       { message: "요청이 너무 많습니다. 잠시 후 다시 시도해주세요." },
       { status: 429 },
@@ -87,14 +79,17 @@ export async function POST(request: Request) {
     });
     const sheets = google.sheets({ version: "v4", auth });
 
-    await sheets.spreadsheets.values.append({
-      spreadsheetId: sheetId,
-      range,
-      valueInputOption: "RAW",
-      requestBody: {
-        values: [[anonymousId, consentItem, consentedAt, method, consentVersion]],
+    await sheets.spreadsheets.values.append(
+      {
+        spreadsheetId: sheetId,
+        range,
+        valueInputOption: "RAW",
+        requestBody: {
+          values: [[anonymousId, consentItem, consentedAt, method, consentVersion]],
+        },
       },
-    });
+      { timeout: GOOGLE_SHEETS_TIMEOUT_MS },
+    );
 
     return NextResponse.json({ ok: true });
   } catch (error) {
