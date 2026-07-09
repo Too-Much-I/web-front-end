@@ -44,12 +44,13 @@ async function extractWaveformPeaks(
   audioUrl: string,
   barCount: number,
 ): Promise<number[] | null> {
+  let audioContext: AudioContext | undefined;
   try {
     const res = await fetch(audioUrl);
     if (!res.ok) return null;
 
     const arrayBuffer = await res.arrayBuffer();
-    const audioContext = new AudioContext();
+    audioContext = new AudioContext();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
     const channelData = audioBuffer.getChannelData(0);
     const samplesPerBar = Math.max(
@@ -68,12 +69,12 @@ async function extractWaveformPeaks(
       peaks.push(max);
     }
 
-    await audioContext.close();
-
     const peakMax = Math.max(...peaks, 0.01);
     return peaks.map((p) => p / peakMax);
   } catch {
     return null;
+  } finally {
+    await audioContext?.close();
   }
 }
 
