@@ -1,11 +1,12 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ThumbsUp, TriangleAlert } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
 
 import { AnswerAudioPlayer } from "@/components/exam/answer-audio-player";
+import { SketchyDashBorder } from "@/components/exam/sketchy-dash-border";
 import { TypedText } from "@/components/exam/typed-text";
 import {
   getExamPartMeta,
@@ -229,33 +230,37 @@ export function ExamQuestionFeedbackScreen({
         />
       </div>
 
-      <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
-        <span className="text-sm font-bold text-blue-950">강점 &amp; 약점</span>
-
-        <div className="mt-4">
-          <p className="text-xs font-semibold text-emerald-600">강점</p>
-          <ul className="mt-2 flex flex-col gap-1.5">
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="relative rounded-3xl bg-white p-6">
+          <SketchyDashBorder />
+          <span className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-950">
+            <ThumbsUp className="size-4 text-orange-500" aria-hidden />
+            강점
+          </span>
+          <ul className="mt-4 flex flex-col gap-2">
             {detail.feedback.strengths.map((item, i) => (
               <li
                 key={i}
-                className="flex gap-2 text-sm leading-relaxed text-zinc-700"
+                className="rounded-xl bg-zinc-50 p-3 text-sm leading-relaxed text-zinc-700 ring-1 ring-zinc-100"
               >
-                <span className="text-emerald-500">+</span>
                 {item}
               </li>
             ))}
           </ul>
         </div>
 
-        <div className="mt-5">
-          <p className="text-xs font-semibold text-rose-600">약점</p>
-          <ul className="mt-2 flex flex-col gap-1.5">
+        <div className="relative rounded-3xl bg-white p-6">
+          <SketchyDashBorder />
+          <span className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-950">
+            <TriangleAlert className="size-4 text-orange-500" aria-hidden />
+            보완 필요
+          </span>
+          <ul className="mt-4 flex flex-col gap-2">
             {detail.feedback.weaknesses.map((item, i) => (
               <li
                 key={i}
-                className="flex gap-2 text-sm leading-relaxed text-zinc-700"
+                className="rounded-xl bg-zinc-50 p-3 text-sm leading-relaxed text-zinc-700 ring-1 ring-zinc-100"
               >
-                <span className="text-rose-500">−</span>
                 {item}
               </li>
             ))}

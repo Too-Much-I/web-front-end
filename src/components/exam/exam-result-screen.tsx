@@ -1,12 +1,13 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ThumbsUp, TriangleAlert } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { ExamPartScoreRadar } from "@/components/exam/exam-part-score-radar";
 import { ScrollSatisfactionPopup } from "@/components/exam/scroll-satisfaction-popup";
+import { SketchyDashBorder } from "@/components/exam/sketchy-dash-border";
 import { TargetGradeMascot } from "@/components/exam/target-grade-mascot";
 import { TypedText } from "@/components/exam/typed-text";
 import { getExamPartQuestionNumbers } from "@/features/exam/part-meta";
@@ -78,21 +79,21 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-amber-300">★</span>
-                  <span className={`${gaegu.className} text-lg text-amber-100`}>
+                  <span className={`${gaegu.className} text-xl text-amber-100`}>
                     예상 총점
                   </span>
                 </div>
 
                 <p
-                  className={`${gaegu.className} mt-4 text-4xl text-amber-50 sm:text-5xl`}
+                  className={`${gaegu.className} mt-4 text-5xl text-amber-50 sm:text-6xl`}
                 >
                   {result.totalScore}
-                  <span className="text-xl text-white/50">
+                  <span className="text-2xl text-white/50">
                     {" "}
                     / {result.maxScore}
                   </span>
                 </p>
-                <p className={`${gaegu.className} mt-2 text-sm text-amber-200`}>
+                <p className={`${gaegu.className} mt-2 text-base text-amber-200`}>
                   {result.levelEstimate}
                 </p>
 
@@ -105,14 +106,14 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
 
                 <TypedText
                   text={result.summary}
-                  className={`${gaegu.className} mt-6 text-sm leading-relaxed text-white/90`}
+                  className={`${gaegu.className} mt-6 text-base leading-relaxed text-white/90`}
                 />
               </div>
 
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-amber-300">★</span>
-                  <span className={`${gaegu.className} text-lg text-amber-100`}>
+                  <span className={`${gaegu.className} text-xl text-amber-100`}>
                     파트별 세부 점수
                   </span>
                 </div>
@@ -125,35 +126,37 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
           </div>
         </div>
 
-        <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
-          <span className="text-sm font-bold text-blue-950">
-            강점 &amp; 약점
-          </span>
-
-          <div className="mt-4">
-            <p className="text-xs font-semibold text-emerald-600">강점</p>
-            <ul className="mt-2 flex flex-col gap-1.5">
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="relative rounded-3xl bg-white p-6">
+            <SketchyDashBorder />
+            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-950">
+              <ThumbsUp className="size-4 text-orange-500" aria-hidden />
+              강점
+            </span>
+            <ul className="mt-4 flex flex-col gap-2">
               {result.strengths.map((item, i) => (
                 <li
                   key={i}
-                  className="flex gap-2 text-sm leading-relaxed text-zinc-700"
+                  className="rounded-xl bg-zinc-50 p-3 text-sm leading-relaxed text-zinc-700 ring-1 ring-zinc-100"
                 >
-                  <span className="text-emerald-500">+</span>
                   {item}
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="mt-5">
-            <p className="text-xs font-semibold text-rose-600">약점</p>
-            <ul className="mt-2 flex flex-col gap-1.5">
+          <div className="relative rounded-3xl bg-white p-6">
+            <SketchyDashBorder />
+            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-950">
+              <TriangleAlert className="size-4 text-orange-500" aria-hidden />
+              보완 필요
+            </span>
+            <ul className="mt-4 flex flex-col gap-2">
               {result.weaknesses.map((item, i) => (
                 <li
                   key={i}
-                  className="flex gap-2 text-sm leading-relaxed text-zinc-700"
+                  className="rounded-xl bg-zinc-50 p-3 text-sm leading-relaxed text-zinc-700 ring-1 ring-zinc-100"
                 >
-                  <span className="text-rose-500">−</span>
                   {item}
                 </li>
               ))}
@@ -161,7 +164,8 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
           </div>
         </div>
 
-        <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
+        <div className="relative mt-6 rounded-3xl bg-white p-6">
+          <SketchyDashBorder />
           <span className="text-sm font-bold text-blue-950">종합 피드백</span>
           <p className="mt-3 text-sm leading-relaxed text-zinc-700">
             {result.overallFeedback}
