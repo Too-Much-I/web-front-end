@@ -8,12 +8,14 @@ import { useEffect, useState } from "react";
 import { ExamPartScoreRadar } from "@/components/exam/exam-part-score-radar";
 import { ScrollSatisfactionPopup } from "@/components/exam/scroll-satisfaction-popup";
 import { TargetGradeMascot } from "@/components/exam/target-grade-mascot";
+import { TypedText } from "@/components/exam/typed-text";
 import { getExamPartQuestionNumbers } from "@/features/exam/part-meta";
 import {
   getStoredTargetGradeId,
   getTargetGradeOption,
   type TargetGradeOption,
 } from "@/features/exam/target-grade";
+import { gaegu } from "@/lib/fonts";
 import type { ExamGradingResult } from "@/types/exam";
 
 const PART_MASCOTS = [
@@ -37,6 +39,10 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
   }, []);
 
   const scoreGap = targetGrade ? targetGrade.score - result.totalScore : null;
+  const mascot =
+    scorePercent > 50
+      ? { src: "/mascots/good_rabbit.png", alt: "만족스러워하는 토끼 캐릭터" }
+      : { src: "/mascots/hmm_rabbit.png", alt: "고민하는 토끼 캐릭터" };
 
   return (
     <>
@@ -56,35 +62,67 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
           )}
         </div>
 
-        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div className="rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
-            <span className="inline-block rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600">
-              예상 총점
-            </span>
-            <p className="mt-4 text-4xl font-extrabold text-orange-600 sm:text-5xl">
-              {result.totalScore}
-              <span className="text-xl font-semibold text-zinc-400">
-                {" "}
-                / {result.maxScore}
-              </span>
-            </p>
-            <p className="mt-2 text-sm font-semibold text-blue-950">
-              {result.levelEstimate}
-            </p>
-
-            <div className="mt-6 h-2 w-full rounded-full bg-orange-100">
-              <div
-                className="h-full rounded-full bg-orange-500 transition-[width] duration-500"
-                style={{ width: `${scorePercent}%` }}
-              />
-            </div>
-
-            <p className="mt-6 text-sm leading-relaxed text-zinc-600">
-              {result.summary}
-            </p>
+        <div className="relative mt-8">
+          <div className="absolute bottom-0 left-0 z-10 h-40 w-40 -scale-x-100 sm:-left-4 sm:h-48 sm:w-48">
+            <Image
+              src={mascot.src}
+              alt={mascot.alt}
+              fill
+              sizes="192px"
+              className="object-contain drop-shadow-lg"
+            />
           </div>
 
-          <ExamPartScoreRadar partScores={result.partScores} />
+          <div className="rounded-3xl border-[10px] border-amber-900 bg-emerald-950 py-6 pr-6 pl-32 shadow-xl sm:pl-36">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-amber-300">★</span>
+                  <span className={`${gaegu.className} text-lg text-amber-100`}>
+                    예상 총점
+                  </span>
+                </div>
+
+                <p
+                  className={`${gaegu.className} mt-4 text-4xl text-amber-50 sm:text-5xl`}
+                >
+                  {result.totalScore}
+                  <span className="text-xl text-white/50">
+                    {" "}
+                    / {result.maxScore}
+                  </span>
+                </p>
+                <p className={`${gaegu.className} mt-2 text-sm text-amber-200`}>
+                  {result.levelEstimate}
+                </p>
+
+                <div className="mt-6 h-2 w-full rounded-full bg-white/15">
+                  <div
+                    className="h-full rounded-full bg-amber-300 transition-[width] duration-500"
+                    style={{ width: `${scorePercent}%` }}
+                  />
+                </div>
+
+                <TypedText
+                  text={result.summary}
+                  className={`${gaegu.className} mt-6 text-sm leading-relaxed text-white/90`}
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-amber-300">★</span>
+                  <span className={`${gaegu.className} text-lg text-amber-100`}>
+                    파트별 세부 점수
+                  </span>
+                </div>
+
+                <div className="mt-2">
+                  <ExamPartScoreRadar partScores={result.partScores} />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
