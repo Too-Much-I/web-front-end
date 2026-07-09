@@ -11,6 +11,7 @@ import {
   Tooltip,
 } from "recharts";
 
+import { getExamPartMeta } from "@/features/exam/part-meta";
 import type { ExamPartScores } from "@/types/exam";
 
 const ACCENT = "#f97316";
@@ -125,8 +126,24 @@ function RadarTooltip({
   );
 }
 
+/** 채점된 파트를 점수순으로 정렬해 상/하위 파트를 강점·보완 필요로 나눈다 (가운데 파트는 제외). */
+function buildStrengthWeakness(chartData: PartScoreDatum[]) {
+  const scored = chartData.filter((d) => d.score !== null);
+  const sorted = [...scored].sort((a, b) => b.percent - a.percent);
+  const highlightCount = Math.floor(sorted.length / 2);
+
+  const toLabels = (data: PartScoreDatum[]) =>
+    data.map((d) => getExamPartMeta(d.partNumber).titleKo);
+
+  return {
+    strengths: highlightCount > 0 ? toLabels(sorted.slice(0, highlightCount)) : [],
+    weaknesses: highlightCount > 0 ? toLabels(sorted.slice(-highlightCount)) : [],
+  };
+}
+
 export function ExamPartScoreRadar({ partScores }: { partScores: ExamPartScores }) {
   const chartData = buildChartData(partScores);
+  const { strengths, weaknesses } = buildStrengthWeakness(chartData);
 
   return (
     <div className="rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
@@ -156,6 +173,23 @@ export function ExamPartScoreRadar({ partScores }: { partScores: ExamPartScores 
           </RadarChart>
         </ResponsiveContainer>
       </div>
+
+      {(strengths.length > 0 || weaknesses.length > 0) && (
+        <div className="mt-4 grid grid-cols-2 gap-3 rounded-2xl bg-zinc-50 p-4 ring-1 ring-zinc-100">
+          <div>
+            <p className="text-xs font-semibold text-emerald-600">강점</p>
+            <p className="mt-1 text-sm font-medium text-zinc-700">
+              {strengths.length > 0 ? strengths.join(", ") : "-"}
+            </p>
+          </div>
+          <div className="border-l border-zinc-200 pl-3">
+            <p className="text-xs font-semibold text-rose-600">보완 필요</p>
+            <p className="mt-1 text-sm font-medium text-zinc-700">
+              {weaknesses.length > 0 ? weaknesses.join(", ") : "-"}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
