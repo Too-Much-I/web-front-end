@@ -1,7 +1,10 @@
 "use client";
 
 import { ArrowLeft } from "lucide-react";
+import localFont from "next/font/local";
+import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import { AnswerAudioPlayer } from "@/components/exam/answer-audio-player";
 import {
@@ -10,27 +13,113 @@ import {
 } from "@/features/exam/part-meta";
 import type { ExamQuestionDetail } from "@/types/exam";
 
+const gaegu = localFont({ src: "../../assets/fonts/Gaegu-Bold.woff2" });
+
+/** 평균 성인 독해 속도(분당 약 500~600자)에 맞춘 글자당 지연 시간. */
+const TYPEWRITER_SPEED_MS = 40;
+
+/**
+ * 최초 마운트 시 한 번만 타이핑 애니메이션을 재생하고, 이후엔 항상 전체 텍스트를 보여준다.
+ * 전체 글자를 처음부터 모두 렌더링해두고 opacity만 토글하는 방식이라, 문자가 하나씩
+ * "추가"되면서 text-center 정렬이 매번 다시 계산되어 이미 나타난 글자의 위치가
+ * 밀리는 문제가 없다 — 레이아웃은 최초 페인트부터 최종 형태로 고정된다.
+ */
+function useTypewriterOnce(text: string): {
+  chars: string[];
+  revealedCount: number;
+} {
+  const [chars] = useState(() => Array.from(text));
+  const [prefersReducedMotion] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  const [revealedCount, setRevealedCount] = useState(
+    prefersReducedMotion ? chars.length : 0,
+  );
+
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+
+    let i = 0;
+    const id = setInterval(() => {
+      i += 1;
+      setRevealedCount(i);
+      if (i >= chars.length) clearInterval(id);
+    }, TYPEWRITER_SPEED_MS);
+
+    return () => clearInterval(id);
+  }, [chars, prefersReducedMotion]);
+
+  return { chars, revealedCount };
+}
+
 function clampPercent(ratio: number): number {
   return Math.min(100, Math.max(0, ratio * 100));
 }
 
-function ScoreBar({ label, ratio }: { label: string; ratio: number }) {
+/** pronunciationFluencyScore / contentRelevanceScore는 10점 만점으로 내려온다. */
+const SUB_SCORE_MAX = 10;
+
+function ScoreRing({
+  percent,
+  size,
+  strokeWidth,
+  trackClassName = "stroke-orange-100",
+  progressClassName = "stroke-orange-500",
+}: {
+  percent: number;
+  size: number;
+  strokeWidth: number;
+  trackClassName?: string;
+  progressClassName?: string;
+}) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference * (1 - percent / 100);
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      className="-rotate-90"
+    >
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        strokeWidth={strokeWidth}
+        className={trackClassName}
+      />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        className={`${progressClassName} transition-[stroke-dashoffset] duration-500`}
+      />
+    </svg>
+  );
+}
+
+function ScoreCircleStat({ label, ratio }: { label: string; ratio: number }) {
   const percent = clampPercent(ratio);
 
   return (
-    <div>
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-zinc-500">{label}</span>
-        <span className="text-xs font-bold text-orange-600">
+    <div className="flex flex-col items-center gap-2">
+      <div className="relative flex items-center justify-center">
+        <ScoreRing percent={percent} size={104} strokeWidth={10} />
+        <span className="absolute text-lg font-bold text-orange-600">
           {Math.round(percent)}%
         </span>
       </div>
-      <div className="mt-1.5 h-2 w-full rounded-full bg-orange-100">
-        <div
-          className="h-full rounded-full bg-orange-500 transition-[width] duration-500"
-          style={{ width: `${percent}%` }}
-        />
-      </div>
+      <span className="text-xs font-semibold text-zinc-500">{label}</span>
     </div>
   );
 }
@@ -55,9 +144,16 @@ export function ExamQuestionFeedbackScreen({
   const scorePercent = clampPercent(
     detail.maxScore > 0 ? detail.score / detail.maxScore : 0,
   );
+  const isAboveHalf = scorePercent > 50;
+  const mascot = isAboveHalf
+    ? { src: "/mascots/good_rabbit.png", alt: "만족스러워하는 토끼 캐릭터" }
+    : { src: "/mascots/hmm_rabbit.png", alt: "고민하는 토끼 캐릭터" };
   const { speakTimeSec } = getExamPartTimingByQuestionNumber(
     detail.partNumber,
     detail.questionNumber,
+  );
+  const { chars: summaryChars, revealedCount } = useTypewriterOnce(
+    detail.feedback.summary,
   );
 
   return (
@@ -86,28 +182,56 @@ export function ExamQuestionFeedbackScreen({
         </span>
       </div>
 
-      <div className="mt-8 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
-        <span className="inline-block rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600">
-          이 문제 점수
-        </span>
-        <p className="mt-4 text-4xl font-extrabold text-orange-600 sm:text-5xl">
-          {detail.score}
-          <span className="text-xl font-semibold text-zinc-400">
-            {" "}
-            / {detail.maxScore}
-          </span>
-        </p>
-
-        <div className="mt-6 h-2 w-full rounded-full bg-orange-100">
-          <div
-            className="h-full rounded-full bg-orange-500 transition-[width] duration-500"
-            style={{ width: `${scorePercent}%` }}
+      <div className="relative mt-8">
+        <div className="absolute bottom-0 left-0 z-10 h-40 w-40 -scale-x-100 sm:-left-4 sm:h-48 sm:w-48">
+          <Image
+            src={mascot.src}
+            alt={mascot.alt}
+            fill
+            sizes="192px"
+            className="object-contain drop-shadow-lg"
           />
         </div>
 
-        <p className="mt-6 text-sm leading-relaxed text-zinc-600">
-          {detail.feedback.summary}
-        </p>
+        <div className="relative rounded-3xl border-[10px] border-amber-900 bg-emerald-950 py-6 pr-6 pl-32 shadow-xl sm:pl-36">
+          <div className="absolute -top-5 left-4 z-20 -rotate-3 rounded-lg bg-amber-400 px-4 py-2 shadow-md">
+            <span className={`${gaegu.className} text-lg text-emerald-950`}>
+              이 문제 점수
+            </span>
+          </div>
+          <div className="mt-8 flex justify-center">
+            <div className="relative flex items-center justify-center">
+              <ScoreRing
+                percent={scorePercent}
+                size={140}
+                strokeWidth={12}
+                trackClassName="stroke-white/15"
+                progressClassName="stroke-amber-300"
+              />
+              <div className="absolute flex flex-col items-center">
+                <span className={`${gaegu.className} text-4xl text-amber-50`}>
+                  {detail.score}
+                </span>
+                <span className={`${gaegu.className} text-sm text-white/60`}>
+                  / {detail.maxScore}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <p
+            className={`${gaegu.className} mt-6 text-center text-base leading-relaxed text-white/90`}
+          >
+            {summaryChars.map((ch, i) => (
+              <span
+                key={i}
+                className={i < revealedCount ? "opacity-100" : "opacity-0"}
+              >
+                {ch}
+              </span>
+            ))}
+          </p>
+        </div>
       </div>
 
       {detail.audioUrl && (
@@ -129,14 +253,14 @@ export function ExamQuestionFeedbackScreen({
         </p>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-5 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 sm:grid-cols-2">
-        <ScoreBar
+      <div className="mt-6 grid grid-cols-2 gap-5 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
+        <ScoreCircleStat
           label="발음 & 유창성"
-          ratio={detail.feedback.pronunciationFluencyScore}
+          ratio={detail.feedback.pronunciationFluencyScore / SUB_SCORE_MAX}
         />
-        <ScoreBar
+        <ScoreCircleStat
           label="내용 적합성"
-          ratio={detail.feedback.contentRelevanceScore}
+          ratio={detail.feedback.contentRelevanceScore / SUB_SCORE_MAX}
         />
       </div>
 
