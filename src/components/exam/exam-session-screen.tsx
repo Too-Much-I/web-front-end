@@ -119,7 +119,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     (a, b) => a - b,
   );
 
-  const isCounting = phase === "prep" || phase === "speaking";
+  const isCounting = (phase === "prep" || phase === "speaking") && !showExitConfirm;
   const isPrepGroup = phase === "prep-cue" || phase === "prep";
   const isSpeakGroup = phase === "speak-cue" || phase === "speaking";
   const isListeningPhase =
@@ -142,7 +142,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     questionAudioFallbackMs,
     handlePhaseComplete,
     `${question?.questionNumber}-question-audio`,
-    phase === "question-audio",
+    phase === "question-audio" && !showExitConfirm,
   );
 
   useAudioCue(
@@ -150,7 +150,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     CUE_FALLBACK_MS,
     handlePhaseComplete,
     `${question?.questionNumber}-repeat-cue`,
-    phase === "repeat-cue",
+    phase === "repeat-cue" && !showExitConfirm,
   );
 
   useAudioCue(
@@ -158,7 +158,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     questionAudioFallbackMs,
     handlePhaseComplete,
     `${question?.questionNumber}-question-audio-repeat`,
-    phase === "question-audio-repeat",
+    phase === "question-audio-repeat" && !showExitConfirm,
   );
 
   useAudioSequence(
@@ -166,7 +166,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     CUE_FALLBACK_MS,
     handlePhaseComplete,
     `${question?.questionNumber}-prep-cue`,
-    phase === "prep-cue",
+    phase === "prep-cue" && !showExitConfirm,
   );
 
   const speakCueClip =
@@ -181,7 +181,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     CUE_FALLBACK_MS,
     handlePhaseComplete,
     `${question?.questionNumber}-speak-cue`,
-    phase === "speak-cue",
+    phase === "speak-cue" && !showExitConfirm,
   );
 
   useEffect(() => {
