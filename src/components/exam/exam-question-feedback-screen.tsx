@@ -3,6 +3,7 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
+import { AnswerAudioPlayer } from "@/components/exam/answer-audio-player";
 import { getExamPartMeta } from "@/features/exam/part-meta";
 import type { ExamQuestionDetail } from "@/types/exam";
 
@@ -17,7 +18,9 @@ function ScoreBar({ label, ratio }: { label: string; ratio: number }) {
     <div>
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold text-zinc-500">{label}</span>
-        <span className="text-xs font-bold text-orange-600">{Math.round(percent)}%</span>
+        <span className="text-xs font-bold text-orange-600">
+          {Math.round(percent)}%
+        </span>
       </div>
       <div className="mt-1.5 h-2 w-full rounded-full bg-orange-100">
         <div
@@ -46,7 +49,9 @@ export function ExamQuestionFeedbackScreen({
   detail: ExamQuestionDetail;
 }) {
   const partMeta = getExamPartMeta(detail.partNumber);
-  const scorePercent = clampPercent(detail.maxScore > 0 ? detail.score / detail.maxScore : 0);
+  const scorePercent = clampPercent(
+    detail.maxScore > 0 ? detail.score / detail.maxScore : 0,
+  );
 
   return (
     <section className="mx-auto w-full max-w-3xl px-6 py-10">
@@ -80,7 +85,10 @@ export function ExamQuestionFeedbackScreen({
         </span>
         <p className="mt-4 text-4xl font-extrabold text-orange-600 sm:text-5xl">
           {detail.score}
-          <span className="text-xl font-semibold text-zinc-400"> / {detail.maxScore}</span>
+          <span className="text-xl font-semibold text-zinc-400">
+            {" "}
+            / {detail.maxScore}
+          </span>
         </p>
 
         <div className="mt-6 h-2 w-full rounded-full bg-orange-100">
@@ -90,13 +98,17 @@ export function ExamQuestionFeedbackScreen({
           />
         </div>
 
-        <p className="mt-6 text-sm leading-relaxed text-zinc-600">{detail.feedback.summary}</p>
+        <p className="mt-6 text-sm leading-relaxed text-zinc-600">
+          {detail.feedback.summary}
+        </p>
       </div>
 
       {detail.audioUrl && (
         <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
           <span className="text-sm font-bold text-blue-950">내 답변 음성</span>
-          <audio className="mt-3 w-full" controls src={detail.audioUrl} />
+          <div className="mt-3">
+            <AnswerAudioPlayer audioUrl={detail.audioUrl} />
+          </div>
         </div>
       )}
 
@@ -108,8 +120,14 @@ export function ExamQuestionFeedbackScreen({
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-5 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 sm:grid-cols-2">
-        <ScoreBar label="발음 & 유창성" ratio={detail.feedback.pronunciationFluencyScore} />
-        <ScoreBar label="내용 적합성" ratio={detail.feedback.contentRelevanceScore} />
+        <ScoreBar
+          label="발음 & 유창성"
+          ratio={detail.feedback.pronunciationFluencyScore}
+        />
+        <ScoreBar
+          label="내용 적합성"
+          ratio={detail.feedback.contentRelevanceScore}
+        />
       </div>
 
       <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
@@ -119,7 +137,10 @@ export function ExamQuestionFeedbackScreen({
           <p className="text-xs font-semibold text-emerald-600">강점</p>
           <ul className="mt-2 flex flex-col gap-1.5">
             {detail.feedback.strengths.map((item, i) => (
-              <li key={i} className="flex gap-2 text-sm leading-relaxed text-zinc-700">
+              <li
+                key={i}
+                className="flex gap-2 text-sm leading-relaxed text-zinc-700"
+              >
                 <span className="text-emerald-500">+</span>
                 {item}
               </li>
@@ -131,7 +152,10 @@ export function ExamQuestionFeedbackScreen({
           <p className="text-xs font-semibold text-rose-600">약점</p>
           <ul className="mt-2 flex flex-col gap-1.5">
             {detail.feedback.weaknesses.map((item, i) => (
-              <li key={i} className="flex gap-2 text-sm leading-relaxed text-zinc-700">
+              <li
+                key={i}
+                className="flex gap-2 text-sm leading-relaxed text-zinc-700"
+              >
                 <span className="text-rose-500">−</span>
                 {item}
               </li>
@@ -145,7 +169,10 @@ export function ExamQuestionFeedbackScreen({
         <DetailBlock title="발음" body={detail.feedback.pronunciation} />
         <DetailBlock title="유창성" body={detail.feedback.fluency} />
         <DetailBlock title="내용" body={detail.feedback.content} />
-        <DetailBlock title="문법 & 어휘" body={detail.feedback.grammarVocabulary} />
+        <DetailBlock
+          title="문법 & 어휘"
+          body={detail.feedback.grammarVocabulary}
+        />
       </div>
 
       <div className="mt-6 rounded-3xl bg-orange-50 p-6 ring-1 ring-orange-100">
@@ -156,7 +183,9 @@ export function ExamQuestionFeedbackScreen({
               key={i}
               className="flex gap-3 rounded-2xl bg-white p-4 text-sm leading-relaxed text-zinc-700 shadow-sm"
             >
-              <span className="shrink-0 font-bold text-orange-600">{i + 1}</span>
+              <span className="shrink-0 font-bold text-orange-600">
+                {i + 1}
+              </span>
               {item}
             </li>
           ))}
