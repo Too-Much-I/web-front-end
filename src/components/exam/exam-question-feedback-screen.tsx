@@ -3,6 +3,7 @@
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRef } from "react";
 
 import { AnswerAudioPlayer } from "@/components/exam/answer-audio-player";
 import { TypedText } from "@/components/exam/typed-text";
@@ -10,6 +11,7 @@ import {
   getExamPartMeta,
   getExamPartTimingByQuestionNumber,
 } from "@/features/exam/part-meta";
+import { useRevealOnScroll } from "@/features/exam/use-reveal-on-scroll";
 import { gaegu } from "@/lib/fonts";
 import type { ExamQuestionDetail } from "@/types/exam";
 
@@ -111,6 +113,10 @@ export function ExamQuestionFeedbackScreen({
     detail.partNumber,
     detail.questionNumber,
   );
+  const mainRingRef = useRef<HTMLDivElement>(null);
+  const mainRingRevealed = useRevealOnScroll(mainRingRef);
+  const subRingsRef = useRef<HTMLDivElement>(null);
+  const subRingsRevealed = useRevealOnScroll(subRingsRef);
 
   return (
     <section className="mx-auto w-full max-w-3xl px-6 py-10">
@@ -155,10 +161,10 @@ export function ExamQuestionFeedbackScreen({
               이 문제 점수
             </span>
           </div>
-          <div className="mt-8 flex justify-center">
+          <div ref={mainRingRef} className="mt-8 flex justify-center">
             <div className="relative flex items-center justify-center">
               <ScoreRing
-                percent={scorePercent}
+                percent={mainRingRevealed ? scorePercent : 0}
                 size={140}
                 strokeWidth={12}
                 trackClassName="stroke-white/15"
@@ -201,14 +207,25 @@ export function ExamQuestionFeedbackScreen({
         </p>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-5 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
+      <div
+        ref={subRingsRef}
+        className="mt-6 grid grid-cols-2 gap-5 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100"
+      >
         <ScoreCircleStat
           label="발음 & 유창성"
-          ratio={detail.feedback.pronunciationFluencyScore / SUB_SCORE_MAX}
+          ratio={
+            subRingsRevealed
+              ? detail.feedback.pronunciationFluencyScore / SUB_SCORE_MAX
+              : 0
+          }
         />
         <ScoreCircleStat
           label="내용 적합성"
-          ratio={detail.feedback.contentRelevanceScore / SUB_SCORE_MAX}
+          ratio={
+            subRingsRevealed
+              ? detail.feedback.contentRelevanceScore / SUB_SCORE_MAX
+              : 0
+          }
         />
       </div>
 
