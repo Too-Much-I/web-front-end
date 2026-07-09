@@ -12,9 +12,10 @@ import {
 } from "recharts";
 
 import { getExamPartMeta } from "@/features/exam/part-meta";
+import { gaegu } from "@/lib/fonts";
 import type { ExamPartScores } from "@/types/exam";
 
-const ACCENT = "#f97316";
+const ACCENT = "#fcd34d";
 
 /** TOEIC Speaking 파트별 배점 (Part1~2: 6점, Part3~4: 9점, Part5: 5점) */
 const PART_MAX_SCORES: Record<number, number> = {
@@ -63,7 +64,7 @@ function AngleTick(chartData: PartScoreDatum[]) {
           textAnchor={textAnchor}
           fontSize={13}
           fontWeight={isTop ? 700 : 500}
-          fill={isTop ? ACCENT : "#71717a"}
+          fill={isTop ? ACCENT : "#e4e4e7"}
         >
           {datum.partLabel}
         </text>
@@ -86,7 +87,7 @@ function ScoreDot(props: DotItemDotProps) {
   const datum = payload as PartScoreDatum;
 
   if (datum.score === null) {
-    return <circle cx={cx} cy={cy} r={3} fill="#d4d4d8" />;
+    return <circle cx={cx} cy={cy} r={3} fill="#71717a" />;
   }
 
   return (
@@ -141,18 +142,24 @@ function buildStrengthWeakness(chartData: PartScoreDatum[]) {
   };
 }
 
-export function ExamPartScoreRadar({ partScores }: { partScores: ExamPartScores }) {
+/**
+ * 칠판 안에 배치되는 것을 전제로 한 콘텐츠 블록 — 자체 프레임/배경/마스코트는 없다.
+ * 배치 위치는 호출하는 쪽(칠판)이 책임진다.
+ */
+export function ExamPartScoreRadar({
+  partScores,
+}: {
+  partScores: ExamPartScores;
+}) {
   const chartData = buildChartData(partScores);
   const { strengths, weaknesses } = buildStrengthWeakness(chartData);
 
   return (
-    <div className="rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
-      <span className="text-sm font-bold text-blue-950">파트별 세부 점수</span>
-
-      <div className="mt-2 h-[300px] w-full">
+    <div>
+      <div className="h-[300px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={chartData} outerRadius="65%">
-            <PolarGrid stroke="#e4e4e7" />
+            <PolarGrid stroke="rgba(255,255,255,0.15)" />
             <PolarAngleAxis dataKey="partLabel" tick={AngleTick(chartData)} />
             <PolarRadiusAxis
               domain={[0, 100]}
@@ -175,16 +182,20 @@ export function ExamPartScoreRadar({ partScores }: { partScores: ExamPartScores 
       </div>
 
       {(strengths.length > 0 || weaknesses.length > 0) && (
-        <div className="mt-4 grid grid-cols-2 gap-3 rounded-2xl bg-zinc-50 p-4 ring-1 ring-zinc-100">
+        <div className="mt-4 grid grid-cols-2 gap-3 rounded-2xl bg-white/10 p-4 ring-1 ring-white/10">
           <div>
-            <p className="text-xs font-semibold text-emerald-600">강점</p>
-            <p className="mt-1 text-sm font-medium text-zinc-700">
+            <p className={`${gaegu.className} text-xs text-emerald-300`}>
+              강점
+            </p>
+            <p className="mt-1 text-sm font-medium text-white/90">
               {strengths.length > 0 ? strengths.join(", ") : "-"}
             </p>
           </div>
-          <div className="border-l border-zinc-200 pl-3">
-            <p className="text-xs font-semibold text-rose-600">보완 필요</p>
-            <p className="mt-1 text-sm font-medium text-zinc-700">
+          <div className="border-l border-white/15 pl-3">
+            <p className={`${gaegu.className} text-xs text-rose-300`}>
+              보완 필요
+            </p>
+            <p className="mt-1 text-sm font-medium text-white/90">
               {weaknesses.length > 0 ? weaknesses.join(", ") : "-"}
             </p>
           </div>
