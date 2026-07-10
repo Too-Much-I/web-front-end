@@ -54,8 +54,9 @@ export default function PrivacyPolicyPage() {
             이내 파기
           </li>
           <li>
-            동의 이력(익명 식별자, 동의 항목·버전·일시·방법): 동의 이력 분쟁
-            대비 및 법령상 추적 요건 충족을 위해 서비스 운영 종료 시까지 보관
+            동의 이력(익명 식별자, 동의 항목·버전·일시·방법): 동의 철회 또는
+            삭제 요청 시 지체 없이 파기하며, 별도 요청이 없는 경우 최종
+            동의일로부터 3년간 보관 후 파기
           </li>
           <li>
             만족도 조사 응답(자율 기재 연락처 포함): 조사 목적 달성 후 지체
@@ -63,8 +64,9 @@ export default function PrivacyPolicyPage() {
             가공하여 보관할 수 있음
           </li>
           <li>
-            쿠키 등 자동 수집된 행태정보: 분석 도구(Microsoft Clarity) 자체
-            보유기간 정책에 따름(제10조 참조)
+            쿠키 등 자동 수집된 행태정보(Microsoft Clarity): 세션 재생 데이터는
+            최대 30일, 클릭·이동 경로 등 집계 데이터는 최대 9개월간 보관(제10조
+            참조)
           </li>
         </ul>
       </LegalSection>
@@ -122,12 +124,21 @@ export default function PrivacyPolicyPage() {
                   웹사이트 방문 및 이용 행태 분석(Microsoft Clarity)
                 </td>
               </tr>
+              <tr>
+                <td className="px-3 py-2 align-top">
+                  Amazon Web Services, Inc.
+                </td>
+                <td className="px-3 py-2 align-top">
+                  음성 답변 녹음 파일의 저장(클라우드 스토리지, 국내 리전)
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
         <p>
-          음성 답변 녹음 파일의 채점·저장을 위한 서버(백엔드)는 서비스
-          운영팀이 직접 운영하며, 별도의 외부 업체에 위탁하지 않습니다.
+          음성 답변 채점을 위한 백엔드 서버는 서비스 운영팀이 직접 운영하며,
+          별도의 외부 채점 업체에 위탁하지 않습니다. 다만 음성 답변 녹음
+          파일의 저장을 위해 위 표와 같이 클라우드 스토리지를 이용합니다.
         </p>
       </LegalSection>
 
@@ -174,11 +185,25 @@ export default function PrivacyPolicyPage() {
         </div>
         <p>
           음성 답변 녹음 파일 자체는 국내 리전(AWS ap-northeast-2)에 위치한
-          클라우드 스토리지에 저장되며, 국외로 이전되지 않습니다. 국외 이전을
-          거부하고자 하는 경우 제10조의 쿠키 거부 방법을 통해 행태정보 수집을
-          차단할 수 있으며, 이 경우에도 모의고사 응시 등 핵심 기능 이용에는
-          제한이 없습니다.
+          클라우드 스토리지에 저장되며, 국외로 이전되지 않습니다.
         </p>
+        <p>
+          위 국외 이전에 대해 거부하고자 하는 경우, 각 항목의 성격에 따라
+          다음과 같이 거부할 수 있습니다.
+        </p>
+        <ul className="list-disc space-y-1 pl-5">
+          <li>
+            Microsoft Clarity(행태정보): 제10조의 쿠키 거부 방법을 통해 수집을
+            차단할 수 있으며, 차단하더라도 모의고사 응시 등 핵심 기능 이용에는
+            제한이 없습니다.
+          </li>
+          <li>
+            Google 스프레드시트(만족도 조사 응답): 만족도 조사는 선택적으로
+            참여하는 절차이며, 설문에 응답을 제출하지 않으면 해당 정보가
+            국외로 이전되지 않습니다. 이미 제출한 응답의 삭제를 원하는 경우
+            제11조의 연락처로 요청할 수 있습니다.
+          </li>
+        </ul>
       </LegalSection>
 
       <LegalSection title="제7조 (정보주체와 법정대리인의 권리·의무 및 행사방법)">
@@ -287,9 +312,29 @@ export default function PrivacyPolicyPage() {
           신고, 상담에 대하여는 아래 기관에 문의하시기 바랍니다.
         </p>
         <ul className="list-disc space-y-1 pl-5">
-          <li>개인정보 분쟁조정위원회: (국번없이) 1833-6972 (privacy.go.kr)</li>
           <li>
-            개인정보침해신고센터: (국번없이) 118 (privacy.go.kr, 한국인터넷진흥원 운영)
+            개인정보 분쟁조정위원회: (국번없이) 1833-6972 (
+            <a
+              href="https://www.kopico.go.kr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-orange-500 hover:underline"
+            >
+              kopico.go.kr
+            </a>
+            )
+          </li>
+          <li>
+            개인정보침해신고센터: (국번없이) 118 (
+            <a
+              href="https://privacy.kisa.or.kr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-orange-500 hover:underline"
+            >
+              privacy.kisa.or.kr
+            </a>
+            , 한국인터넷진흥원 운영)
           </li>
           <li>대검찰청: (국번없이) 1301 (spo.go.kr)</li>
           <li>경찰청: (국번없이) 182 (ecrm.police.go.kr)</li>

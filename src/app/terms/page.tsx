@@ -110,7 +110,7 @@ export default function TermsOfServicePage() {
         </ol>
       </LegalSection>
 
-      <LegalSection title="제7조 (회사의 의무)">
+      <LegalSection title="제7조 (서비스의 의무)">
         <ol className="list-decimal space-y-1 pl-5">
           <li>
             서비스는 관련 법령과 이 약관이 금지하거나 미풍양속에 반하는

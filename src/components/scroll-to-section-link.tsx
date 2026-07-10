@@ -25,11 +25,19 @@ export function ScrollToSectionLink({
 
     const startY = window.scrollY;
     const targetY = startY + target.getBoundingClientRect().top;
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      window.scrollTo({ top: targetY, behavior: "auto" });
+      return;
+    }
+
     const distance = targetY - startY;
     const startTime = performance.now();
+    const safeDuration = Number.isFinite(duration) ? Math.max(duration, 0) : 0;
 
     function step(now: number) {
-      const progress = Math.min((now - startTime) / duration, 1);
+      const progress =
+        safeDuration === 0 ? 1 : Math.min((now - startTime) / safeDuration, 1);
       window.scrollTo({
         top: startY + distance * easeInOutCubic(progress),
         behavior: "auto",
