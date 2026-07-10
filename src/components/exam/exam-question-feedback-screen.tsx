@@ -6,6 +6,9 @@ import Link from "next/link";
 import { useRef } from "react";
 
 import { AnswerAudioPlayer } from "@/components/exam/answer-audio-player";
+import { ExamMarkedTranscript } from "@/components/exam/exam-marked-transcript";
+import { ExamPriorityPanel } from "@/components/exam/exam-priority-panel";
+import { ExamPronunciationTranscript } from "@/components/exam/exam-pronunciation-transcript";
 import { SketchyDashBorder } from "@/components/exam/sketchy-dash-border";
 import { TypedText } from "@/components/exam/typed-text";
 import {
@@ -20,8 +23,8 @@ function clampPercent(ratio: number): number {
   return Math.min(100, Math.max(0, ratio * 100));
 }
 
-/** pronunciationFluencyScore / contentRelevanceScore는 10점 만점으로 내려온다. */
-const SUB_SCORE_MAX = 10;
+/** pronunciationFluencyScore는 100점 만점으로 내려온다. */
+const PRONUNCIATION_FLUENCY_MAX = 100;
 
 function ScoreRing({
   percent,
@@ -189,6 +192,13 @@ export function ExamQuestionFeedbackScreen({
         </div>
       </div>
 
+      {detail.partNumber !== 1 && (
+        <ExamPriorityPanel
+          correctionItems={detail.feedback.correctionItems}
+          nextStrategy={detail.feedback.nextStrategy}
+        />
+      )}
+
       {detail.audioUrl && (
         <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
           <span className="text-sm font-bold text-blue-950">내 답변 음성</span>
@@ -201,12 +211,23 @@ export function ExamQuestionFeedbackScreen({
         </div>
       )}
 
-      <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
-        <span className="text-sm font-bold text-blue-950">답변 스크립트</span>
-        <p className="mt-3 rounded-2xl bg-zinc-50 p-4 text-sm leading-relaxed whitespace-pre-line text-zinc-700 ring-1 ring-zinc-100">
-          {detail.transcript}
-        </p>
-      </div>
+      {detail.partNumber !== 1 ? (
+        <ExamMarkedTranscript
+          transcript={detail.transcript}
+          correctionItems={detail.feedback.correctionItems}
+        />
+      ) : detail.spokenWordSequence.length > 0 ? (
+        <ExamPronunciationTranscript
+          spokenWordSequence={detail.spokenWordSequence}
+        />
+      ) : (
+        <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
+          <span className="text-sm font-bold text-blue-950">답변 스크립트</span>
+          <p className="mt-3 rounded-2xl bg-zinc-50 p-4 text-sm leading-relaxed whitespace-pre-line text-zinc-700 ring-1 ring-zinc-100">
+            {detail.transcript}
+          </p>
+        </div>
+      )}
 
       <div
         ref={subRingsRef}
@@ -216,18 +237,37 @@ export function ExamQuestionFeedbackScreen({
           label="발음 & 유창성"
           ratio={
             subRingsRevealed
-              ? detail.feedback.pronunciationFluencyScore / SUB_SCORE_MAX
+              ? detail.feedback.pronunciationFluencyScore / PRONUNCIATION_FLUENCY_MAX
               : 0
           }
         />
-        <ScoreCircleStat
-          label="내용 적합성"
-          ratio={
-            subRingsRevealed
-              ? detail.feedback.contentRelevanceScore / SUB_SCORE_MAX
-              : 0
-          }
-        />
+        {detail.feedback.contentRelevanceScore === null ? (
+          <div className="flex flex-col items-center justify-center gap-2 text-center">
+            <div className="relative h-[104px] w-[104px] shrink-0">
+              <Image
+                src="/mascots/no_score.png"
+                alt="채점하지 않는 항목을 안내하는 캐릭터"
+                fill
+                sizes="104px"
+                className="object-contain"
+              />
+            </div>
+            <span className="text-xs font-semibold text-zinc-400">
+              이 파트는 내용 적합성을
+              <br />
+              채점하지 않아요
+            </span>
+          </div>
+        ) : (
+          <ScoreCircleStat
+            label="내용 적합성"
+            ratio={
+              subRingsRevealed && detail.maxScore > 0
+                ? detail.feedback.contentRelevanceScore / detail.maxScore
+                : 0
+            }
+          />
+        )}
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">

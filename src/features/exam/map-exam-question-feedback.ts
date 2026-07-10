@@ -23,6 +23,21 @@ export function mapExamQuestionDetail(raw: RawExamQuestionDetailResult): ExamQue
       contentRelevanceScore: question.feedback.contentRelevanceScore,
       grammarVocabulary: question.feedback.grammarVocabulary,
       actionItems: question.feedback.actionItems,
+      correctionItems: (question.feedback.correctionItems ?? []).map((item) => ({
+        type: item.type,
+        original: item.original,
+        issue: item.issue,
+        explanation: item.explanation,
+        suggested: item.suggested,
+        severity: item.severity,
+      })),
+      nextStrategy: question.feedback.nextStrategy,
     },
+    spokenWordSequence: (question.spokenWordSequence ?? []).map((word) => ({
+      segmentIndex: word.segmentIndex,
+      word: word.word,
+      accuracyScore: word.accuracyScore,
+      errorType: word.errorType,
+    })),
   };
 }
