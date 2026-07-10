@@ -62,6 +62,7 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
               <TooltipTrigger
                 className="shrink-0 cursor-help rounded-full"
                 onClick={() => setIsBetaTooltipOpen((open) => !open)}
+                aria-label="BETA 안내 보기"
               >
                 <Image
                   src="/mascots/beta.png"
