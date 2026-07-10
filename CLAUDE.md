@@ -56,3 +56,12 @@ Note: `src/types/report.ts` and `src/features/report/api/use-report.ts` define a
 ### UI stack
 
 shadcn/ui (`components.json`, style `base-nova`, icon lib `lucide-react`) generates into `src/components/ui`; Tailwind v4 is configured via CSS in `src/app/globals.css` (no `tailwind.config.*`). Brand accents are orange-500/600 with blue-950 for headings — match this when adding new screens rather than introducing new accent colors. Charts use `recharts` directly (see `exam-part-score-radar.tsx`, `phone-demo.tsx`) rather than the shadcn chart wrapper in most places. Toasts via `sonner` (`src/components/ui/sonner.tsx`), mounted once in `Providers`. Server state fetching (where used) goes through a single app-wide `QueryClient` in `src/components/providers.tsx`.
+
+## Opening pull requests
+
+Branches are named `feat/#<issue>` / `fix/#<issue>` / `refactor/#<issue>` (or without the `#`) — the number is the linked GitHub issue. When asked to open/update a PR for the current branch:
+
+1. Pull the issue number out of the branch name and fetch that issue (`gh issue view <n> --json title,body,labels`) for context and its labels.
+2. Fill `.github/PULL_REQUEST_TEMPLATE.md`'s sections (`#️⃣연관된 이슈`, `📝작업 내용`, `💬고민하고 있는 부분(선택)`) from the actual diff on the branch (`git log origin/main..HEAD`, `git diff origin/main...HEAD --stat`) — don't just restate the issue body, describe what was actually built/changed, commit by commit if they cover distinct pieces of work. Leave `### 스크린샷 (선택)` empty unless screenshots are provided.
+3. In the `연관된 이슈` section, reference the issue as `- closes #<n>` (lowercase `closes`, so merging auto-closes it).
+4. Create with `gh pr create --base main --assignee "@me" --label "<issue's labels>" --body "$(cat <<'EOF' ... EOF)"` — assignee is always the PR author (`@me`), and labels mirror whatever labels the linked issue already has (fetched in step 1), not a guess.
