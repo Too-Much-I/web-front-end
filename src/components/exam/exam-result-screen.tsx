@@ -10,6 +10,11 @@ import { ScrollSatisfactionPopup } from "@/components/exam/scroll-satisfaction-p
 import { SketchyDashBorder } from "@/components/exam/sketchy-dash-border";
 import { TargetGradeMascot } from "@/components/exam/target-grade-mascot";
 import { TypedText } from "@/components/exam/typed-text";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { getExamPartQuestionNumbers } from "@/features/exam/part-meta";
 import {
   getStoredTargetGradeId,
@@ -34,6 +39,7 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
   );
 
   const [targetGrade, setTargetGrade] = useState<TargetGradeOption | null>(null);
+  const [isBetaTooltipOpen, setIsBetaTooltipOpen] = useState(false);
 
   useEffect(() => {
     // localStorage는 서버에 없으므로, SSR/하이드레이션 불일치를 피하기 위해 마운트 후에만 읽는다.
@@ -51,13 +57,35 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
     <>
       <section className="mx-auto w-full max-w-5xl px-6 py-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold tracking-wide text-orange-600">
-              SESSION ANALYSIS
-            </p>
-            <h1 className="mt-1 text-2xl font-bold text-blue-950 sm:text-3xl">
-              채점 결과 리포트
-            </h1>
+          <div className="flex items-center gap-5">
+            <Tooltip open={isBetaTooltipOpen} onOpenChange={setIsBetaTooltipOpen}>
+              <TooltipTrigger
+                className="shrink-0 cursor-help rounded-full"
+                onClick={() => setIsBetaTooltipOpen((open) => !open)}
+                aria-label="BETA 안내 보기"
+              >
+                <Image
+                  src="/mascots/beta.png"
+                  alt="BETA"
+                  width={88}
+                  height={88}
+                  className="drop-shadow-sm"
+                />
+              </TooltipTrigger>
+              <TooltipContent side="right" align="start">
+                현재 POC 단계에서 채점 결과에 부정확한 내용이 있을 수 있어요.
+                정식 출시 시 더 정확한 채점을 제공해 드릴게요.
+              </TooltipContent>
+            </Tooltip>
+
+            <div>
+              <p className="text-sm font-semibold tracking-wide text-orange-600">
+                SESSION ANALYSIS
+              </p>
+              <h1 className="mt-1 text-2xl font-bold text-blue-950 sm:text-3xl">
+                채점 결과 리포트
+              </h1>
+            </div>
           </div>
 
           {targetGrade && scoreGap !== null && (
