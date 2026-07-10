@@ -243,6 +243,15 @@ export function ExamQuestionFeedbackScreen({
         />
         {detail.feedback.contentRelevanceScore === null ? (
           <div className="flex flex-col items-center justify-center gap-2 text-center">
+            <div className="relative h-[104px] w-[104px] shrink-0">
+              <Image
+                src="/mascots/no_score.png"
+                alt="채점하지 않는 항목을 안내하는 캐릭터"
+                fill
+                sizes="104px"
+                className="object-contain"
+              />
+            </div>
             <span className="text-xs font-semibold text-zinc-400">
               이 파트는 내용 적합성을
               <br />
