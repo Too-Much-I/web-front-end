@@ -56,3 +56,9 @@ Note: `src/types/report.ts` and `src/features/report/api/use-report.ts` define a
 ### UI stack
 
 shadcn/ui (`components.json`, style `base-nova`, icon lib `lucide-react`) generates into `src/components/ui`; Tailwind v4 is configured via CSS in `src/app/globals.css` (no `tailwind.config.*`). Brand accents are orange-500/600 with blue-950 for headings — match this when adding new screens rather than introducing new accent colors. Charts use `recharts` directly (see `exam-part-score-radar.tsx`, `phone-demo.tsx`) rather than the shadcn chart wrapper in most places. Toasts via `sonner` (`src/components/ui/sonner.tsx`), mounted once in `Providers`. Server state fetching (where used) goes through a single app-wide `QueryClient` in `src/components/providers.tsx`.
+
+## Git workflow
+
+- **Branch naming**: `<type>/#<issue-number>` (e.g. `feat/#34`, `fix/#40`), where `<type>` is one of `feat`/`fix`/`docs`/`refactor`/`chore`/`hotfix`. Branches that don't follow this pattern (e.g. an issue-less spike) are fine too, but they opt out of the automation below — open the PR by hand for those.
+- **Pushing a branch named this way auto-opens a PR** via `.github/workflows/auto-pr.yml`: base `main`, body pre-filled from `.github/PULL_REQUEST_TEMPLATE.md` with `closes #<issue-number>` and a commit-list draft of "작업 내용" (rewrite that section by hand before requesting review — it's a starting point, not a real summary), assignee set to whoever pushed, and a label mapped from `<type>` (`feat→feat`, `fix`/`hotfix→bug`, `docs→documentation`, `refactor`/`perf`/`chore→enhancement`). Re-pushing to the same branch does not create a duplicate PR.
+- This requires the org-level "Allow GitHub Actions to create and approve pull requests" policy to be enabled for this repo (Too-Much-I org settings → Actions → Policies); without it the workflow run fails with a 403 on the `gh pr create` step.
