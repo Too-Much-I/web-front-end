@@ -37,7 +37,7 @@
 
 처음엔 팀원 초안과 동일하게 `node:20-alpine`으로 시작했는데, `pnpm install --frozen-lockfile` 단계에서 다음과 같이 실패했다.
 
-```
+```text
 Error [ERR_UNKNOWN_BUILTIN_MODULE]: No such built-in module: node:sqlite
 ```
 

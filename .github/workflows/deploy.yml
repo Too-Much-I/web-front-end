@@ -13,16 +13,17 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false
 
     # 도커 이미지 빌드 전에 lint/typecheck로 먼저 실패시켜 이미지 빌드 낭비를 줄임
+    # pnpm 버전은 지정하지 않고 package.json의 packageManager 필드(Dockerfile과 동일 버전)를 따른다.
     - name: Set up pnpm
       uses: pnpm/action-setup@v3
-      with:
-        version: 9
 
     - name: Set up Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: '22'
         cache: 'pnpm'
@@ -37,10 +38,10 @@ jobs:
       run: npx tsc --noEmit
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v3
 
     - name: Login to Docker Hub
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -49,17 +50,20 @@ jobs:
     # 버전 태그는 롤백 시 "몇 주 전 latest"가 아니라 특정 시점의 이미지를 정확히 가리키기 위한 것.
     - name: Determine image tags
       id: image-tags
+      env:
+        REF_TYPE: ${{ github.ref_type }}
+        REF_NAME: ${{ github.ref_name }}
       run: |
         TAGS="msde76/tosunsaeng-frontend:latest"
-        if [ "${{ github.ref_type }}" = "tag" ]; then
-          TAGS="$TAGS,msde76/tosunsaeng-frontend:${{ github.ref_name }}"
+        if [ "$REF_TYPE" = "tag" ]; then
+          TAGS="$TAGS,msde76/tosunsaeng-frontend:$REF_NAME"
         fi
         echo "tags=$TAGS" >> "$GITHUB_OUTPUT"
 
     # 빌드타임 공개 변수만 build-arg로 전달. GOOGLE_* 같은 서버 전용 시크릿은
     # 이미지에 포함시키지 않고 EC2의 docker-compose 런타임 환경에서만 주입한다.
     - name: Build and push Docker image
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v6
       with:
         context: .
         file: ./Dockerfile
@@ -77,7 +81,7 @@ jobs:
       if: github.ref_type == 'branch'
       uses: appleboy/ssh-action@v0.1.10
       with:
-        host: 13.209.221.104
+        host: ${{ secrets.EC2_HOST }}
         username: ubuntu
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |

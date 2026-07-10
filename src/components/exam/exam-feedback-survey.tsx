@@ -55,6 +55,9 @@ export function ExamFeedbackSurvey({
   const [submitting, setSubmitting] = useState(false);
   const [isPopping, setIsPopping] = useState(false);
 
+  // initialSatisfaction이 null로 바뀌어도 satisfaction은 의도적으로 유지한다.
+  // 이미 별점을 골랐다면 그 선택을 지우지 않기 위함(사용자가 스크롤 팝업에서 평가한 뒤
+  // 설문 페이지로 넘어오는 흐름에서, URL 쿼리 유무와 무관하게 선택이 보존돼야 함).
   const [prevInitialSatisfaction, setPrevInitialSatisfaction] = useState(initialSatisfaction);
   if (initialSatisfaction !== prevInitialSatisfaction) {
     setPrevInitialSatisfaction(initialSatisfaction);
