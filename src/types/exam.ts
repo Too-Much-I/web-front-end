@@ -125,6 +125,16 @@ export interface ExamGradingResult {
   partScores: ExamPartScores;
 }
 
+/** 문장/구간 단위 첨삭 항목. correctionItems, offTopicItems가 이 모양을 공유한다. */
+export interface RawExamCorrectionItem {
+  type: string;
+  original: string;
+  issue: string;
+  explanation: string;
+  suggested: string;
+  severity: "high" | "medium" | "low";
+}
+
 /** GET /api/v1/exams/{examId}/questions/{questionNumber} 의 result.question.feedback */
 export interface RawExamQuestionFeedback {
   summary: string;
@@ -135,9 +145,13 @@ export interface RawExamQuestionFeedback {
   fluency: string;
   content: string;
   pronunciationFluencyScore: number;
-  contentRelevanceScore: number;
+  /** Part 1(낭독)에는 내용 적합성 개념이 없어 null로 내려온다. */
+  contentRelevanceScore: number | null;
   grammarVocabulary: string;
   actionItems: string[];
+  /** 채점 항목에 문제가 없으면 빈 배열이 아니라 null로 내려오기도 한다. */
+  correctionItems: RawExamCorrectionItem[] | null;
+  nextStrategy: string;
 }
 
 /** GET /api/v1/exams/{examId}/questions/{questionNumber} 의 result.question */
@@ -157,6 +171,15 @@ export interface RawExamQuestionDetailResult {
   question: RawExamQuestionDetail;
 }
 
+export interface ExamCorrectionItem {
+  type: string;
+  original: string;
+  issue: string;
+  explanation: string;
+  suggested: string;
+  severity: "high" | "medium" | "low";
+}
+
 export interface ExamQuestionFeedback {
   summary: string;
   level: string;
@@ -166,9 +189,11 @@ export interface ExamQuestionFeedback {
   fluency: string;
   content: string;
   pronunciationFluencyScore: number;
-  contentRelevanceScore: number;
+  contentRelevanceScore: number | null;
   grammarVocabulary: string;
   actionItems: string[];
+  correctionItems: ExamCorrectionItem[];
+  nextStrategy: string;
 }
 
 export interface ExamQuestionDetail {
