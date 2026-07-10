@@ -3,7 +3,7 @@
 import { ArrowLeft, ThumbsUp, TriangleAlert } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 import { AnswerAudioPlayer } from "@/components/exam/answer-audio-player";
 import { ExamMarkedTranscript } from "@/components/exam/exam-marked-transcript";
@@ -11,6 +11,11 @@ import { ExamPriorityPanel } from "@/components/exam/exam-priority-panel";
 import { ExamPronunciationTranscript } from "@/components/exam/exam-pronunciation-transcript";
 import { SketchyDashBorder } from "@/components/exam/sketchy-dash-border";
 import { TypedText } from "@/components/exam/typed-text";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   getExamPartMeta,
   getExamPartTimingByQuestionNumber,
@@ -117,6 +122,7 @@ export function ExamQuestionFeedbackScreen({
     detail.partNumber,
     detail.questionNumber,
   );
+  const [isBetaTooltipOpen, setIsBetaTooltipOpen] = useState(false);
   const mainRingRef = useRef<HTMLDivElement>(null);
   const mainRingRevealed = useRevealOnScroll(mainRingRef);
   const subRingsRef = useRef<HTMLDivElement>(null);
@@ -135,13 +141,34 @@ export function ExamQuestionFeedbackScreen({
       </Link>
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold tracking-wide text-orange-600">
-            Part {detail.partNumber} · {partMeta.titleKo}
-          </p>
-          <h1 className="mt-1 text-2xl font-bold text-blue-950 sm:text-3xl">
-            문제 {detail.questionNumber}번 피드백
-          </h1>
+        <div className="flex items-center gap-5">
+          <Tooltip open={isBetaTooltipOpen} onOpenChange={setIsBetaTooltipOpen}>
+            <TooltipTrigger
+              className="shrink-0 cursor-help rounded-full"
+              onClick={() => setIsBetaTooltipOpen((open) => !open)}
+            >
+              <Image
+                src="/mascots/beta.png"
+                alt="BETA"
+                width={72}
+                height={72}
+                className="drop-shadow-sm"
+              />
+            </TooltipTrigger>
+            <TooltipContent side="right" align="start">
+              현재 POC 단계에서 채점 결과에 부정확한 내용이 있을 수 있어요.
+              정식 출시 시 더 정확한 채점을 제공해 드릴게요.
+            </TooltipContent>
+          </Tooltip>
+
+          <div>
+            <p className="text-sm font-semibold tracking-wide text-orange-600">
+              Part {detail.partNumber} · {partMeta.titleKo}
+            </p>
+            <h1 className="mt-1 text-2xl font-bold text-blue-950 sm:text-3xl">
+              문제 {detail.questionNumber}번 피드백
+            </h1>
+          </div>
         </div>
         <span className="rounded-full bg-blue-950 px-4 py-1.5 text-sm font-semibold text-white">
           {detail.feedback.level}
