@@ -93,7 +93,17 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("[consent] Failed to append consent record to Google Sheets", error);
+    const gaxiosError = error as {
+      message?: string;
+      code?: number | string;
+      response?: { status?: number; data?: unknown };
+    };
+    console.error("[consent] Failed to append consent record to Google Sheets", {
+      message: gaxiosError?.message,
+      code: gaxiosError?.code,
+      status: gaxiosError?.response?.status,
+      data: gaxiosError?.response?.data,
+    });
     return NextResponse.json(
       { message: "동의 기록 저장 중 오류가 발생했습니다." },
       { status: 502 },

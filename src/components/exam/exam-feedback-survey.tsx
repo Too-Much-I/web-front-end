@@ -2,7 +2,7 @@
 
 import { Star } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { SatisfactionStars } from "@/components/exam/satisfaction-stars";
@@ -55,9 +55,11 @@ export function ExamFeedbackSurvey({
   const [submitting, setSubmitting] = useState(false);
   const [isPopping, setIsPopping] = useState(false);
 
-  useEffect(() => {
+  const [prevInitialSatisfaction, setPrevInitialSatisfaction] = useState(initialSatisfaction);
+  if (initialSatisfaction !== prevInitialSatisfaction) {
+    setPrevInitialSatisfaction(initialSatisfaction);
     if (initialSatisfaction !== null) setSatisfaction(initialSatisfaction);
-  }, [initialSatisfaction]);
+  }
 
   const handleGiftClick = () => {
     if (isPopping) return;
