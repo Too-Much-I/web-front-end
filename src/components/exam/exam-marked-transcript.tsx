@@ -18,7 +18,7 @@ function getMarkKind(type: string): MarkKind {
 }
 
 /** 마크 색은 심각도(severity)로만 정한다 — 색상은 늘리지 않고 주황의 진한 정도로만 구분한다. */
-const SEVERITY_COLOR: Record<ExamCorrectionItem["severity"], string> = {
+export const SEVERITY_COLOR: Record<ExamCorrectionItem["severity"], string> = {
   high: "#c2410c",
   medium: "#f97316",
   low: "#fdba74",

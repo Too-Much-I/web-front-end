@@ -8,6 +8,7 @@ import { useRef } from "react";
 import { AnswerAudioPlayer } from "@/components/exam/answer-audio-player";
 import { ExamMarkedTranscript } from "@/components/exam/exam-marked-transcript";
 import { ExamPriorityPanel } from "@/components/exam/exam-priority-panel";
+import { ExamPronunciationTranscript } from "@/components/exam/exam-pronunciation-transcript";
 import { SketchyDashBorder } from "@/components/exam/sketchy-dash-border";
 import { TypedText } from "@/components/exam/typed-text";
 import {
@@ -214,6 +215,10 @@ export function ExamQuestionFeedbackScreen({
         <ExamMarkedTranscript
           transcript={detail.transcript}
           correctionItems={detail.feedback.correctionItems}
+        />
+      ) : detail.spokenWordSequence.length > 0 ? (
+        <ExamPronunciationTranscript
+          spokenWordSequence={detail.spokenWordSequence}
         />
       ) : (
         <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">

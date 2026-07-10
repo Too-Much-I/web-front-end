@@ -154,6 +154,23 @@ export interface RawExamQuestionFeedback {
   nextStrategy: string;
 }
 
+/**
+ * Azure Pronunciation Assessment 기반 단어별 발음 채점. Part 1(낭독)에서만 내려오며,
+ * word는 실제로 인식된(발화된) 단어 순서라 transcript(정제된 참고 답안)와 1:1로 대응하지 않는다.
+ */
+export interface RawSpokenWord {
+  index: number;
+  segmentIndex: number;
+  wordIndex: number;
+  word: string;
+  offset: number;
+  duration: number;
+  accuracyScore: number;
+  pronunciationScore: number;
+  /** Azure 오류 태그. "None"이면 정상, 그 외(Mispronunciation/Omission/Insertion 등)는 오류. */
+  errorType: string;
+}
+
 /** GET /api/v1/exams/{examId}/questions/{questionNumber} 의 result.question */
 export interface RawExamQuestionDetail {
   partNumber: number;
@@ -163,6 +180,7 @@ export interface RawExamQuestionDetail {
   maxScore: number;
   transcript: string;
   feedback: RawExamQuestionFeedback;
+  spokenWordSequence?: RawSpokenWord[];
 }
 
 /** GET /api/v1/exams/{examId}/questions/{questionNumber} 의 result */
@@ -196,6 +214,13 @@ export interface ExamQuestionFeedback {
   nextStrategy: string;
 }
 
+export interface SpokenWord {
+  segmentIndex: number;
+  word: string;
+  accuracyScore: number;
+  errorType: string;
+}
+
 export interface ExamQuestionDetail {
   examId: string;
   partNumber: number;
@@ -205,4 +230,5 @@ export interface ExamQuestionDetail {
   maxScore: number;
   transcript: string;
   feedback: ExamQuestionFeedback;
+  spokenWordSequence: SpokenWord[];
 }

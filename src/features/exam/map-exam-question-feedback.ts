@@ -33,5 +33,11 @@ export function mapExamQuestionDetail(raw: RawExamQuestionDetailResult): ExamQue
       })),
       nextStrategy: question.feedback.nextStrategy,
     },
+    spokenWordSequence: (question.spokenWordSequence ?? []).map((word) => ({
+      segmentIndex: word.segmentIndex,
+      word: word.word,
+      accuracyScore: word.accuracyScore,
+      errorType: word.errorType,
+    })),
   };
 }
