@@ -1,6 +1,6 @@
 "use client";
 
-import { Volume2 } from "lucide-react";
+import { ChevronDown, Volume2 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -9,17 +9,23 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const SOUND_CHECK_SRC = "/assets/audio/sound_check.wav";
+const PLAYBACK_RATES = [1, 1.25, 1.5, 1.75, 2] as const;
+const DEFAULT_PLAYBACK_RATE = 1.5;
 
 export function SoundCheckPanel({ onCompleted }: { onCompleted: () => void }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [playbackRate, setPlaybackRate] = useState(DEFAULT_PLAYBACK_RATE);
+  const [isRateMenuOpen, setIsRateMenuOpen] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const rateMenuRef = useRef<HTMLDivElement>(null);
 
   const showQuietNotice = hasPlayed && !isPlaying;
 
   useEffect(() => {
     const audio = new Audio(SOUND_CHECK_SRC);
+    audio.playbackRate = DEFAULT_PLAYBACK_RATE;
     audioRef.current = audio;
 
     const handleEnded = () => {
@@ -41,6 +47,20 @@ export function SoundCheckPanel({ onCompleted }: { onCompleted: () => void }) {
       audioRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.playbackRate = playbackRate;
+  }, [playbackRate]);
+
+  useEffect(() => {
+    if (!isRateMenuOpen) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (!rateMenuRef.current?.contains(e.target as Node))
+        setIsRateMenuOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isRateMenuOpen]);
 
   const handlePlay = () => {
     const audio = audioRef.current;
@@ -89,16 +109,51 @@ export function SoundCheckPanel({ onCompleted }: { onCompleted: () => void }) {
           />
         </button>
 
-        <Button
-          variant="outline"
-          size="lg"
-          onClick={handlePlay}
-          disabled={isPlaying}
-          className="h-12 w-full border-orange-300 text-base text-orange-600 hover:bg-orange-50"
-        >
-          <Volume2 className="size-4" />
-          {isPlaying ? "재생 중..." : hasPlayed ? "다시 듣기" : "소리 재생하기"}
-        </Button>
+        <div className="flex w-full items-center gap-2">
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={handlePlay}
+            disabled={isPlaying}
+            className="h-12 flex-1 border-orange-300 text-base text-orange-600 hover:bg-orange-50"
+          >
+            <Volume2 className="size-4" />
+            {isPlaying ? "재생 중..." : hasPlayed ? "다시 듣기" : "소리 재생하기"}
+          </Button>
+
+          <div ref={rateMenuRef} className="relative shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsRateMenuOpen((v) => !v)}
+              className="flex h-12 items-center gap-1 rounded-lg border border-orange-300 bg-white px-3 text-sm font-semibold text-orange-600 hover:bg-orange-50"
+            >
+              {playbackRate}x
+              <ChevronDown className="size-3.5" />
+            </button>
+
+            {isRateMenuOpen && (
+              <div className="absolute right-0 z-10 mt-1 w-20 rounded-lg bg-white py-1 shadow-lg ring-1 ring-zinc-200">
+                {PLAYBACK_RATES.map((rate) => (
+                  <button
+                    key={rate}
+                    type="button"
+                    onClick={() => {
+                      setPlaybackRate(rate);
+                      setIsRateMenuOpen(false);
+                    }}
+                    className={`block w-full px-3 py-1.5 text-left text-sm hover:bg-orange-50 ${
+                      rate === playbackRate
+                        ? "font-semibold text-orange-600"
+                        : "text-zinc-600"
+                    }`}
+                  >
+                    {rate}x
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col gap-2">
