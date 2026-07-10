@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { HeroVideo } from "@/components/hero-video";
 import { PhoneDemo } from "@/components/phone-demo";
+import { ScrollToSectionLink } from "@/components/scroll-to-section-link";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
@@ -20,12 +21,15 @@ export default function Home() {
           <span className="text-lg font-bold text-orange-500">토선생</span>
         </div>
         <nav className="hidden items-center gap-8 text-sm font-medium text-zinc-600 sm:flex">
-          <a href="#" className="hover:text-orange-500">
+          <ScrollToSectionLink
+            targetId="service-intro"
+            className="hover:text-orange-500"
+          >
             서비스 소개
-          </a>
-          <a href="#" className="hover:text-orange-500">
+          </ScrollToSectionLink>
+          <Link href="/contact" className="hover:text-orange-500">
             문의하기
-          </a>
+          </Link>
         </nav>
         <Button
           size="lg"
@@ -81,15 +85,15 @@ export default function Home() {
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 text-sm text-zinc-500 sm:flex-row">
           <span>© {new Date().getFullYear()} 토선생. All rights reserved.</span>
           <nav className="flex items-center gap-5">
-            <a href="#" className="hover:text-orange-500">
+            <Link href="/terms" className="hover:text-orange-500">
               이용약관
-            </a>
-            <a href="#" className="hover:text-orange-500">
+            </Link>
+            <Link href="/privacy" className="hover:text-orange-500">
               개인정보처리방침
-            </a>
-            <a href="#" className="hover:text-orange-500">
+            </Link>
+            <Link href="/contact" className="hover:text-orange-500">
               문의하기
-            </a>
+            </Link>
           </nav>
         </div>
       </footer>
