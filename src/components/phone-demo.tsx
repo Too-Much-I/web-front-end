@@ -66,6 +66,7 @@ export function PhoneDemo() {
 
   return (
     <section
+      id="service-intro"
       ref={sectionRef}
       className="mx-auto flex w-full max-w-6xl flex-col items-center gap-3 px-6 py-28 text-center sm:py-36"
     >
