@@ -13,6 +13,8 @@ export function TargetGradeSelect() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
+    // localStorage는 서버에 없으므로, SSR/하이드레이션 불일치를 피하기 위해 마운트 후에만 읽는다.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedId(getStoredTargetGradeId());
   }, []);
 

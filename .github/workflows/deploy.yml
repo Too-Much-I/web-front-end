@@ -1,0 +1,91 @@
+name: Deploy Frontend to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+
+    # 도커 이미지 빌드 전에 lint/typecheck로 먼저 실패시켜 이미지 빌드 낭비를 줄임
+    # pnpm 버전은 지정하지 않고 package.json의 packageManager 필드(Dockerfile과 동일 버전)를 따른다.
+    - name: Set up pnpm
+      uses: pnpm/action-setup@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Lint
+      run: pnpm lint
+
+    - name: Type check
+      run: npx tsc --noEmit
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # main push는 latest만, v* 태그 push는 latest에 더해 그 버전 태그도 함께 붙인다.
+    # 버전 태그는 롤백 시 "몇 주 전 latest"가 아니라 특정 시점의 이미지를 정확히 가리키기 위한 것.
+    - name: Determine image tags
+      id: image-tags
+      env:
+        REF_TYPE: ${{ github.ref_type }}
+        REF_NAME: ${{ github.ref_name }}
+      run: |
+        TAGS="msde76/tosunsaeng-frontend:latest"
+        if [ "$REF_TYPE" = "tag" ]; then
+          TAGS="$TAGS,msde76/tosunsaeng-frontend:$REF_NAME"
+        fi
+        echo "tags=$TAGS" >> "$GITHUB_OUTPUT"
+
+    # 빌드타임 공개 변수만 build-arg로 전달. GOOGLE_* 같은 서버 전용 시크릿은
+    # 이미지에 포함시키지 않고 EC2의 docker-compose 런타임 환경에서만 주입한다.
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: ${{ steps.image-tags.outputs.tags }}
+        build-args: |
+          NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
+          NEXT_PUBLIC_CLARITY_PROJECT_ID=${{ secrets.NEXT_PUBLIC_CLARITY_PROJECT_ID }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    # 태그 push는 이미지 버전 태깅까지만 하고, 실제 EC2 배포는 main push일 때만 실행한다.
+    # 과거 커밋에 태그를 붙이는 경우까지 자동으로 운영 서버에 재배포되는 걸 막기 위함.
+    - name: SSH Command to Deploy
+      if: github.ref_type == 'branch'
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd ~/tosunsaeng
+          docker compose pull frontend
+          docker compose up -d frontend
+          docker image prune -f

@@ -10,11 +10,17 @@ export function usePhaseCountdown(
 ) {
   const [remainingMs, setRemainingMs] = useState(durationSec * 1000);
 
+  const resetSignature = `${resetKey}:${enabled}`;
+  const [prevResetSignature, setPrevResetSignature] = useState(resetSignature);
+  if (prevResetSignature !== resetSignature) {
+    setPrevResetSignature(resetSignature);
+    setRemainingMs(durationSec * 1000);
+  }
+
   useEffect(() => {
     if (!enabled) return;
 
     const deadline = Date.now() + durationSec * 1000;
-    setRemainingMs(durationSec * 1000);
 
     const tick = () => {
       const next = deadline - Date.now();

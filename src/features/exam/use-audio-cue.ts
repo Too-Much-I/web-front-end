@@ -15,7 +15,9 @@ export function useAudioCue(
   enabled: boolean = true,
 ) {
   const onEndedRef = useRef(onEnded);
-  onEndedRef.current = onEnded;
+  useEffect(() => {
+    onEndedRef.current = onEnded;
+  });
 
   useEffect(() => {
     if (!enabled) return;
