@@ -31,6 +31,14 @@ function clampPercent(ratio: number): number {
 /** pronunciationFluencyScore는 100점 만점으로 내려온다. */
 const PRONUNCIATION_FLUENCY_MAX = 100;
 
+/** contentRelevanceScore의 만점은 파트마다 다르다 (Part 1은 채점 대상이 아니라 null로 내려옴). */
+const CONTENT_RELEVANCE_MAX: Record<number, number> = {
+  2: 2.5,
+  3: 2.5,
+  4: 2.5,
+  5: 4,
+};
+
 function ScoreRing({
   percent,
   size,
@@ -290,8 +298,9 @@ export function ExamQuestionFeedbackScreen({
           <ScoreCircleStat
             label="내용 적합성"
             ratio={
-              subRingsRevealed && detail.maxScore > 0
-                ? detail.feedback.contentRelevanceScore / detail.maxScore
+              subRingsRevealed
+                ? detail.feedback.contentRelevanceScore /
+                  CONTENT_RELEVANCE_MAX[detail.partNumber]
                 : 0
             }
           />
