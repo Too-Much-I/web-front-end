@@ -39,6 +39,8 @@ export interface ExamQuestion {
   tableContext?: ExamTableContext;
   prepTimeSec: number;
   speakTimeSec: number;
+  /** 같은 파트의 첫 문제인지. Part 4의 첫 문제(Q8) 앞에는 정보를 읽는 45초가 별도로 주어진다. */
+  isFirstInPart: boolean;
   /** 같은 파트의 마지막 문제인지. Part 4의 마지막 문제(Q10)는 질문 오디오를 두 번 들려준다. */
   isLastInPart: boolean;
 }

@@ -41,7 +41,6 @@ export interface ExamPartTiming {
 /** 파트별 준비/답변 시간. 토익 스피킹 정규 구성 기준의 고정값 — 실제 시험 형식이 바뀌기 전엔 변하지 않는다. */
 export function getExamPartTiming(
   partNumber: number,
-  isFirstInPart: boolean,
   isLastInPart: boolean,
 ): ExamPartTiming {
   switch (partNumber) {
@@ -54,8 +53,11 @@ export function getExamPartTiming(
         ? { prepTimeSec: 3, speakTimeSec: 30 }
         : { prepTimeSec: 3, speakTimeSec: 15 };
     case 4: // Respond to Questions Using Information Provided
+      // 첫 문제(Q8) 앞의 45초 정보 읽는 시간은 prepTimeSec이 아니라 별도의
+      // reading-time phase(exam-session-screen.tsx)로 처리된다. 오디오 재생 후
+      // 준비 시간은 Q8~Q10 모두 3초로 동일하다.
       return {
-        prepTimeSec: isFirstInPart ? 45 : 3,
+        prepTimeSec: 3,
         speakTimeSec: isLastInPart ? 30 : 15,
       };
     case 5: // Express an Opinion
@@ -71,8 +73,7 @@ export function getExamPartTimingByQuestionNumber(
   questionNumber: number,
 ): ExamPartTiming {
   const questionNumbers = getExamPartQuestionNumbers(partNumber);
-  const isFirstInPart = questionNumbers[0] === questionNumber;
   const isLastInPart =
     questionNumbers[questionNumbers.length - 1] === questionNumber;
-  return getExamPartTiming(partNumber, isFirstInPart, isLastInPart);
+  return getExamPartTiming(partNumber, isLastInPart);
 }
