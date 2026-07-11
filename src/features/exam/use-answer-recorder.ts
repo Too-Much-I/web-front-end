@@ -102,8 +102,13 @@ export function useAnswerRecorder() {
     // startRecording()이 아직 getUserMedia를 기다리는 중일 수 있으니, recorderRef를
     // 확인하기 전에 먼저 끝나도록 기다린다. 실패했다면(마이크 접근 거부 등) 여기서
     // 무시하고 아래 recorderRef 체크로 자연스럽게 빈 Blob을 반환한다.
-    await startPromiseRef.current?.catch(() => {});
-    startPromiseRef.current = null;
+    const startPromise = startPromiseRef.current;
+    await startPromise?.catch(() => {});
+    // await 하는 동안 새 startRecording()이 startPromiseRef를 교체했을 수 있으니,
+    // 우리가 기다린 promise가 여전히 최신일 때만 비운다.
+    if (startPromiseRef.current === startPromise) {
+      startPromiseRef.current = null;
+    }
 
     return new Promise((resolve) => {
       stopVisualizer();
