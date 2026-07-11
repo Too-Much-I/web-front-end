@@ -23,6 +23,11 @@ export function useAnswerRecorder() {
   const rafRef = useRef<number | null>(null);
   const levelBarRefs = useRef<(HTMLSpanElement | null)[]>([]);
 
+  // getUserMedia는 비동기라 완료 전에 stopRecording이 먼저 호출될 수 있다 —
+  // stopRecording이 이 promise를 기다려서 recorderRef가 세팅되기 전에 빈 Blob으로
+  // 끝나버리는 레이스를 막는다.
+  const startPromiseRef = useRef<Promise<void> | null>(null);
+
   const stopVisualizer = useCallback(() => {
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     rafRef.current = null;
@@ -68,28 +73,38 @@ export function useAnswerRecorder() {
     tick();
   }, []);
 
-  const startRecording = useCallback(async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation: false,
-        noiseSuppression: false,
-        autoGainControl: false,
-      },
-    });
-    streamRef.current = stream;
-    chunksRef.current = [];
+  const startRecording = useCallback(() => {
+    const promise = (async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false,
+        },
+      });
+      streamRef.current = stream;
+      chunksRef.current = [];
 
-    const recorder = new MediaRecorder(stream);
-    recorder.ondataavailable = (e) => {
-      if (e.data.size > 0) chunksRef.current.push(e.data);
-    };
-    recorderRef.current = recorder;
-    recorder.start();
-    setIsRecording(true);
-    startVisualizer(stream);
+      const recorder = new MediaRecorder(stream);
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+      recorderRef.current = recorder;
+      recorder.start();
+      setIsRecording(true);
+      startVisualizer(stream);
+    })();
+    startPromiseRef.current = promise;
+    return promise;
   }, [startVisualizer]);
 
-  const stopRecording = useCallback((): Promise<Blob> => {
+  const stopRecording = useCallback(async (): Promise<Blob> => {
+    // startRecording()이 아직 getUserMedia를 기다리는 중일 수 있으니, recorderRef를
+    // 확인하기 전에 먼저 끝나도록 기다린다. 실패했다면(마이크 접근 거부 등) 여기서
+    // 무시하고 아래 recorderRef 체크로 자연스럽게 빈 Blob을 반환한다.
+    await startPromiseRef.current?.catch(() => {});
+    startPromiseRef.current = null;
+
     return new Promise((resolve) => {
       stopVisualizer();
       const recorder = recorderRef.current;
