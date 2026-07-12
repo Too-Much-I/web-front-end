@@ -28,15 +28,15 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: SITE_URL,
     siteName: "토선생",
-    images: ["/logo.png"],
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: TITLE }],
     locale: "ko_KR",
     type: "website",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: TITLE,
     description: DESCRIPTION,
-    images: ["/logo.png"],
+    images: ["/og-image.png"],
   },
 };
 
