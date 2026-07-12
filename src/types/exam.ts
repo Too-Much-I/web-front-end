@@ -21,6 +21,10 @@ export interface RawExamQuestion {
   text?: string;
   tableContext?: ExamTableContext;
   audioUrl?: string;
+  /** Part 3 setup narration text ("Imagine a cooking magazine..."), read once before the part's first question. */
+  partIntroText?: string;
+  /** Narrated audio for partIntroText. */
+  guideAudioUrl?: string;
 }
 
 export interface RawExamSession {
@@ -37,8 +41,14 @@ export interface ExamQuestion {
   question?: string;
   audioUrl?: string;
   tableContext?: ExamTableContext;
+  /** Part 3 setup narration text ("Imagine a cooking magazine..."), read once before the part's first question. */
+  partIntroText?: string;
+  /** Narrated audio for partIntroText. */
+  guideAudioUrl?: string;
   prepTimeSec: number;
   speakTimeSec: number;
+  /** 같은 파트의 첫 문제인지. Part 4의 첫 문제(Q8) 앞에는 정보를 읽는 45초가 별도로 주어진다. */
+  isFirstInPart: boolean;
   /** 같은 파트의 마지막 문제인지. Part 4의 마지막 문제(Q10)는 질문 오디오를 두 번 들려준다. */
   isLastInPart: boolean;
 }

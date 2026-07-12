@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ExamDirectionsScreen } from "@/components/exam/exam-directions-screen";
 import { ExamExitConfirmPopup } from "@/components/exam/exam-exit-confirm-popup";
 import { ExamHeader } from "@/components/exam/exam-header";
+import { ExamPartIntroScreen } from "@/components/exam/exam-part-intro-screen";
 import { ExamQaNavBar } from "@/components/exam/exam-qa-nav-bar";
 import { uploadExamAnswer } from "@/features/exam/api/exam-answer-upload"; // TODO: 서버 배포 후 주석 해제
 import { AUDIO_CUES } from "@/features/exam/audio-cues";
@@ -20,6 +21,8 @@ import type { ExamSession } from "@/types/exam";
 
 type Phase =
   | "directions"
+  | "part-intro"
+  | "reading-time"
   | "question-audio"
   | "repeat-cue"
   | "question-audio-repeat"
@@ -29,6 +32,8 @@ type Phase =
   | "speaking";
 
 const CUE_FALLBACK_MS = 2000;
+// Part 4는 Q8 오디오가 나오기 전, 표/일정 정보를 읽을 45초를 별도로 준다.
+const PART4_READING_TIME_SEC = 45;
 
 export function ExamSessionScreen({ session }: { session: ExamSession }) {
   const { questions } = session;
@@ -45,6 +50,24 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
 
   const handlePhaseComplete = useCallback(() => {
     if (phase === "directions") {
+      // Part 4의 첫 문제(Q8) 앞에는 정보를 읽는 45초가 질문 오디오보다 먼저 온다.
+      if (question?.partNumber === 4 && question?.isFirstInPart) {
+        setPhase("reading-time");
+        return;
+      }
+      // Part 3의 첫 문제(Q5) 앞에는 상황을 설명하는 안내문+안내 음성이 먼저 온다.
+      if (question?.isFirstInPart && (question?.partIntroText || question?.guideAudioUrl)) {
+        setPhase("part-intro");
+        return;
+      }
+      setPhase(question?.question ? "question-audio" : "prep-cue");
+      return;
+    }
+    if (phase === "part-intro") {
+      setPhase(question?.question ? "question-audio" : "prep-cue");
+      return;
+    }
+    if (phase === "reading-time") {
       setPhase(question?.question ? "question-audio" : "prep-cue");
       return;
     }
@@ -119,13 +142,21 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     (a, b) => a - b,
   );
 
-  const isCounting = (phase === "prep" || phase === "speaking") && !showExitConfirm;
+  const isReadingTime = phase === "reading-time";
+  const isCounting =
+    (phase === "prep" || phase === "speaking" || isReadingTime) && !showExitConfirm;
   const isPrepGroup = phase === "prep-cue" || phase === "prep";
   const isSpeakGroup = phase === "speak-cue" || phase === "speaking";
   const isListeningPhase =
     phase === "question-audio" || phase === "repeat-cue" || phase === "question-audio-repeat";
 
-  const durationSec = question ? (isPrepGroup ? question.prepTimeSec : question.speakTimeSec) : 0;
+  const durationSec = question
+    ? isReadingTime
+      ? PART4_READING_TIME_SEC
+      : isPrepGroup
+        ? question.prepTimeSec
+        : question.speakTimeSec
+    : 0;
 
   const remainingMs = usePhaseCountdown(
     durationSec,
@@ -281,7 +312,28 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     return (
       <div className="flex flex-1 flex-col bg-white">
         <ExamHeader label={`Part ${question.partNumber}`} />
-        <ExamDirectionsScreen partNumber={question.partNumber} onComplete={handlePhaseComplete} />
+        <ExamDirectionsScreen
+          partNumber={question.partNumber}
+          onComplete={handlePhaseComplete}
+          enabled={!showExitConfirm}
+        />
+        {qaNavBar}
+        {exitConfirmDialog}
+      </div>
+    );
+  }
+
+  if (phase === "part-intro") {
+    return (
+      <div className="flex flex-1 flex-col bg-white">
+        <ExamHeader label={`Part ${question.partNumber}`} />
+        <ExamPartIntroScreen
+          text={question.partIntroText ?? ""}
+          audioUrl={question.guideAudioUrl}
+          resetKey={`part-intro-${question.questionNumber}`}
+          onComplete={handlePhaseComplete}
+          enabled={!showExitConfirm}
+        />
         {qaNavBar}
         {exitConfirmDialog}
       </div>
@@ -289,7 +341,11 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
   }
 
   const partMeta = getExamPartMeta(question.partNumber);
-  const frozenMs = isPrepGroup ? question.prepTimeSec * 1000 : question.speakTimeSec * 1000;
+  const frozenMs = isReadingTime
+    ? PART4_READING_TIME_SEC * 1000
+    : isPrepGroup
+      ? question.prepTimeSec * 1000
+      : question.speakTimeSec * 1000;
 
   return (
     <div className="flex flex-1 flex-col bg-white">
@@ -379,7 +435,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
           <>
             <div className="flex flex-col items-center">
               <span className="w-56 rounded-t-lg bg-blue-950 py-2 text-center text-sm font-bold tracking-wide text-white sm:w-64 sm:text-base">
-                {isPrepGroup ? "PREPARATION TIME" : "RESPONSE TIME"}
+                {isReadingTime ? "READING TIME" : isPrepGroup ? "PREPARATION TIME" : "RESPONSE TIME"}
               </span>
               <span
                 className={cn(
@@ -416,6 +472,12 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
                   준비 완료, 바로 답변 시작하기
                 </button>
               </div>
+            )}
+
+            {phase === "reading-time" && (
+              <span className="text-sm text-zinc-500 sm:text-base">
+                화면의 정보를 확인하고 읽어보세요.
+              </span>
             )}
 
             {phase === "prep-cue" && (

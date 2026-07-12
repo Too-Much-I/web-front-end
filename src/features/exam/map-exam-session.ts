@@ -17,6 +17,7 @@ export function mapExamSession(raw: RawExamSession): ExamSession {
     const group = partGroups.get(q.part) ?? [q];
     const positionInPart = group.indexOf(q);
 
+    const isFirstInPart = positionInPart === 0;
     const isLastInPart = positionInPart === group.length - 1;
 
     return {
@@ -27,8 +28,11 @@ export function mapExamSession(raw: RawExamSession): ExamSession {
       question: q.text,
       audioUrl: q.audioUrl,
       tableContext: q.tableContext,
+      partIntroText: q.partIntroText,
+      guideAudioUrl: q.guideAudioUrl,
+      isFirstInPart,
       isLastInPart,
-      ...getExamPartTiming(q.part, positionInPart === 0, isLastInPart),
+      ...getExamPartTiming(q.part, isLastInPart),
     };
   });
 

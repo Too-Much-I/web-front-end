@@ -30,7 +30,7 @@ export const EXAM_PART_DIRECTIONS: Record<number, ExamPartDirections> = {
       "You will have three seconds to prepare after you hear each question.",
       "You will have 15 seconds to respond to questions 5 and 6, and 30 seconds to respond to question 7.",
     ],
-    audioUrl: "/assets/audio/part3_intro.wav",
+    audioUrl: "/assets/audio/Part3_Directions.wav",
   },
   4: {
     title: "Question 8-10: Respond to Questions Using Information Provided",
