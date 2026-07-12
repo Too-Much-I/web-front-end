@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { FaqSection } from "@/components/faq-section";
 import { HeroVideo } from "@/components/hero-video";
 import { PhoneDemo } from "@/components/phone-demo";
 import { ScrollToSectionLink } from "@/components/scroll-to-section-link";
@@ -26,6 +27,9 @@ export default function Home() {
             className="hover:text-orange-500"
           >
             서비스 소개
+          </ScrollToSectionLink>
+          <ScrollToSectionLink targetId="faq" className="hover:text-orange-500">
+            자주 묻는 질문
           </ScrollToSectionLink>
           <Link href="/contact" className="hover:text-orange-500">
             문의하기
@@ -80,6 +84,8 @@ export default function Home() {
       </main>
 
       <PhoneDemo />
+
+      <FaqSection />
 
       <footer className="border-t border-orange-200/60 px-6 py-8 sm:px-10">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 text-sm text-zinc-500 sm:flex-row">
