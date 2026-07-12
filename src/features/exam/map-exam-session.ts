@@ -28,6 +28,8 @@ export function mapExamSession(raw: RawExamSession): ExamSession {
       question: q.text,
       audioUrl: q.audioUrl,
       tableContext: q.tableContext,
+      partIntroText: q.partIntroText,
+      guideAudioUrl: q.guideAudioUrl,
       isFirstInPart,
       isLastInPart,
       ...getExamPartTiming(q.part, isLastInPart),

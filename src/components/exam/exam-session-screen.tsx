@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ExamDirectionsScreen } from "@/components/exam/exam-directions-screen";
 import { ExamExitConfirmPopup } from "@/components/exam/exam-exit-confirm-popup";
 import { ExamHeader } from "@/components/exam/exam-header";
+import { ExamPartIntroScreen } from "@/components/exam/exam-part-intro-screen";
 import { ExamQaNavBar } from "@/components/exam/exam-qa-nav-bar";
 import { uploadExamAnswer } from "@/features/exam/api/exam-answer-upload"; // TODO: 서버 배포 후 주석 해제
 import { AUDIO_CUES } from "@/features/exam/audio-cues";
@@ -20,6 +21,7 @@ import type { ExamSession } from "@/types/exam";
 
 type Phase =
   | "directions"
+  | "part-intro"
   | "reading-time"
   | "question-audio"
   | "repeat-cue"
@@ -53,6 +55,15 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
         setPhase("reading-time");
         return;
       }
+      // Part 3의 첫 문제(Q5) 앞에는 상황을 설명하는 안내문+안내 음성이 먼저 온다.
+      if (question?.isFirstInPart && (question?.partIntroText || question?.guideAudioUrl)) {
+        setPhase("part-intro");
+        return;
+      }
+      setPhase(question?.question ? "question-audio" : "prep-cue");
+      return;
+    }
+    if (phase === "part-intro") {
       setPhase(question?.question ? "question-audio" : "prep-cue");
       return;
     }
@@ -302,6 +313,22 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
       <div className="flex flex-1 flex-col bg-white">
         <ExamHeader label={`Part ${question.partNumber}`} />
         <ExamDirectionsScreen partNumber={question.partNumber} onComplete={handlePhaseComplete} />
+        {qaNavBar}
+        {exitConfirmDialog}
+      </div>
+    );
+  }
+
+  if (phase === "part-intro") {
+    return (
+      <div className="flex flex-1 flex-col bg-white">
+        <ExamHeader label={`Part ${question.partNumber}`} />
+        <ExamPartIntroScreen
+          text={question.partIntroText ?? ""}
+          audioUrl={question.guideAudioUrl}
+          resetKey={`part-intro-${question.questionNumber}`}
+          onComplete={handlePhaseComplete}
+        />
         {qaNavBar}
         {exitConfirmDialog}
       </div>
