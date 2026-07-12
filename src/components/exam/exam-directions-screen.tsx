@@ -9,16 +9,24 @@ const MIN_FALLBACK_MS = 3000;
 export function ExamDirectionsScreen({
   partNumber,
   onComplete,
+  enabled = true,
 }: {
   partNumber: number;
   onComplete: () => void;
+  enabled?: boolean;
 }) {
   const directions = getExamPartDirections(partNumber);
 
   const wordCount = directions?.lines.join(" ").split(/\s+/).length ?? 0;
   const fallbackDurationMs = Math.max(MIN_FALLBACK_MS, (wordCount / WORDS_PER_SEC) * 1000);
 
-  useAudioCue(directions?.audioUrl, fallbackDurationMs, onComplete, `directions-${partNumber}`);
+  useAudioCue(
+    directions?.audioUrl,
+    fallbackDurationMs,
+    onComplete,
+    `directions-${partNumber}`,
+    enabled,
+  );
 
   if (!directions) return null;
 

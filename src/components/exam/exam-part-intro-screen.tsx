@@ -10,16 +10,18 @@ export function ExamPartIntroScreen({
   audioUrl,
   resetKey,
   onComplete,
+  enabled = true,
 }: {
   text: string;
   audioUrl: string | undefined;
   resetKey: string;
   onComplete: () => void;
+  enabled?: boolean;
 }) {
   const wordCount = text.split(/\s+/).length;
   const fallbackDurationMs = Math.max(MIN_FALLBACK_MS, (wordCount / WORDS_PER_SEC) * 1000);
 
-  useAudioCue(audioUrl, fallbackDurationMs, onComplete, resetKey);
+  useAudioCue(audioUrl, fallbackDurationMs, onComplete, resetKey, enabled);
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-8 bg-orange-50/60 px-8 text-center">

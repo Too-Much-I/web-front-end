@@ -312,7 +312,11 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     return (
       <div className="flex flex-1 flex-col bg-white">
         <ExamHeader label={`Part ${question.partNumber}`} />
-        <ExamDirectionsScreen partNumber={question.partNumber} onComplete={handlePhaseComplete} />
+        <ExamDirectionsScreen
+          partNumber={question.partNumber}
+          onComplete={handlePhaseComplete}
+          enabled={!showExitConfirm}
+        />
         {qaNavBar}
         {exitConfirmDialog}
       </div>
@@ -328,6 +332,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
           audioUrl={question.guideAudioUrl}
           resetKey={`part-intro-${question.questionNumber}`}
           onComplete={handlePhaseComplete}
+          enabled={!showExitConfirm}
         />
         {qaNavBar}
         {exitConfirmDialog}
