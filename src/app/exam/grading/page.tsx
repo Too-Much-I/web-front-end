@@ -16,7 +16,7 @@ function ExamGradingContent() {
       {examId ? (
         <GradingWaitScreen examId={examId} />
       ) : (
-        <p className="flex flex-1 items-center justify-center text-sm text-zinc-500">
+        <p className="flex flex-1 items-center justify-center text-sm text-zinc-500 lg:text-base">
           잘못된 접근이에요. examId가 없어요.
         </p>
       )}

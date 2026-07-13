@@ -37,17 +37,19 @@ function ExamResultContent() {
     <div className="flex flex-1 flex-col bg-white">
       <ExamHeader label="채점 결과" />
       {!examId && (
-        <p className="flex flex-1 items-center justify-center text-sm text-zinc-500">
+        <p className="flex flex-1 items-center justify-center text-sm text-zinc-500 lg:text-base">
           잘못된 접근이에요. examId가 없어요.
         </p>
       )}
       {isLoading && (
-        <p className="flex flex-1 items-center justify-center text-sm text-zinc-500">
+        <p className="flex flex-1 items-center justify-center text-sm text-zinc-500 lg:text-base">
           불러오는 중이에요...
         </p>
       )}
       {error && (
-        <p className="flex flex-1 items-center justify-center text-sm text-red-500">{error}</p>
+        <p className="flex flex-1 items-center justify-center text-sm text-red-500 lg:text-base">
+          {error}
+        </p>
       )}
       {result && <ExamResultScreen result={result} />}
     </div>

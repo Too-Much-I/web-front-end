@@ -82,13 +82,13 @@ export function GradingWaitScreen({
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-[#ffe0b2] px-6 py-10 text-center">
-      <div className="relative w-full max-w-4xl rounded-3xl bg-white p-6 shadow-md sm:p-8">
-        <span className="w-fit rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600 sm:text-sm">
+      <div className="relative w-full max-w-4xl rounded-3xl bg-white p-6 shadow-md sm:p-8 lg:max-w-5xl lg:p-10">
+        <span className="w-fit rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600 sm:text-sm lg:text-base">
           토익 스피킹 꿀팁
         </span>
         <p
           key={tipIndex}
-          className="animate-in fade-in mt-3 text-base leading-relaxed font-medium text-blue-950 duration-500 sm:text-lg"
+          className="animate-in fade-in mt-3 text-base leading-relaxed font-medium text-blue-950 duration-500 sm:text-lg lg:text-xl"
         >
           {SPEAKING_TIPS[tipIndex]}
         </p>
@@ -99,18 +99,18 @@ export function GradingWaitScreen({
         />
       </div>
 
-      <div className="mt-10 grid w-full max-w-4xl grid-cols-2 items-end justify-items-center gap-x-4 gap-y-8 sm:grid-cols-4 sm:gap-x-8 md:gap-x-14">
+      <div className="mt-10 grid w-full max-w-4xl grid-cols-2 items-end justify-items-center gap-x-4 gap-y-8 sm:grid-cols-4 sm:gap-x-8 md:gap-x-14 lg:max-w-5xl lg:gap-x-20">
         {MASCOTS.map((mascot, i) => (
           <div
             key={mascot.src}
-            className="relative aspect-square w-full max-w-[160px] animate-bounce sm:max-w-[220px] md:max-w-[288px]"
+            className="relative aspect-square w-full max-w-[160px] animate-bounce sm:max-w-[220px] md:max-w-[288px] lg:max-w-[320px]"
             style={{ animationDuration: "2.4s", animationDelay: `${i * 0.2}s` }}
           >
             <Image
               src={mascot.src}
               alt={mascot.alt}
               fill
-              sizes="(min-width: 768px) 288px, (min-width: 640px) 220px, 45vw"
+              sizes="(min-width: 1024px) 320px, (min-width: 768px) 288px, (min-width: 640px) 220px, 45vw"
               className="object-contain"
               priority={i === 0}
             />
@@ -118,31 +118,31 @@ export function GradingWaitScreen({
         ))}
       </div>
 
-      <div className="mt-10 w-full max-w-md">
-        <div className="relative h-2 w-full rounded-full bg-orange-100">
+      <div className="mt-10 w-full max-w-md lg:max-w-lg">
+        <div className="relative h-2 w-full rounded-full bg-orange-100 lg:h-2.5">
           <div
             className="h-full rounded-full bg-orange-500 transition-[width] duration-500"
             style={{ width: `${clampedProgress}%` }}
           />
           <div
-            className="absolute top-1/2 size-4 -translate-y-1/2 rounded-full border-2 border-orange-500 bg-white shadow transition-[left] duration-500"
+            className="absolute top-1/2 size-4 -translate-y-1/2 rounded-full border-2 border-orange-500 bg-white shadow transition-[left] duration-500 lg:size-5"
             style={{ left: `calc(${clampedProgress}% - 8px)` }}
           />
         </div>
       </div>
 
       {failed ? (
-        <p className="mt-4 text-sm font-semibold text-red-500" aria-live="assertive">
+        <p className="mt-4 text-sm font-semibold text-red-500 lg:text-base" aria-live="assertive">
           채점 중 문제가 발생했어요. 잠시 후 다시 시도해 주세요.
         </p>
       ) : (
         <>
-          <p className="mt-4 text-sm text-zinc-500">
+          <p className="mt-4 text-sm text-zinc-500 lg:text-base">
             예상 대기 시간:{" "}
             <span className="font-semibold text-orange-600">{estimatedWaitLabel}</span>
           </p>
 
-          <p className="mt-6 text-xs text-zinc-400" aria-live="polite">
+          <p className="mt-6 text-xs text-zinc-400 lg:text-sm" aria-live="polite">
             {STATUS_MESSAGES[messageIndex]}
           </p>
         </>

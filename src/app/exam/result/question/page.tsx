@@ -39,17 +39,19 @@ function ExamQuestionFeedbackContent() {
     <div className="flex flex-1 flex-col bg-white">
       <ExamHeader label="문제별 피드백" />
       {!hasValidParams && (
-        <p className="flex flex-1 items-center justify-center text-sm text-zinc-500">
+        <p className="flex flex-1 items-center justify-center text-sm text-zinc-500 lg:text-base">
           잘못된 접근이에요. examId 또는 questionNumber가 없어요.
         </p>
       )}
       {isLoading && (
-        <p className="flex flex-1 items-center justify-center text-sm text-zinc-500">
+        <p className="flex flex-1 items-center justify-center text-sm text-zinc-500 lg:text-base">
           불러오는 중이에요...
         </p>
       )}
       {error && (
-        <p className="flex flex-1 items-center justify-center text-sm text-red-500">{error}</p>
+        <p className="flex flex-1 items-center justify-center text-sm text-red-500 lg:text-base">
+          {error}
+        </p>
       )}
       {detail && <ExamQuestionFeedbackScreen examId={examId} detail={detail} />}
     </div>

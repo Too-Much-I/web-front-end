@@ -93,20 +93,22 @@ function ScoreCircleStat({ label, ratio }: { label: string; ratio: number }) {
     <div className="flex flex-col items-center gap-2">
       <div className="relative flex items-center justify-center">
         <ScoreRing percent={percent} size={104} strokeWidth={10} />
-        <span className="absolute text-lg font-bold text-orange-600">
+        <span className="absolute text-lg font-bold text-orange-600 lg:text-xl">
           {Math.round(percent)}%
         </span>
       </div>
-      <span className="text-xs font-semibold text-zinc-500">{label}</span>
+      <span className="text-xs font-semibold text-zinc-500 lg:text-sm">{label}</span>
     </div>
   );
 }
 
 function DetailBlock({ title, body }: { title: string; body: string }) {
   return (
-    <div className="rounded-2xl bg-sky-50 p-4 ring-1 ring-sky-100">
-      <p className="text-xs font-bold text-sky-700">{title}</p>
-      <p className="mt-1.5 text-sm leading-relaxed text-sky-900">{body}</p>
+    <div className="rounded-2xl bg-sky-50 p-4 ring-1 ring-sky-100 lg:p-5">
+      <p className="text-xs font-bold text-sky-700 lg:text-sm">{title}</p>
+      <p className="mt-1.5 text-sm leading-relaxed text-sky-900 lg:text-base">
+        {body}
+      </p>
     </div>
   );
 }
@@ -137,10 +139,10 @@ export function ExamQuestionFeedbackScreen({
   const subRingsRevealed = useRevealOnScroll(subRingsRef);
 
   return (
-    <section className="mx-auto w-full max-w-3xl px-6 py-10">
+    <section className="mx-auto w-full max-w-3xl px-6 py-10 lg:max-w-4xl xl:max-w-5xl">
       <Link
         href={`/exam/result?examId=${examId}`}
-        className="group inline-flex items-center gap-1.5 text-sm font-semibold text-zinc-500 hover:text-zinc-700"
+        className="group inline-flex items-center gap-1.5 text-sm font-semibold text-zinc-500 hover:text-zinc-700 lg:text-base"
       >
         <span className="flex size-6 items-center justify-center rounded-full bg-zinc-100 transition-transform duration-200 group-hover:-translate-x-0.5">
           <ArrowLeft className="size-3.5" aria-hidden />
@@ -161,7 +163,7 @@ export function ExamQuestionFeedbackScreen({
                 alt="BETA"
                 width={72}
                 height={72}
-                className="drop-shadow-sm"
+                className="drop-shadow-sm lg:h-20 lg:w-20"
               />
             </TooltipTrigger>
             <TooltipContent side="right" align="start">
@@ -171,15 +173,15 @@ export function ExamQuestionFeedbackScreen({
           </Tooltip>
 
           <div>
-            <p className="text-sm font-semibold tracking-wide text-orange-600">
+            <p className="text-sm font-semibold tracking-wide text-orange-600 lg:text-base">
               Part {detail.partNumber} · {partMeta.titleKo}
             </p>
-            <h1 className="mt-1 text-2xl font-bold text-blue-950 sm:text-3xl">
+            <h1 className="mt-1 text-2xl font-bold text-blue-950 sm:text-3xl lg:text-4xl">
               문제 {detail.questionNumber}번 피드백
             </h1>
           </div>
         </div>
-        <span className="rounded-full bg-blue-950 px-4 py-1.5 text-sm font-semibold text-white">
+        <span className="rounded-full bg-blue-950 px-4 py-1.5 text-sm font-semibold text-white lg:text-base">
           {detail.feedback.level}
         </span>
       </div>
@@ -195,9 +197,9 @@ export function ExamQuestionFeedbackScreen({
           />
         </div>
 
-        <div className="relative rounded-3xl border-[10px] border-amber-900 bg-emerald-950 py-6 pr-6 pl-32 shadow-xl sm:pl-36">
+        <div className="relative rounded-3xl border-[10px] border-amber-900 bg-emerald-950 py-6 pr-6 pl-32 shadow-xl sm:pl-36 lg:p-10 lg:pl-40">
           <div className="absolute -top-5 left-4 z-20 -rotate-3 rounded-lg bg-amber-400 px-4 py-2 shadow-md">
-            <span className={`${gaegu.className} text-lg text-emerald-950`}>
+            <span className={`${gaegu.className} text-lg text-emerald-950 lg:text-xl`}>
               이 문제 점수
             </span>
           </div>
@@ -211,10 +213,10 @@ export function ExamQuestionFeedbackScreen({
                 progressClassName="stroke-amber-300"
               />
               <div className="absolute flex flex-col items-center">
-                <span className={`${gaegu.className} text-4xl text-amber-50`}>
+                <span className={`${gaegu.className} text-4xl text-amber-50 lg:text-5xl`}>
                   {detail.score}
                 </span>
-                <span className={`${gaegu.className} text-sm text-white/60`}>
+                <span className={`${gaegu.className} text-sm text-white/60 lg:text-base`}>
                   / {detail.maxScore}
                 </span>
               </div>
@@ -223,7 +225,7 @@ export function ExamQuestionFeedbackScreen({
 
           <TypedText
             text={detail.feedback.summary}
-            className={`${gaegu.className} mt-6 text-center text-base leading-relaxed text-white/90`}
+            className={`${gaegu.className} mt-6 text-center text-base leading-relaxed text-white/90 lg:text-lg`}
           />
         </div>
       </div>
@@ -236,8 +238,10 @@ export function ExamQuestionFeedbackScreen({
       )}
 
       {detail.audioUrl && (
-        <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
-          <span className="text-sm font-bold text-blue-950">내 답변 음성</span>
+        <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
+          <span className="text-sm font-bold text-blue-950 lg:text-base">
+            내 답변 음성
+          </span>
           <div className="mt-3">
             <AnswerAudioPlayer
               audioUrl={detail.audioUrl}
@@ -257,9 +261,11 @@ export function ExamQuestionFeedbackScreen({
           spokenWordSequence={detail.spokenWordSequence}
         />
       ) : (
-        <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
-          <span className="text-sm font-bold text-blue-950">답변 스크립트</span>
-          <p className="mt-3 rounded-2xl bg-zinc-50 p-4 text-sm leading-relaxed whitespace-pre-line text-zinc-700 ring-1 ring-zinc-100">
+        <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
+          <span className="text-sm font-bold text-blue-950 lg:text-base">
+            답변 스크립트
+          </span>
+          <p className="mt-3 rounded-2xl bg-zinc-50 p-4 text-sm leading-relaxed whitespace-pre-line text-zinc-700 ring-1 ring-zinc-100 lg:text-base">
             {detail.transcript}
           </p>
         </div>
@@ -267,7 +273,7 @@ export function ExamQuestionFeedbackScreen({
 
       <div
         ref={subRingsRef}
-        className="mt-6 grid grid-cols-2 gap-5 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100"
+        className="mt-6 grid grid-cols-2 gap-5 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8"
       >
         <ScoreCircleStat
           label="발음 & 유창성"
@@ -288,7 +294,7 @@ export function ExamQuestionFeedbackScreen({
                 className="object-contain"
               />
             </div>
-            <span className="text-xs font-semibold text-zinc-400">
+            <span className="text-xs font-semibold text-zinc-400 lg:text-sm">
               이 파트는 내용 적합성을
               <br />
               채점하지 않아요
@@ -307,10 +313,10 @@ export function ExamQuestionFeedbackScreen({
         )}
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="relative rounded-3xl bg-white p-6">
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
+        <div className="relative rounded-3xl bg-white p-6 lg:p-8">
           <SketchyDashBorder />
-          <span className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-950">
+          <span className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-950 lg:text-base">
             <ThumbsUp className="size-4 text-orange-500" aria-hidden />
             강점
           </span>
@@ -318,7 +324,7 @@ export function ExamQuestionFeedbackScreen({
             {detail.feedback.strengths.map((item, i) => (
               <li
                 key={i}
-                className="rounded-xl bg-zinc-50 p-3 text-sm leading-relaxed text-zinc-700 ring-1 ring-zinc-100"
+                className="rounded-xl bg-zinc-50 p-3 text-sm leading-relaxed text-zinc-700 ring-1 ring-zinc-100 lg:text-base"
               >
                 {item}
               </li>
@@ -326,9 +332,9 @@ export function ExamQuestionFeedbackScreen({
           </ul>
         </div>
 
-        <div className="relative rounded-3xl bg-white p-6">
+        <div className="relative rounded-3xl bg-white p-6 lg:p-8">
           <SketchyDashBorder />
-          <span className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-950">
+          <span className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-950 lg:text-base">
             <TriangleAlert className="size-4 text-orange-500" aria-hidden />
             보완 필요
           </span>
@@ -336,7 +342,7 @@ export function ExamQuestionFeedbackScreen({
             {detail.feedback.weaknesses.map((item, i) => (
               <li
                 key={i}
-                className="rounded-xl bg-zinc-50 p-3 text-sm leading-relaxed text-zinc-700 ring-1 ring-zinc-100"
+                className="rounded-xl bg-zinc-50 p-3 text-sm leading-relaxed text-zinc-700 ring-1 ring-zinc-100 lg:text-base"
               >
                 {item}
               </li>
@@ -345,8 +351,10 @@ export function ExamQuestionFeedbackScreen({
         </div>
       </div>
 
-      <div className="mt-6 flex flex-col gap-4 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
-        <span className="text-sm font-bold text-blue-950">세부 피드백</span>
+      <div className="mt-6 flex flex-col gap-4 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
+        <span className="text-sm font-bold text-blue-950 lg:text-base">
+          세부 피드백
+        </span>
         <DetailBlock title="발음" body={detail.feedback.pronunciation} />
         <DetailBlock title="유창성" body={detail.feedback.fluency} />
         <DetailBlock title="내용" body={detail.feedback.content} />
@@ -356,13 +364,15 @@ export function ExamQuestionFeedbackScreen({
         />
       </div>
 
-      <div className="mt-6 rounded-3xl bg-orange-50 p-6 ring-1 ring-orange-100">
-        <span className="text-sm font-bold text-blue-950">실천 과제</span>
+      <div className="mt-6 rounded-3xl bg-orange-50 p-6 ring-1 ring-orange-100 lg:p-8">
+        <span className="text-sm font-bold text-blue-950 lg:text-base">
+          실천 과제
+        </span>
         <ol className="mt-4 flex flex-col gap-3">
           {detail.feedback.actionItems.map((item, i) => (
             <li
               key={i}
-              className="flex gap-3 rounded-2xl bg-white p-4 text-sm leading-relaxed text-zinc-700 shadow-sm"
+              className="flex gap-3 rounded-2xl bg-white p-4 text-sm leading-relaxed text-zinc-700 shadow-sm lg:text-base"
             >
               <span className="shrink-0 font-bold text-orange-600">
                 {i + 1}

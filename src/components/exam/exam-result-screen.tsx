@@ -55,7 +55,7 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
 
   return (
     <>
-      <section className="mx-auto w-full max-w-5xl px-6 py-10">
+      <section className="mx-auto w-full max-w-5xl px-6 py-10 xl:max-w-6xl">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex items-center gap-5">
             <Tooltip open={isBetaTooltipOpen} onOpenChange={setIsBetaTooltipOpen}>
@@ -69,7 +69,7 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
                   alt="BETA"
                   width={88}
                   height={88}
-                  className="drop-shadow-sm"
+                  className="drop-shadow-sm lg:h-24 lg:w-24"
                 />
               </TooltipTrigger>
               <TooltipContent side="right" align="start">
@@ -79,10 +79,10 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
             </Tooltip>
 
             <div>
-              <p className="text-sm font-semibold tracking-wide text-orange-600">
+              <p className="text-sm font-semibold tracking-wide text-orange-600 lg:text-base">
                 SESSION ANALYSIS
               </p>
-              <h1 className="mt-1 text-2xl font-bold text-blue-950 sm:text-3xl">
+              <h1 className="mt-1 text-2xl font-bold text-blue-950 sm:text-3xl lg:text-4xl">
                 채점 결과 리포트
               </h1>
             </div>
@@ -94,40 +94,40 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
         </div>
 
         <div className="relative mt-8">
-          <div className="absolute bottom-0 left-0 z-10 h-40 w-40 -scale-x-100 sm:-left-4 sm:h-48 sm:w-48">
+          <div className="absolute bottom-0 left-0 z-10 h-40 w-40 -scale-x-100 sm:-left-4 sm:h-48 sm:w-48 lg:h-56 lg:w-56">
             <Image
               src={mascot.src}
               alt={mascot.alt}
               fill
-              sizes="192px"
+              sizes="(min-width: 1024px) 224px, 192px"
               className="object-contain drop-shadow-lg"
             />
           </div>
 
-          <div className="rounded-3xl border-[10px] border-amber-900 bg-emerald-950 py-6 pr-6 pl-32 shadow-xl sm:pl-36">
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+          <div className="rounded-3xl border-[10px] border-amber-900 bg-emerald-950 py-6 pr-6 pl-32 shadow-xl sm:pl-36 lg:p-10 lg:pl-40">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-12">
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-amber-300">★</span>
-                  <span className={`${gaegu.className} text-xl text-amber-100`}>
+                  <span className={`${gaegu.className} text-xl text-amber-100 lg:text-2xl`}>
                     예상 총점
                   </span>
                 </div>
 
                 <p
-                  className={`${gaegu.className} mt-4 text-5xl text-amber-50 sm:text-6xl`}
+                  className={`${gaegu.className} mt-4 text-5xl text-amber-50 sm:text-6xl lg:text-7xl`}
                 >
                   {result.totalScore}
-                  <span className="text-2xl text-white/50">
+                  <span className="text-2xl text-white/50 lg:text-3xl">
                     {" "}
                     / {result.maxScore}
                   </span>
                 </p>
-                <p className={`${gaegu.className} mt-2 text-base text-amber-200`}>
+                <p className={`${gaegu.className} mt-2 text-base text-amber-200 lg:text-lg`}>
                   {result.levelEstimate}
                 </p>
 
-                <div className="mt-6 h-2 w-full rounded-full bg-white/15">
+                <div className="mt-6 h-2 w-full rounded-full bg-white/15 lg:h-2.5">
                   <div
                     className="h-full rounded-full bg-amber-300 transition-[width] duration-500"
                     style={{ width: `${scorePercent}%` }}
@@ -136,14 +136,14 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
 
                 <TypedText
                   text={result.summary}
-                  className={`${gaegu.className} mt-6 text-base leading-relaxed text-white/90`}
+                  className={`${gaegu.className} mt-6 text-base leading-relaxed text-white/90 lg:text-lg`}
                 />
               </div>
 
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-amber-300">★</span>
-                  <span className={`${gaegu.className} text-xl text-amber-100`}>
+                  <span className={`${gaegu.className} text-xl text-amber-100 lg:text-2xl`}>
                     파트별 세부 점수
                   </span>
                 </div>
@@ -156,10 +156,10 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="relative rounded-3xl bg-white p-6">
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
+          <div className="relative rounded-3xl bg-white p-6 lg:p-8">
             <SketchyDashBorder />
-            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-950">
+            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-950 lg:text-base">
               <ThumbsUp className="size-4 text-orange-500" aria-hidden />
               강점
             </span>
@@ -167,7 +167,7 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
               {result.strengths.map((item, i) => (
                 <li
                   key={i}
-                  className="rounded-xl bg-zinc-50 p-3 text-sm leading-relaxed text-zinc-700 ring-1 ring-zinc-100"
+                  className="rounded-xl bg-zinc-50 p-3 text-sm leading-relaxed text-zinc-700 ring-1 ring-zinc-100 lg:text-base"
                 >
                   {item}
                 </li>
@@ -175,9 +175,9 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
             </ul>
           </div>
 
-          <div className="relative rounded-3xl bg-white p-6">
+          <div className="relative rounded-3xl bg-white p-6 lg:p-8">
             <SketchyDashBorder />
-            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-950">
+            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-950 lg:text-base">
               <TriangleAlert className="size-4 text-orange-500" aria-hidden />
               보완 필요
             </span>
@@ -185,7 +185,7 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
               {result.weaknesses.map((item, i) => (
                 <li
                   key={i}
-                  className="rounded-xl bg-zinc-50 p-3 text-sm leading-relaxed text-zinc-700 ring-1 ring-zinc-100"
+                  className="rounded-xl bg-zinc-50 p-3 text-sm leading-relaxed text-zinc-700 ring-1 ring-zinc-100 lg:text-base"
                 >
                   {item}
                 </li>
@@ -194,18 +194,18 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
           </div>
         </div>
 
-        <div className="relative mt-6 rounded-3xl bg-white p-6">
+        <div className="relative mt-6 rounded-3xl bg-white p-6 lg:p-8">
           <SketchyDashBorder />
-          <span className="text-sm font-bold text-blue-950">종합 피드백</span>
-          <p className="mt-3 text-sm leading-relaxed text-zinc-700">
+          <span className="text-sm font-bold text-blue-950 lg:text-base">종합 피드백</span>
+          <p className="mt-3 text-sm leading-relaxed text-zinc-700 lg:text-base">
             {result.overallFeedback}
           </p>
         </div>
       </section>
 
       <section className="px-6 py-10">
-        <div className="mx-auto w-full max-w-5xl rounded-[2rem] bg-gradient-to-br from-orange-500 to-orange-300 p-6 shadow-[0_20px_45px_-20px_rgba(249,115,22,0.45)] sm:p-10">
-          <h2 className="text-center text-2xl font-extrabold text-white sm:text-3xl">
+        <div className="mx-auto w-full max-w-5xl rounded-[2rem] bg-gradient-to-br from-orange-500 to-orange-300 p-6 shadow-[0_20px_45px_-20px_rgba(249,115,22,0.45)] sm:p-10 xl:max-w-6xl xl:p-12">
+          <h2 className="text-center text-2xl font-extrabold text-white sm:text-3xl lg:text-4xl">
             파트별 피드백
           </h2>
 
@@ -215,35 +215,35 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
               return (
                 <div key={part.partNumber} className="relative pt-5">
                   <div className="absolute top-0 left-0 z-10 rounded-t-xl bg-white px-4 py-1.5">
-                    <span className="text-base font-extrabold text-orange-600">
+                    <span className="text-base font-extrabold text-orange-600 lg:text-lg">
                       Part {part.partNumber}
                     </span>
                   </div>
 
-                  <div className="absolute -top-6 right-4 z-10 h-20 w-20 sm:right-8">
+                  <div className="absolute -top-6 right-4 z-10 h-20 w-20 sm:right-8 lg:h-24 lg:w-24">
                     <Image
                       src={mascot.src}
                       alt={mascot.alt}
                       fill
-                      sizes="80px"
+                      sizes="(min-width: 1024px) 96px, 80px"
                       className="object-contain drop-shadow-sm"
                     />
                   </div>
 
-                  <div className="rounded-2xl rounded-tl-none bg-white p-5 text-left shadow-sm">
-                    <p className="rounded-xl bg-sky-50 p-3 text-sm leading-relaxed text-sky-900 ring-1 ring-sky-100">
+                  <div className="rounded-2xl rounded-tl-none bg-white p-5 text-left shadow-sm lg:p-7">
+                    <p className="rounded-xl bg-sky-50 p-3 text-sm leading-relaxed text-sky-900 ring-1 ring-sky-100 lg:text-base">
                       {part.feedback}
                     </p>
 
                     <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-semibold text-sky-700">
+                      <span className="text-xs font-semibold text-sky-700 lg:text-sm">
                         문제별 피드백 보기
                       </span>
                       {getExamPartQuestionNumbers(part.partNumber).map((questionNumber) => (
                         <Link
                           key={questionNumber}
                           href={`/exam/result/question?examId=${result.examId}&questionNumber=${questionNumber}`}
-                          className="group inline-flex items-center gap-1.5 rounded-full bg-sky-500 py-1.5 pr-1.5 pl-4 text-sm font-semibold text-white transition-colors hover:bg-sky-600"
+                          className="group inline-flex items-center gap-1.5 rounded-full bg-sky-500 py-1.5 pr-1.5 pl-4 text-sm font-semibold text-white transition-colors hover:bg-sky-600 lg:text-base"
                         >
                           Q{questionNumber}
                           <span className="flex size-5 items-center justify-center rounded-full bg-white/25 transition-transform duration-200 group-hover:translate-x-0.5">
@@ -260,13 +260,13 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-5xl px-6 py-10">
-        <h2 className="text-lg font-bold text-blue-950">추천 학습법</h2>
+      <section className="mx-auto w-full max-w-5xl px-6 py-10 xl:max-w-6xl">
+        <h2 className="text-lg font-bold text-blue-950 lg:text-xl">추천 학습법</h2>
         <ol className="mt-4 flex flex-col gap-3">
           {result.recommendedPractice.map((item, i) => (
             <li
               key={i}
-              className="flex gap-3 rounded-2xl bg-orange-50 p-4 text-sm leading-relaxed text-zinc-700"
+              className="flex gap-3 rounded-2xl bg-orange-50 p-4 text-sm leading-relaxed text-zinc-700 lg:text-base"
             >
               <span className="shrink-0 font-bold text-orange-600">
                 {i + 1}
