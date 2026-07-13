@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { ExamDirectionsScreen } from "@/components/exam/exam-directions-screen";
 import { ExamExitConfirmPopup } from "@/components/exam/exam-exit-confirm-popup";
@@ -233,7 +234,10 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
           session.examId,
           String(currentQuestion.questionNumber),
           audioBlob
-        ).catch(console.error);
+        ).catch((err) => {
+          console.error(err);
+          toast.error("답변 업로드에 실패했어요. 네트워크 환경을 확인해주세요.");
+        });
       });
     };
   }, [phase, question, session.examId, startRecording, stopRecording]); // 의존성 배열 유지

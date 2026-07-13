@@ -19,16 +19,27 @@ async function getAnswerUploadUrl(
   return result;
 }
 
+/** 한 번의 PUT 시도가 무한 대기하지 않도록 거는 타임아웃(ms). */
+const PUT_TIMEOUT_MS = 15_000;
+
 /** 발급받은 presigned URL로 녹음 파일을 S3에 직접 업로드한다. */
 async function putAnswerAudioToS3(uploadUrl: string, audioBlob: Blob): Promise<void> {
-  const res = await fetch(uploadUrl, {
-    method: "PUT",
-    headers: { "Content-Type": audioBlob.type || "audio/wav" },
-    body: audioBlob,
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), PUT_TIMEOUT_MS);
 
-  if (!res.ok) {
-    throw new Error(`S3 업로드에 실패했습니다. (status: ${res.status})`);
+  try {
+    const res = await fetch(uploadUrl, {
+      method: "PUT",
+      headers: { "Content-Type": audioBlob.type || "audio/wav" },
+      body: audioBlob,
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {
+      throw new Error(`S3 업로드에 실패했습니다. (status: ${res.status})`);
+    }
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
@@ -56,16 +67,29 @@ function wait(ms: number): Promise<void> {
 }
 
 /**
- * S3 PUT 업로드를 지수 백오프로 재시도한다. presigned URL은 60초간 유효해서
- * 재시도 합계(~31초) 안에는 만료되지 않으므로, URL은 최초 1회만 발급받아 재사용한다.
+ * S3 PUT 업로드를 지수 백오프로 재시도한다. presigned URL은 재발급받지 않고 재사용하므로,
+ * 서버가 응답한 실제 만료 시각(deadline)을 넘기면 재시도 횟수가 남아있어도 즉시 포기한다
+ * (만료된 URL로는 S3가 어차피 거부하기 때문).
  */
-async function putAnswerAudioToS3WithRetry(uploadUrl: string, audioBlob: Blob): Promise<void> {
+async function putAnswerAudioToS3WithRetry(
+  uploadUrl: string,
+  audioBlob: Blob,
+  deadline: number,
+): Promise<void> {
   for (let attempt = 0; ; attempt++) {
+    if (Date.now() >= deadline) {
+      throw new Error("presigned URL이 만료되어 S3 업로드를 재시도할 수 없습니다.");
+    }
+
     try {
       return await putAnswerAudioToS3(uploadUrl, audioBlob);
     } catch (err) {
       if (attempt >= UPLOAD_RETRY_DELAYS_MS.length) throw err;
-      await wait(UPLOAD_RETRY_DELAYS_MS[attempt]);
+
+      const delay = UPLOAD_RETRY_DELAYS_MS[attempt];
+      if (Date.now() + delay >= deadline) throw err;
+
+      await wait(delay);
     }
   }
 }
@@ -82,7 +106,8 @@ export async function uploadExamAnswer(
   questionId: string,
   audioBlob: Blob,
 ): Promise<ExamAnswerSubmitResult> {
-  const { uploadUrl, fileKey } = await getAnswerUploadUrl(examId, questionId);
-  await putAnswerAudioToS3WithRetry(uploadUrl, audioBlob);
+  const { uploadUrl, fileKey, expiresIn } = await getAnswerUploadUrl(examId, questionId);
+  const deadline = Date.now() + expiresIn * 1000;
+  await putAnswerAudioToS3WithRetry(uploadUrl, audioBlob, deadline);
   return submitAnswerForGrading(examId, questionId, fileKey);
 }
