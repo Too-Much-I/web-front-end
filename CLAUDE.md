@@ -57,6 +57,10 @@ Note: `src/types/report.ts` and `src/features/report/api/use-report.ts` define a
 
 shadcn/ui (`components.json`, style `base-nova`, icon lib `lucide-react`) generates into `src/components/ui`; Tailwind v4 is configured via CSS in `src/app/globals.css` (no `tailwind.config.*`). Brand accents are orange-500/600 with blue-950 for headings — match this when adding new screens rather than introducing new accent colors. Charts use `recharts` directly (see `exam-part-score-radar.tsx`, `phone-demo.tsx`) rather than the shadcn chart wrapper in most places. Toasts via `sonner` (`src/components/ui/sonner.tsx`), mounted once in `Providers`. Server state fetching (where used) goes through a single app-wide `QueryClient` in `src/components/providers.tsx`.
 
+### Responsive design
+
+`globals.css` has no custom `--breakpoint-*` overrides, so Tailwind v4's default breakpoints apply everywhere: `sm=640px`, `md=768px`, `lg=1024px`, `xl=1280px`, `2xl=1536px`. Any screen you build or edit should define its responsive scale across `sm → md → lg → xl` together — not just `sm:` — for both text size (headings/body) and its page-level `max-w-*` wrapper, so wide viewports (large desktop monitors included) don't end up stuck with mobile-tuned sizes. Don't invent a new size scale per page; match the step sizes already used on neighboring screens in the same flow.
+
 ## Opening pull requests
 
 Branches are named `feat/#<issue>` / `fix/#<issue>` / `refactor/#<issue>` (or without the `#`) — the number is the linked GitHub issue. When asked to open/update a PR for the current branch:

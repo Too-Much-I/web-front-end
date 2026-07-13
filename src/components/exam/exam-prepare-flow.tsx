@@ -37,29 +37,39 @@ export function ExamPrepareFlow() {
 
   return (
     <>
-      <div className="grid gap-6 lg:grid-cols-[3fr_2fr] lg:items-start">
-        <section className="flex w-full flex-col gap-5 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-zinc-100">
+      <div className="grid gap-6 lg:grid-cols-[3fr_2fr] lg:items-start xl:gap-8">
+        <section className="flex w-full flex-col gap-5 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-zinc-100 lg:p-8">
           <Badge className="w-fit bg-orange-50 text-orange-600 hover:bg-orange-50">
-            notification 
+            notification
           </Badge>
 
           <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold text-zinc-900">
+            <h1 className="text-2xl font-bold text-zinc-900 lg:text-3xl xl:text-4xl">
               TOEIC® Speaking Mock Exam
             </h1>
-            <p className="text-sm text-zinc-500">토익 스피킹 실전 모의고사</p>
+            <p className="text-sm text-zinc-500 lg:text-base">
+              토익 스피킹 실전 모의고사
+            </p>
           </div>
 
           <Separator />
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <span className="text-xs text-zinc-400">Total Duration</span>
-              <p className="text-lg font-semibold text-zinc-900">약 20분</p>
+              <span className="text-xs text-zinc-400 lg:text-sm">
+                Total Duration
+              </span>
+              <p className="text-lg font-semibold text-zinc-900 lg:text-xl xl:text-2xl">
+                약 20분
+              </p>
             </div>
             <div>
-              <span className="text-xs text-zinc-400">Questions</span>
-              <p className="text-lg font-semibold text-orange-600">11문항</p>
+              <span className="text-xs text-zinc-400 lg:text-sm">
+                Questions
+              </span>
+              <p className="text-lg font-semibold text-orange-600 lg:text-xl xl:text-2xl">
+                11문항
+              </p>
             </div>
           </div>
 
@@ -67,7 +77,7 @@ export function ExamPrepareFlow() {
 
           <div className="flex gap-3 rounded-xl bg-sky-50 p-4">
             <HelpCircle className="mt-0.5 size-5 shrink-0 text-sky-500" />
-            <div className="flex flex-col gap-2 text-sm text-zinc-600">
+            <div className="flex flex-col gap-2 text-sm text-zinc-600 lg:text-base">
               <p className="font-semibold text-zinc-700">
                 시험 전 필수 안내 사항
               </p>
@@ -83,13 +93,13 @@ export function ExamPrepareFlow() {
           </div>
         </section>
 
-        <section className="flex w-full flex-col gap-5 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-zinc-100">
+        <section className="flex w-full flex-col gap-5 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-zinc-100 lg:p-8">
           <TargetGradeSelect />
 
           <Button
             size="lg"
             onClick={() => setDialogStep("consent")}
-            className="mt-auto h-12 w-full rounded-full bg-orange-500 text-white hover:bg-orange-600"
+            className="mt-auto h-12 w-full rounded-full bg-orange-500 text-white hover:bg-orange-600 lg:h-14 lg:text-lg"
           >
             다음 (마이크 테스트)
           </Button>

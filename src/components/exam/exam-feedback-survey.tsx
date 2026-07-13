@@ -107,8 +107,8 @@ export function ExamFeedbackSurvey({
   };
 
   return (
-    <section id="exam-feedback-survey" className="mx-auto w-full max-w-5xl px-6 py-10">
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-200 via-sky-100 to-blue-50 p-6 shadow-md sm:p-8">
+    <section id="exam-feedback-survey" className="mx-auto w-full max-w-5xl px-6 py-10 xl:max-w-6xl">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-200 via-sky-100 to-blue-50 p-6 shadow-md sm:p-8 lg:p-10">
         <div
           aria-hidden
           className="pointer-events-none absolute -top-10 -left-10 h-40 w-40 rounded-full bg-pink-200/70 blur-2xl"
@@ -184,15 +184,15 @@ export function ExamFeedbackSurvey({
         <span className="relative inline-block rounded-full bg-orange-400 px-3 py-1 text-xs font-semibold text-white">
           EVENT
         </span>
-        <h2 className="relative mt-3 text-xl font-bold text-blue-950 sm:text-2xl">
+        <h2 className="relative mt-3 text-xl font-bold text-blue-950 sm:text-2xl lg:text-3xl">
           설문에 참여하고 프리미엄형 모의고사 1회 받기
         </h2>
-        <p className="relative mt-2 text-sm leading-relaxed text-blue-800">
+        <p className="relative mt-2 text-sm leading-relaxed text-blue-800 lg:text-base">
           아래 설문에 답해주시면 프리미엄형 모의고사 1회 응시권을 무료로
           드려요. 만족도만 필수이고 나머지 항목은 선택이에요.
         </p>
 
-        <div className="relative mx-auto mt-2 h-16 w-full max-w-md sm:h-24">
+        <div className="relative mx-auto mt-2 h-16 w-full max-w-md sm:h-24 lg:h-28 lg:max-w-lg">
           <Image
             src={submitted ? "/mascots/smile.png" : "/mascots/please.png"}
             alt={
@@ -207,21 +207,21 @@ export function ExamFeedbackSurvey({
         </div>
 
         {submitted ? (
-          <div className="relative mt-6 rounded-2xl bg-white p-6 text-center text-zinc-700 shadow-lg">
-            <p className="text-base font-semibold text-blue-950">
+          <div className="relative mt-6 rounded-2xl bg-white p-6 text-center text-zinc-700 shadow-lg lg:p-8">
+            <p className="text-base font-semibold text-blue-950 lg:text-lg">
               소중한 의견 감사해요!
             </p>
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-sm text-zinc-500 lg:text-base">
               프리미엄형 모의고사 1회 응시권을 곧 보내드릴게요.
             </p>
           </div>
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="relative mt-6 flex flex-col gap-5 rounded-2xl bg-white p-5 text-zinc-900 shadow-lg sm:p-6"
+            className="relative mt-6 flex flex-col gap-5 rounded-2xl bg-white p-5 text-zinc-900 shadow-lg sm:p-6 lg:p-8"
           >
             <div className="flex flex-col gap-1.5">
-              <span className="text-sm font-semibold text-blue-950">
+              <span className="text-sm font-semibold text-blue-950 lg:text-base">
                 만족도 <span className="font-normal text-orange-500">(필수)</span>
               </span>
               <SatisfactionStars
@@ -233,7 +233,7 @@ export function ExamFeedbackSurvey({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <span className="text-sm font-semibold text-blue-950">
+              <span className="text-sm font-semibold text-blue-950 lg:text-base">
                 이전에 실제로 응시했던 토익스피킹 등급{" "}
                 <span className="font-normal text-zinc-400">(선택)</span>
               </span>
@@ -254,7 +254,7 @@ export function ExamFeedbackSurvey({
                       )
                     }
                     className={cn(
-                      "rounded-full px-3.5 py-1.5 text-sm font-semibold ring-1 transition-colors",
+                      "rounded-full px-3.5 py-1.5 text-sm font-semibold ring-1 transition-colors lg:px-4 lg:py-2 lg:text-base",
                       previousGradeId === option.id
                         ? "bg-orange-50 text-orange-600 ring-orange-300"
                         : "text-zinc-600 ring-zinc-200 hover:bg-zinc-50",
@@ -264,7 +264,7 @@ export function ExamFeedbackSurvey({
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-zinc-400">
+              <p className="text-xs text-zinc-400 lg:text-sm">
                 토익 스피킹을 이미 응시해 본 적이 있다면 실제로 받았던 등급을
                 선택해 주세요. 응시한 적이 없다면 &apos;안 봄&apos;을
                 선택해 주세요.
@@ -272,7 +272,7 @@ export function ExamFeedbackSurvey({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <span className="text-sm font-semibold text-blue-950">
+              <span className="text-sm font-semibold text-blue-950 lg:text-base">
                 이 모의고사에 지불할 의향이 있는 금액{" "}
                 <span className="font-normal text-zinc-400">(선택)</span>
               </span>
@@ -287,7 +287,7 @@ export function ExamFeedbackSurvey({
                       setPriceId((prev) => (prev === option.id ? null : option.id))
                     }
                     className={cn(
-                      "rounded-full px-3.5 py-1.5 text-sm font-semibold ring-1 transition-colors",
+                      "rounded-full px-3.5 py-1.5 text-sm font-semibold ring-1 transition-colors lg:px-4 lg:py-2 lg:text-base",
                       priceId === option.id
                         ? "bg-orange-50 text-orange-600 ring-orange-300"
                         : "text-zinc-600 ring-zinc-200 hover:bg-zinc-50",
@@ -300,7 +300,7 @@ export function ExamFeedbackSurvey({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="survey-opinion" className="text-sm font-semibold text-blue-950">
+              <label htmlFor="survey-opinion" className="text-sm font-semibold text-blue-950 lg:text-base">
                 의견 <span className="font-normal text-zinc-400">(선택)</span>
               </label>
               <textarea
@@ -309,14 +309,14 @@ export function ExamFeedbackSurvey({
                 onChange={(e) => setOpinion(e.target.value)}
                 rows={3}
                 placeholder="개선했으면 하는 점이나 느낀 점을 자유롭게 남겨주세요"
-                className="resize-none rounded-xl px-3 py-2 text-sm text-zinc-900 ring-1 ring-zinc-200 placeholder:text-zinc-400 focus:ring-2 focus:ring-orange-300 focus:outline-none"
+                className="resize-none rounded-xl px-3 py-2 text-sm text-zinc-900 ring-1 ring-zinc-200 placeholder:text-zinc-400 focus:ring-2 focus:ring-orange-300 focus:outline-none lg:px-4 lg:py-2.5 lg:text-base"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="survey-contact" className="text-sm font-semibold text-blue-950">
+              <label htmlFor="survey-contact" className="text-sm font-semibold text-blue-950 lg:text-base">
                 전화번호 또는 이메일{" "}
-                <span className="font-normal text-zinc-400">(선택)</span>
+                <span className="font-normal text-zinc-400">(응시권 수령 시 필수)</span>
               </label>
               <input
                 id="survey-contact"
@@ -324,9 +324,9 @@ export function ExamFeedbackSurvey({
                 value={contact}
                 onChange={(e) => setContact(e.target.value)}
                 placeholder="010-0000-0000 또는 example@email.com"
-                className="rounded-xl px-3 py-2 text-sm text-zinc-900 ring-1 ring-zinc-200 placeholder:text-zinc-400 focus:ring-2 focus:ring-orange-300 focus:outline-none"
+                className="rounded-xl px-3 py-2 text-sm text-zinc-900 ring-1 ring-zinc-200 placeholder:text-zinc-400 focus:ring-2 focus:ring-orange-300 focus:outline-none lg:px-4 lg:py-2.5 lg:text-base"
               />
-              <p className="text-xs font-semibold text-orange-500">
+              <p className="text-xs font-semibold text-orange-500 lg:text-sm">
                 남기지 않으면 응시권을 보내드릴 수 없으니 꼭 남겨주세요!
               </p>
             </div>
@@ -334,7 +334,7 @@ export function ExamFeedbackSurvey({
             <button
               type="submit"
               disabled={satisfaction === null || submitting}
-              className="mt-1 rounded-full bg-orange-400 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-orange-500 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400 disabled:hover:bg-zinc-200"
+              className="mt-1 rounded-full bg-orange-400 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-orange-500 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400 disabled:hover:bg-zinc-200 lg:py-3 lg:text-base"
             >
               {submitting ? "제출 중..." : "설문 제출하고 응시권 받기"}
             </button>
