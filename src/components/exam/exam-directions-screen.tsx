@@ -32,15 +32,20 @@ export function ExamDirectionsScreen({
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-8 bg-orange-50/60 px-8 text-center">
-      <h2 className="text-xl font-bold text-zinc-900 sm:text-2xl">{directions.title}</h2>
-      <div className="flex max-w-2xl flex-col gap-3">
+      <h2 className="text-xl font-bold text-zinc-900 sm:text-2xl lg:text-3xl">
+        {directions.title}
+      </h2>
+      <div className="flex max-w-2xl flex-col gap-3 lg:max-w-3xl">
         {directions.lines.map((line, i) => {
           const isFirst = i === 0;
           const prefix = "Directions: ";
           const body = isFirst && line.startsWith(prefix) ? line.slice(prefix.length) : line;
 
           return (
-            <p key={i} className="text-base leading-relaxed text-zinc-700 sm:text-lg">
+            <p
+              key={i}
+              className="text-base leading-relaxed text-zinc-700 sm:text-lg lg:text-xl"
+            >
               {isFirst && line.startsWith(prefix) && (
                 <span className="font-semibold text-zinc-900">{prefix}</span>
               )}

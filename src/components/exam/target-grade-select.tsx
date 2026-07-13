@@ -25,10 +25,12 @@ export function TargetGradeSelect() {
 
   return (
     <div className="flex w-full flex-col gap-2.5">
-      <span className="text-sm font-semibold text-zinc-700">목표 등급</span>
+      <span className="text-sm font-semibold text-zinc-700 lg:text-base">
+        목표 등급
+      </span>
 
       <div className="overflow-hidden rounded-xl ring-1 ring-zinc-100">
-        <div className="grid grid-cols-2 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-950">
+        <div className="grid grid-cols-2 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-950 lg:text-sm">
           <span>레벨</span>
           <span className="text-right">점수</span>
         </div>
@@ -44,7 +46,7 @@ export function TargetGradeSelect() {
                 aria-checked={isSelected}
                 onClick={() => handleSelect(option.id)}
                 className={cn(
-                  "grid grid-cols-2 items-center px-3 py-2 text-left text-sm transition-colors",
+                  "grid grid-cols-2 items-center px-3 py-2 text-left text-sm transition-colors lg:py-2.5 lg:text-base",
                   isSelected
                     ? "bg-orange-50 font-bold text-orange-600"
                     : "text-zinc-600 hover:bg-zinc-50",
@@ -58,7 +60,7 @@ export function TargetGradeSelect() {
         </div>
       </div>
 
-      <p className="text-xs text-zinc-400">
+      <p className="text-xs text-zinc-400 lg:text-sm">
         선택한 목표 등급은 채점 결과 페이지에서 현재 예상 점수와 비교돼요.
       </p>
     </div>

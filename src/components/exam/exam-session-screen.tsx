@@ -339,6 +339,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
       <div className="flex flex-1 flex-col bg-white">
         <ExamHeader label={`Part ${question.partNumber}`} />
         <ExamPartIntroScreen
+          partNumber={question.partNumber}
           text={question.partIntroText ?? ""}
           audioUrl={question.guideAudioUrl}
           resetKey={`part-intro-${question.questionNumber}`}
@@ -362,24 +363,24 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
     <div className="flex flex-1 flex-col bg-white">
       <ExamHeader label={`Question ${index + 1} of ${total}`} />
 
-      <main className="mx-auto flex w-full min-h-0 max-w-2xl flex-1 flex-col items-center gap-4 overflow-y-auto px-6 pt-8 pb-6 text-center md:max-w-3xl md:gap-6">
-        <span className="w-fit shrink-0 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600 sm:text-sm">
+      <main className="mx-auto flex w-full min-h-0 max-w-2xl flex-1 flex-col items-center gap-4 overflow-y-auto px-6 pt-8 pb-6 text-center md:max-w-3xl md:gap-6 lg:max-w-4xl lg:gap-8 xl:max-w-5xl">
+        <span className="w-fit shrink-0 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600 sm:text-sm lg:text-base">
           Part {question.partNumber} · {partMeta.titleEn}
         </span>
 
         {question.referenceText && (
-          <p className="rounded-xl bg-orange-50/60 p-5 text-left text-base leading-relaxed text-blue-950 sm:text-lg md:p-7 md:text-xl">
+          <p className="rounded-xl bg-orange-50/60 p-5 text-left text-base leading-relaxed text-blue-950 sm:text-lg md:p-7 md:text-xl lg:p-8 lg:text-2xl">
             {question.referenceText}
           </p>
         )}
 
         {question.imageUrl && (
-          <div className="relative aspect-[4/3] w-full max-w-md shrink-0 overflow-hidden rounded-xl ring-1 ring-zinc-200 md:max-w-lg">
+          <div className="relative aspect-[4/3] w-full max-w-md shrink-0 overflow-hidden rounded-xl ring-1 ring-zinc-200 md:max-w-lg lg:max-w-xl xl:max-w-2xl">
             <Image
               src={question.imageUrl}
               alt=""
               fill
-              sizes="(min-width: 768px) 512px, (min-width: 640px) 448px, 100vw"
+              sizes="(min-width: 1024px) 672px, (min-width: 768px) 512px, (min-width: 640px) 448px, 100vw"
               className="object-cover"
               priority
             />
@@ -389,15 +390,15 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
         {question.tableContext && (
           <div className="w-full shrink-0 rounded-xl border border-zinc-200 text-left">
             <div className="border-b border-zinc-200 bg-zinc-50 px-4 py-3">
-              <p className="font-semibold text-blue-950 sm:text-lg">
+              <p className="font-semibold text-blue-950 sm:text-lg lg:text-xl">
                 {question.tableContext.title}
               </p>
-              <p className="mt-0.5 text-xs text-zinc-500 sm:text-sm">
+              <p className="mt-0.5 text-xs text-zinc-500 sm:text-sm lg:text-base">
                 {question.tableContext.location} · {question.tableContext.date} · Fee:{" "}
                 {question.tableContext.fee}
               </p>
             </div>
-            <table className="w-full text-xs sm:text-sm">
+            <table className="w-full text-xs sm:text-sm lg:text-base">
               <tbody>
                 {question.tableContext.items.map((item) => (
                   <tr key={item.time} className="border-b border-zinc-100 last:border-0">
@@ -421,7 +422,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
         )}
 
         {question.question && question.partNumber !== 4 && (
-          <p className="text-lg leading-relaxed font-medium text-blue-950 sm:text-xl md:text-2xl">
+          <p className="text-lg leading-relaxed font-medium text-blue-950 sm:text-xl md:text-2xl lg:text-3xl">
             {question.question}
           </p>
         )}
@@ -434,7 +435,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
               <span className="relative inline-flex size-2.5 rounded-full bg-blue-600" />
             </span>
-            <span className="text-sm font-semibold sm:text-base">
+            <span className="text-sm font-semibold sm:text-base lg:text-lg">
               {phase === "repeat-cue"
                 ? "다시 들려드릴게요"
                 : phase === "question-audio-repeat"
@@ -445,12 +446,12 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
         ) : (
           <>
             <div className="flex flex-col items-center">
-              <span className="w-56 rounded-t-lg bg-blue-950 py-2 text-center text-sm font-bold tracking-wide text-white sm:w-64 sm:text-base">
+              <span className="w-56 rounded-t-lg bg-blue-950 py-2 text-center text-sm font-bold tracking-wide text-white sm:w-64 sm:text-base lg:w-72 lg:text-lg">
                 {isReadingTime ? "READING TIME" : isPrepGroup ? "PREPARATION TIME" : "RESPONSE TIME"}
               </span>
               <span
                 className={cn(
-                  "w-56 rounded-b-lg border-2 border-t-0 bg-white py-2.5 text-center font-mono text-2xl font-bold tabular-nums sm:w-64 sm:text-3xl",
+                  "w-56 rounded-b-lg border-2 border-t-0 bg-white py-2.5 text-center font-mono text-2xl font-bold tabular-nums sm:w-64 sm:text-3xl lg:w-72 lg:text-4xl",
                   isSpeakGroup ? "border-red-400 text-red-500" : "border-blue-950 text-blue-950",
                 )}
               >
@@ -464,7 +465,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
                   <span className="relative inline-flex size-2.5 rounded-full bg-red-500" />
                 </span>
-                <span className="text-sm font-semibold sm:text-base">
+                <span className="text-sm font-semibold sm:text-base lg:text-lg">
                   답변을 녹음하고 있어요
                 </span>
               </div>
@@ -472,13 +473,13 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
 
             {phase === "prep" && (
               <div className="flex flex-col items-center gap-2">
-                <span className="text-sm text-zinc-500 sm:text-base">
+                <span className="text-sm text-zinc-500 sm:text-base lg:text-lg">
                   곧 답변 시간이 시작돼요. 답변을 준비해 주세요.
                 </span>
                 <button
                   type="button"
                   onClick={handlePhaseComplete}
-                  className="rounded-full border border-orange-300 px-4 py-1.5 text-sm font-semibold text-orange-600 transition-colors hover:bg-orange-50"
+                  className="rounded-full border border-orange-300 px-4 py-1.5 text-sm font-semibold text-orange-600 transition-colors hover:bg-orange-50 lg:px-5 lg:py-2 lg:text-base"
                 >
                   준비 완료, 바로 답변 시작하기
                 </button>
@@ -486,30 +487,32 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
             )}
 
             {phase === "reading-time" && (
-              <span className="text-sm text-zinc-500 sm:text-base">
+              <span className="text-sm text-zinc-500 sm:text-base lg:text-lg">
                 화면의 정보를 확인하고 읽어보세요.
               </span>
             )}
 
             {phase === "prep-cue" && (
-              <span className="text-sm text-zinc-500 sm:text-base">
+              <span className="text-sm text-zinc-500 sm:text-base lg:text-lg">
                 안내 음성을 재생하고 있어요…
               </span>
             )}
 
             {phase === "speak-cue" && (
-              <span className="text-sm text-zinc-500 sm:text-base">곧 답변이 시작돼요…</span>
+              <span className="text-sm text-zinc-500 sm:text-base lg:text-lg">
+                곧 답변이 시작돼요…
+              </span>
             )}
 
             {phase === "speaking" && (
-              <div className="flex h-8 items-center gap-1" aria-hidden>
+              <div className="flex h-8 items-center gap-1 lg:h-10" aria-hidden>
                 {Array.from({ length: 24 }, (_, i) => (
                   <span
                     key={i}
                     ref={(el) => {
                       levelBarRefs.current[i] = el;
                     }}
-                    className="w-1 rounded-full bg-red-300 transition-[height] duration-75"
+                    className="w-1 rounded-full bg-red-300 transition-[height] duration-75 lg:w-1.5"
                     style={{ height: "4px" }}
                   />
                 ))}
@@ -518,7 +521,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
           </>
         )}
 
-        <p className="px-6 text-center text-xs text-zinc-400">
+        <p className="px-6 text-center text-xs text-zinc-400 lg:text-sm">
           다음 문제로 자동으로 전환됩니다. 시험 도중 중단하거나 뒤로 갈 수 없어요.
         </p>
       </footer>
