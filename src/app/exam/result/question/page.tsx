@@ -37,7 +37,7 @@ function ExamQuestionFeedbackContent() {
 
   return (
     <div className="flex flex-1 flex-col bg-white">
-      <ExamHeader label="문제별 피드백" />
+      <ExamHeader label="문제별 피드백" confirmBeforeLeave />
       {!hasValidParams && (
         <p className="flex flex-1 items-center justify-center text-sm text-zinc-500 lg:text-base">
           잘못된 접근이에요. examId 또는 questionNumber가 없어요.
