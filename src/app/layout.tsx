@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: SITE_URL,
     siteName: "토선생",
-    images: [{ url: "/mascots/og_image.png", width: 1200, height: 600, alt: TITLE }],
+    images: [{ url: "/og-image.png", width: 1200, height: 600, alt: TITLE }],
     locale: "ko_KR",
     type: "website",
   },
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: TITLE,
     description: DESCRIPTION,
-    images: ["/mascots/og_image.png"],
+    images: ["/og-image.png"],
   },
 };
 
