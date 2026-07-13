@@ -68,13 +68,13 @@ export function PhoneDemo() {
     <section
       id="service-intro"
       ref={sectionRef}
-      className="mx-auto flex w-full max-w-6xl flex-col items-center gap-3 px-6 py-28 text-center sm:py-36"
+      className="mx-auto flex w-full max-w-6xl flex-col items-center gap-3 px-6 py-28 text-center sm:py-36 xl:max-w-7xl 2xl:max-w-[100rem]"
     >
-      <h2 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
+      <h2 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl lg:text-4xl">
         실제 시험처럼 녹음하고, <span className="text-orange-500">바로</span>{" "}
         피드백 받기
       </h2>
-      <p className="max-w-lg text-zinc-500">
+      <p className="max-w-lg text-zinc-500 sm:text-lg lg:text-xl">
         핸드폰 화면을 눌러서 녹음 화면과 채점 결과 화면을 직접 확인해보세요.
       </p>
 
