@@ -265,9 +265,20 @@ export function ExamQuestionFeedbackScreen({
           <span className="text-sm font-bold text-blue-950 lg:text-base">
             답변 스크립트
           </span>
-          <p className="mt-3 rounded-2xl bg-zinc-50 p-4 text-sm leading-relaxed whitespace-pre-line text-zinc-700 ring-1 ring-zinc-100 lg:text-base">
-            {detail.transcript}
-          </p>
+          <div className="mt-3 flex flex-col items-center justify-center gap-2 rounded-2xl bg-zinc-50 p-6 text-center ring-1 ring-zinc-100">
+            <div className="relative h-16 w-16 shrink-0">
+              <Image
+                src="/mascots/hmm_rabbit.png"
+                alt="응답이 감지되지 않았음을 안내하는 캐릭터"
+                fill
+                sizes="64px"
+                className="object-contain"
+              />
+            </div>
+            <span className="text-sm font-semibold text-zinc-400 lg:text-base">
+              응답이 감지되지 않았어요
+            </span>
+          </div>
         </div>
       )}
 
