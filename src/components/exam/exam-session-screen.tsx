@@ -3,13 +3,17 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { ExamDirectionsScreen } from "@/components/exam/exam-directions-screen";
 import { ExamExitConfirmPopup } from "@/components/exam/exam-exit-confirm-popup";
 import { ExamHeader } from "@/components/exam/exam-header";
 import { ExamPartIntroScreen } from "@/components/exam/exam-part-intro-screen";
 import { ExamQaNavBar } from "@/components/exam/exam-qa-nav-bar";
-import { uploadExamAnswer } from "@/features/exam/api/exam-answer-upload"; // TODO: 서버 배포 후 주석 해제
+import {
+  ExamAnswerUploadError,
+  uploadExamAnswer,
+} from "@/features/exam/api/exam-answer-upload"; // TODO: 서버 배포 후 주석 해제
 import { AUDIO_CUES } from "@/features/exam/audio-cues";
 import { getExamPartMeta } from "@/features/exam/part-meta";
 import { useAnswerRecorder } from "@/features/exam/use-answer-recorder";
@@ -233,7 +237,14 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
           session.examId,
           String(currentQuestion.questionNumber),
           audioBlob
-        ).catch(console.error);
+        ).catch((err) => {
+          console.error(err);
+          if (err instanceof ExamAnswerUploadError && err.stage === "grading") {
+            toast.error("답변은 업로드됐지만 채점 요청에 실패했어요. 잠시 후 다시 시도해주세요.");
+          } else {
+            toast.error("답변 업로드에 실패했어요. 네트워크 환경을 확인해주세요.");
+          }
+        });
       });
     };
   }, [phase, question, session.examId, startRecording, stopRecording]); // 의존성 배열 유지
