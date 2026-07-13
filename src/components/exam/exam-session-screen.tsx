@@ -447,7 +447,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
           <>
             <div className="flex flex-col items-center">
               <span className="w-56 rounded-t-lg bg-blue-950 py-2 text-center text-sm font-bold tracking-wide text-white sm:w-64 sm:text-base lg:w-72 lg:text-lg">
-                {isReadingTime ? "READING TIME" : isPrepGroup ? "PREPARATION TIME" : "RESPONSE TIME"}
+                {isReadingTime || isPrepGroup ? "PREPARATION TIME" : "RESPONSE TIME"}
               </span>
               <span
                 className={cn(

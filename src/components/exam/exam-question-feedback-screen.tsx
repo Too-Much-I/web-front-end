@@ -368,11 +368,15 @@ export function ExamQuestionFeedbackScreen({
         </span>
         <DetailBlock title="발음" body={detail.feedback.pronunciation} />
         <DetailBlock title="유창성" body={detail.feedback.fluency} />
-        <DetailBlock title="내용" body={detail.feedback.content} />
-        <DetailBlock
-          title="문법 & 어휘"
-          body={detail.feedback.grammarVocabulary}
-        />
+        {detail.partNumber !== 1 && (
+          <>
+            <DetailBlock title="내용" body={detail.feedback.content} />
+            <DetailBlock
+              title="문법 & 어휘"
+              body={detail.feedback.grammarVocabulary}
+            />
+          </>
+        )}
       </div>
 
       <div className="mt-6 rounded-3xl bg-orange-50 p-6 ring-1 ring-orange-100 lg:p-8">
