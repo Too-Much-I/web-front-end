@@ -21,7 +21,7 @@ export function TargetGradeMascot({
           src="/mascots/rabbit_face.png"
           alt="토끼 얼굴 캐릭터"
           fill
-          sizes="(min-width: 1024px) 56px, 48px"
+          sizes="(min-width: 1024px) 56px, (min-width: 640px) 48px, 40px"
           className="object-contain"
         />
       </div>

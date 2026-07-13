@@ -21,18 +21,18 @@ export default function ExamPreparePage() {
             height={36}
             className="size-9"
           />
-          <span className="text-lg font-bold text-orange-500 lg:text-xl">
+          <span className="text-lg font-bold text-orange-500 md:text-xl">
             토선생
           </span>
         </Link>
       </header>
 
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 py-10 xl:max-w-7xl">
+      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 py-10 lg:max-w-7xl">
         <ExamPrepareFlow />
       </main>
 
       <footer className="border-t border-orange-200/60 px-6 py-8 sm:px-10">
-        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 text-sm text-zinc-500 sm:flex-row lg:text-base xl:max-w-7xl">
+        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 text-sm text-zinc-500 sm:flex-row md:text-base lg:max-w-7xl">
           <span>
             © {new Date().getFullYear()} 토선생. All rights reserved.
           </span>

@@ -316,7 +316,7 @@ export function ExamFeedbackSurvey({
             <div className="flex flex-col gap-1.5">
               <label htmlFor="survey-contact" className="text-sm font-semibold text-blue-950 lg:text-base">
                 전화번호 또는 이메일{" "}
-                <span className="font-normal text-zinc-400">(선택)</span>
+                <span className="font-normal text-zinc-400">(응시권 수령 시 필수)</span>
               </label>
               <input
                 id="survey-contact"

@@ -47,9 +47,9 @@ export default function Home() {
         </Button>
       </header>
 
-      <main className="mx-auto flex w-full max-w-6xl flex-col items-center gap-10 px-6 pt-10 pb-20 lg:flex-row lg:items-center lg:gap-8 xl:max-w-7xl xl:gap-10 2xl:max-w-[100rem] 2xl:gap-12">
+      <main className="mx-auto flex w-full max-w-6xl flex-col items-center gap-10 px-6 pt-10 pb-20 lg:max-w-7xl lg:flex-row lg:items-center lg:gap-8 xl:gap-10 2xl:max-w-[100rem] 2xl:gap-12">
         <div className="flex flex-col items-center gap-6 text-center lg:w-3/5 lg:items-start lg:text-left">
-          <h1 className="max-w-xl text-3xl leading-tight font-bold tracking-tight text-zinc-900 sm:text-4xl xl:max-w-3xl xl:text-5xl 2xl:max-w-4xl 2xl:text-6xl">
+          <h1 className="max-w-xl text-3xl leading-tight font-bold tracking-tight text-zinc-900 sm:text-4xl lg:text-5xl xl:max-w-3xl 2xl:max-w-4xl 2xl:text-6xl">
             토익 스피킹 채점부터 피드백까지, <br className="hidden sm:block" />{" "}
             <span className="text-orange-500">토선생</span>과 함께
           </h1>
@@ -90,7 +90,7 @@ export default function Home() {
       <FaqSection />
 
       <footer className="border-t border-orange-200/60 px-6 py-8 sm:px-10">
-        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 text-sm text-zinc-500 sm:flex-row lg:text-base xl:max-w-7xl 2xl:max-w-[100rem]">
+        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 text-sm text-zinc-500 sm:flex-row md:text-base lg:max-w-7xl 2xl:max-w-[100rem]">
           <span>© {new Date().getFullYear()} 토선생. All rights reserved.</span>
           <nav className="flex items-center gap-5">
             <Link href="/terms" className="hover:text-orange-500">

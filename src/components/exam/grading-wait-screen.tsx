@@ -110,7 +110,7 @@ export function GradingWaitScreen({
               src={mascot.src}
               alt={mascot.alt}
               fill
-              sizes="(min-width: 1024px) 320px, (min-width: 768px) 288px, (min-width: 640px) 220px, 45vw"
+              sizes="(min-width: 1024px) 200px, (min-width: 768px) 190px, (min-width: 640px) 160px, 45vw"
               className="object-contain"
               priority={i === 0}
             />
@@ -125,8 +125,8 @@ export function GradingWaitScreen({
             style={{ width: `${clampedProgress}%` }}
           />
           <div
-            className="absolute top-1/2 size-4 -translate-y-1/2 rounded-full border-2 border-orange-500 bg-white shadow transition-[left] duration-500 lg:size-5"
-            style={{ left: `calc(${clampedProgress}% - 8px)` }}
+            className="absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-orange-500 bg-white shadow transition-[left] duration-500 lg:size-5"
+            style={{ left: `${clampedProgress}%` }}
           />
         </div>
       </div>

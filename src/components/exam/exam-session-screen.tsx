@@ -380,7 +380,7 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
               src={question.imageUrl}
               alt=""
               fill
-              sizes="(min-width: 1024px) 672px, (min-width: 768px) 512px, (min-width: 640px) 448px, 100vw"
+              sizes="(min-width: 1280px) 672px, (min-width: 1024px) 576px, (min-width: 768px) 512px, (min-width: 640px) 448px, 100vw"
               className="object-cover"
               priority
             />
