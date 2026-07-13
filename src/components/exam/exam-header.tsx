@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { ExamLeaveConfirmPopup } from "@/components/exam/exam-leave-confirm-popup";
 
@@ -17,6 +17,16 @@ export function ExamHeader({
 }) {
   const router = useRouter();
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const logoLinkRef = useRef<HTMLAnchorElement>(null);
+  const wasLeaveConfirmOpenRef = useRef(false);
+
+  // 팝업이 닫히는 순간(계속 보기/Escape/바깥 클릭)에 포커스를 원래 트리거였던 로고로 되돌린다.
+  useEffect(() => {
+    if (wasLeaveConfirmOpenRef.current && !showLeaveConfirm) {
+      logoLinkRef.current?.focus();
+    }
+    wasLeaveConfirmOpenRef.current = showLeaveConfirm;
+  }, [showLeaveConfirm]);
 
   return (
     <header className="relative h-16 overflow-hidden bg-orange-500 sm:h-20 lg:h-24">
@@ -25,6 +35,7 @@ export function ExamHeader({
         style={{ clipPath: "polygon(60% 0%, 100% 0%, 100% 100%, 84% 100%)" }}
       />
       <Link
+        ref={logoLinkRef}
         href="/"
         onClick={(e) => {
           if (!confirmBeforeLeave) return;
