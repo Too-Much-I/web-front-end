@@ -187,7 +187,7 @@ export function AnswerAudioPlayer({
         onPause={() => setIsPlaying(false)}
         onEnded={() => {
           setIsPlaying(false);
-          onTimeUpdate?.(0);
+          onTimeUpdate?.(Number.NaN);
         }}
         onTimeUpdate={(e) => {
           setCurrentTime(e.currentTarget.currentTime);

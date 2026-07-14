@@ -57,7 +57,7 @@ function ScoredWord({
     <Tooltip>
       <TooltipTrigger
         delay={150}
-        render={<span />}
+        render={<span tabIndex={0} />}
         className={wordClassName}
         style={wordStyle}
       >
