@@ -48,7 +48,7 @@ export function ExamReanswerPanel({
   const handleGradingComplete = useCallback(() => {
     if (pollingRetryCount === null) return;
     router.replace(
-      `/exam/result/question?examId=${encodeURIComponent(examId)}&questionNumber=${questionNumber}&retryCount=${pollingRetryCount}&justGraded=1`,
+      `/exam/result/question?examId=${encodeURIComponent(examId)}&questionNumber=${questionNumber}&retryCount=${pollingRetryCount}`,
     );
   }, [pollingRetryCount, router, examId, questionNumber]);
 
