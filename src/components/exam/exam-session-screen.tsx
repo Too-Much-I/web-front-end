@@ -322,12 +322,12 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
         )}
 
         {question.imageUrl && (
-          <div className="relative aspect-[4/3] w-full max-w-md shrink-0 overflow-hidden rounded-xl ring-1 ring-zinc-200 md:max-w-lg lg:max-w-xl xl:max-w-2xl">
+          <div className="relative aspect-[4/3] w-full max-w-sm shrink-0 overflow-hidden rounded-xl ring-1 ring-zinc-200 md:max-w-md lg:max-w-lg xl:max-w-xl">
             <Image
               src={question.imageUrl}
               alt=""
               fill
-              sizes="(min-width: 1280px) 672px, (min-width: 1024px) 576px, (min-width: 768px) 512px, (min-width: 640px) 448px, 100vw"
+              sizes="(min-width: 1280px) 576px, (min-width: 1024px) 512px, (min-width: 768px) 448px, (min-width: 640px) 384px, 100vw"
               className="object-cover"
               priority
             />
