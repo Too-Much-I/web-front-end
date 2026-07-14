@@ -74,7 +74,15 @@ export interface ExamAnswerUploadUrl {
 
 /** POST /api/v1/exams/{examId}/questions/{questionId}/submit 의 result */
 export interface ExamAnswerSubmitResult {
-  status: "PROCESSING";
+  status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
+}
+
+/** GET /api/v1/exams/{examId}/questions/status (문항별 재시도 채점 진행 상태 폴링)의 result */
+export interface ExamQuestionPollResult {
+  examId: string;
+  questionNumber: number;
+  retryCount: number;
+  status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
 }
 
 /** GET /api/v1/exams/{examId}/status 의 result */

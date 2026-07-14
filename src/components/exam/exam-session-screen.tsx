@@ -204,7 +204,8 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
         uploadExamAnswer(
           session.examId,
           String(currentQuestion.questionNumber),
-          audioBlob
+          audioBlob,
+          0,
         ).catch((err) => {
           console.error(err);
           if (err instanceof ExamAnswerUploadError && err.stage === "grading") {

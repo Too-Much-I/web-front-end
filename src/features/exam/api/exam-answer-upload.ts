@@ -8,13 +8,14 @@ interface ApiEnvelope<T> {
   result: T;
 }
 
-/** S3 presigned upload URL을 발급받는다. */
+/** S3 presigned upload URL을 발급받는다. retryCount별로 고유한 주소가 나오므로 반드시 실제 회차를 넘겨야 한다. */
 async function getAnswerUploadUrl(
   examId: string,
   questionId: string,
+  retryCount: number,
 ): Promise<ExamAnswerUploadUrl> {
   const { result } = await apiFetch<ApiEnvelope<ExamAnswerUploadUrl>>(
-    `/api/v1/exams/${examId}/questions/${questionId}/upload-url`,
+    `/api/v1/exams/${examId}/questions/${questionId}/upload-url?retryCount=${retryCount}`,
   );
   return result;
 }
@@ -48,9 +49,10 @@ async function submitAnswerForGrading(
   examId: string,
   questionId: string,
   fileKey: string,
+  retryCount: number,
 ): Promise<ExamAnswerSubmitResult> {
   const { result } = await apiFetch<ApiEnvelope<ExamAnswerSubmitResult>>(
-    `/api/v1/exams/${examId}/questions/${questionId}/submit`,
+    `/api/v1/exams/${examId}/questions/${questionId}/submit?retryCount=${retryCount}`,
     {
       method: "POST",
       body: JSON.stringify({ fileKey }),
@@ -125,10 +127,11 @@ export async function uploadExamAnswer(
   examId: string,
   questionId: string,
   audioBlob: Blob,
+  retryCount: number,
 ): Promise<ExamAnswerSubmitResult> {
   let fileKey: string;
   try {
-    const uploadUrlResult = await getAnswerUploadUrl(examId, questionId);
+    const uploadUrlResult = await getAnswerUploadUrl(examId, questionId, retryCount);
     const deadline = Date.now() + uploadUrlResult.expiresIn * 1000;
     await putAnswerAudioToS3WithRetry(uploadUrlResult.uploadUrl, audioBlob, deadline);
     fileKey = uploadUrlResult.fileKey;
@@ -137,7 +140,7 @@ export async function uploadExamAnswer(
   }
 
   try {
-    return await submitAnswerForGrading(examId, questionId, fileKey);
+    return await submitAnswerForGrading(examId, questionId, fileKey, retryCount);
   } catch (err) {
     throw new ExamAnswerUploadError("grading", "채점 요청에 실패했어요.", { cause: err });
   }
