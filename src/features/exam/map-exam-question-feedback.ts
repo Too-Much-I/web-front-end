@@ -38,6 +38,8 @@ export function mapExamQuestionDetail(raw: RawExamQuestionDetailResult): ExamQue
       word: word.word,
       accuracyScore: word.accuracyScore,
       errorType: word.errorType,
+      offset: word.offset,
+      duration: word.duration,
     })),
   };
 }
