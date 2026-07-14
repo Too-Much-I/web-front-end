@@ -2,7 +2,7 @@
 
 import { Mic, Square } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   ExamAnswerUploadError,
@@ -19,15 +19,30 @@ type SubmitStatus = "idle" | "submitting" | "submitted" | "error";
 export function ExamReanswerPanel({
   examId,
   questionNumber,
+  onUnsavedChange,
 }: {
   examId: string;
   questionNumber: number;
+  /** 녹음 중이거나 아직 제출하지 않은 녹음본이 있는 동안 true — 탭/회차 이동 시 경고 여부 판단용. */
+  onUnsavedChange?: (hasUnsaved: boolean) => void;
 }) {
   const { isRecording, startRecording, stopRecording, levelBarRefs } =
     useAnswerRecorder();
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [status, setStatus] = useState<SubmitStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    onUnsavedChange?.(isRecording || (recordedBlob !== null && status !== "submitted"));
+  }, [isRecording, recordedBlob, status, onUnsavedChange]);
+
+  async function handleStartRecording() {
+    try {
+      await startRecording();
+    } catch {
+      setErrorMessage("마이크를 사용할 수 없어요. 마이크 권한을 확인해 주세요.");
+    }
+  }
 
   async function handleStop() {
     const blob = await stopRecording();
@@ -121,7 +136,7 @@ export function ExamReanswerPanel({
             {!isRecording && !recordedBlob && (
               <button
                 type="button"
-                onClick={() => startRecording()}
+                onClick={handleStartRecording}
                 aria-label="녹음 시작"
                 className="flex size-20 items-center justify-center rounded-full bg-orange-500 text-white shadow-md transition-colors hover:bg-orange-600"
               >

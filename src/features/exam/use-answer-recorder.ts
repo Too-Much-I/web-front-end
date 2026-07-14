@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export const ANSWER_LEVEL_BAR_COUNT = 24;
 
@@ -129,6 +129,18 @@ export function useAnswerRecorder() {
       };
       recorder.stop();
     });
+  }, [stopVisualizer]);
+
+  // 녹음 중에 탭 전환/페이지 이동 등으로 컴포넌트가 언마운트되면 마이크 스트림이 계속
+  // 켜진 채로 남을 수 있어, 언마운트 시 강제로 정리한다.
+  useEffect(() => {
+    return () => {
+      if (recorderRef.current && recorderRef.current.state !== "inactive") {
+        recorderRef.current.stop();
+      }
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+      stopVisualizer();
+    };
   }, [stopVisualizer]);
 
   return { isRecording, startRecording, stopRecording, levelBarRefs };

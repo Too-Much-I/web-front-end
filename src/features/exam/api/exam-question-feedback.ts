@@ -15,11 +15,5 @@ export async function getExamQuestionFeedback(
   const { result } = await apiFetch<ApiEnvelope<RawExamQuestionDetailResult>>(
     `/api/v1/exams/${examId}/questions?questionNumber=${questionNumber}&retryCount=${retryCount}`,
   );
-  console.error("[getExamQuestionFeedback] requested retryCount", retryCount, {
-    rawCorrectedAnswer: result.question.feedback.correctedAnswer,
-    rawRecommendedAnswer: result.question.feedback.recommendedAnswer,
-    rawRetryCount: result.question.retryCount,
-    rawTotalRetryCount: result.question.totalRetryCount,
-  });
   return mapExamQuestionDetail(result);
 }

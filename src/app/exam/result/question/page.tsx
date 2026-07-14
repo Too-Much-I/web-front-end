@@ -8,6 +8,12 @@ import { ExamQuestionFeedbackScreen } from "@/components/exam/exam-question-feed
 import { getExamQuestionFeedback } from "@/features/exam/api/exam-question-feedback";
 import type { ExamQuestionDetail } from "@/types/exam";
 
+/** 잘못되거나 없는 값(예: "abc", 음수)은 최초 응시(0)로 취급한다. */
+function parseRetryCount(raw: string | null): number {
+  const parsed = Number(raw);
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : 0;
+}
+
 /**
  * examId/questionNumber/retryCount로 key를 잡아 부모에서 마운트한다 — 회차가 바뀌면 이 컴포넌트가
  * 통째로 새로 마운트되면서 detail/error가 자연스럽게 초기화된다(effect 안에서 직접 리셋할 필요 없음).
@@ -73,10 +79,19 @@ function ExamQuestionFeedbackContent() {
   const questionNumber = Number(searchParams.get("questionNumber"));
   const hasValidParams = Boolean(examId) && Number.isInteger(questionNumber) && questionNumber > 0;
 
-  // 날개 화살표로 회차를 넘기면 이 state만 바뀐다 — URL은 최초 진입 시의 회차만 담당한다.
   const [retryCount, setRetryCount] = useState(() =>
-    Number(searchParams.get("retryCount") ?? "0"),
+    parseRetryCount(searchParams.get("retryCount")),
   );
+
+  // 날개 화살표로 회차를 넘기면 state를 바꾸는 동시에, 새로고침/공유 시에도 같은 회차를
+  // 보게끔 URL도 맞춰준다. App Router의 router.push/replace는 항상 서버 왕복(재로드)이
+  // 생기므로, 여기서는 history.replaceState로 URL만 조용히 바꾼다.
+  function handleNavigateRetry(nextRetryCount: number) {
+    setRetryCount(nextRetryCount);
+    const url = new URL(window.location.href);
+    url.searchParams.set("retryCount", String(nextRetryCount));
+    window.history.replaceState(null, "", url);
+  }
 
   return (
     <div className="flex flex-1 flex-col bg-white">
@@ -92,7 +107,7 @@ function ExamQuestionFeedbackContent() {
           examId={examId}
           questionNumber={questionNumber}
           retryCount={retryCount}
-          onNavigateRetry={setRetryCount}
+          onNavigateRetry={handleNavigateRetry}
         />
       )}
     </div>

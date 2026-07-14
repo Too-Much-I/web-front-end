@@ -35,7 +35,7 @@ export function ExamQuestionPrompt({
                   "repeating-linear-gradient(to bottom, transparent, transparent 27px, rgba(71,85,105,0.12) 27px, rgba(71,85,105,0.12) 28px), repeating-linear-gradient(to right, transparent, transparent 27px, rgba(71,85,105,0.12) 27px, rgba(71,85,105,0.12) 28px)",
               }}
             />
-            <p className="relative p-4 text-base leading-7 whitespace-pre-line text-slate-700 sm:text-lg lg:p-5 lg:text-xl lg:leading-8">
+            <p className="relative p-4 text-base leading-7 whitespace-pre-line text-slate-700 sm:text-lg lg:p-5 lg:text-xl">
               {questionInfo.referenceText}
             </p>
           </div>
@@ -46,7 +46,7 @@ export function ExamQuestionPrompt({
         <div className="relative aspect-[4/3] w-full max-w-md shrink-0 self-center overflow-hidden rounded-2xl ring-1 ring-zinc-200">
           <Image
             src={questionInfo.imageUrl}
-            alt=""
+            alt="문제 이미지"
             fill
             sizes="(min-width: 1024px) 448px, 100vw"
             className="object-cover"

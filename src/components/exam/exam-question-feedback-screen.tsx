@@ -123,10 +123,6 @@ function DetailBlock({ title, body }: { title: string; body: string }) {
 
 /** "모범·추천답안" 탭 — correctedAnswer가 모범답안, recommendedAnswer가 추천답안. 둘 다 없을 수도, 하나만 있을 수도 있다. */
 function ExamModelAnswerTab({ feedback }: { feedback: ExamQuestionFeedback }) {
-  console.error("[ExamModelAnswerTab] correctedAnswer/recommendedAnswer", {
-    correctedAnswer: feedback.correctedAnswer,
-    recommendedAnswer: feedback.recommendedAnswer,
-  });
   const hasModel = Boolean(feedback.correctedAnswer);
   const hasRecommended = Boolean(feedback.recommendedAnswer);
   const [active, setActive] = useState<"model" | "recommended">(
@@ -153,6 +149,7 @@ function ExamModelAnswerTab({ feedback }: { feedback: ExamQuestionFeedback }) {
           <button
             type="button"
             onClick={() => setActive("model")}
+            aria-pressed={active === "model"}
             className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
               active === "model"
                 ? "bg-blue-950 text-white"
@@ -164,6 +161,7 @@ function ExamModelAnswerTab({ feedback }: { feedback: ExamQuestionFeedback }) {
           <button
             type="button"
             onClick={() => setActive("recommended")}
+            aria-pressed={active === "recommended"}
             className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
               active === "recommended"
                 ? "bg-blue-950 text-white"
@@ -212,9 +210,25 @@ export function ExamQuestionFeedbackScreen({
   const [activeTab, setActiveTab] = useState<TabValue>("my-answer");
   // 이전 탭보다 오른쪽으로 이동하면 오른쪽에서, 왼쪽으로 이동하면 왼쪽에서 슬라이드 인.
   const [slideDir, setSlideDir] = useState(1);
+  // "다시 답변하기" 탭에 저장 안 한 녹음이 있는 동안 true — 탭/회차 이동 전에 확인이 필요한지 판단.
+  const [hasUnsavedRecording, setHasUnsavedRecording] = useState(false);
+
+  function confirmDiscardUnsavedRecording(): boolean {
+    if (activeTab !== "reanswer" || !hasUnsavedRecording) return true;
+    return window.confirm(
+      "저장하지 않은 녹음이 있어요. 지금 이동하면 녹음이 사라져요. 계속할까요?",
+    );
+  }
+
   function handleTabChange(next: TabValue) {
+    if (!confirmDiscardUnsavedRecording()) return;
     setSlideDir(TAB_VALUES.indexOf(next) > TAB_VALUES.indexOf(activeTab) ? 1 : -1);
     setActiveTab(next);
+  }
+
+  function handleNavigateRetry(nextRetryCount: number) {
+    if (!confirmDiscardUnsavedRecording()) return;
+    onNavigateRetry(nextRetryCount);
   }
 
   return (
@@ -222,7 +236,7 @@ export function ExamQuestionFeedbackScreen({
       <ExamRetryWingNav
         retryCount={detail.retryCount}
         totalRetryCount={detail.totalRetryCount}
-        onNavigate={onNavigateRetry}
+        onNavigate={handleNavigateRetry}
       />
 
       <Link
@@ -524,6 +538,7 @@ export function ExamQuestionFeedbackScreen({
           <ExamReanswerPanel
             examId={examId}
             questionNumber={detail.questionNumber}
+            onUnsavedChange={setHasUnsavedRecording}
           />
         </TabsContent>
       </Tabs>
