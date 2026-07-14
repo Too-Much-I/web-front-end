@@ -145,12 +145,18 @@ export interface RawExamCorrectionItem {
   severity: "high" | "medium" | "low";
 }
 
-/** GET /api/v1/exams/{examId}/questions/{questionNumber} 의 result.question.feedback */
+/**
+ * GET /api/v1/exams/{examId}/questions/{questionNumber} 의 result.question.feedback.
+ * 스웨거 스펙(v3/api-docs)에는 이 안이 snake_case로 문서화돼 있지만,
+ * 실제 서버 응답은 camelCase로 내려온다 — 스펙이 실제 구현과 어긋나 있으니
+ * 필드명은 실측(콘솔 로그) 기준으로 맞춘다.
+ */
 export interface RawExamQuestionFeedback {
   summary: string;
   level: string;
-  strengths: string[];
-  weaknesses: string[];
+  /** 다른 항목처럼 값이 없으면 빈 배열 대신 null로 내려올 수 있다. */
+  strengths: string[] | null;
+  weaknesses: string[] | null;
   pronunciation: string;
   fluency: string;
   content: string;
@@ -158,15 +164,21 @@ export interface RawExamQuestionFeedback {
   /** Part 1(낭독)에는 내용 적합성 개념이 없어 null로 내려온다. */
   contentRelevanceScore: number | null;
   grammarVocabulary: string;
-  actionItems: string[];
+  actionItems: string[] | null;
   /** 채점 항목에 문제가 없으면 빈 배열이 아니라 null로 내려오기도 한다. */
   correctionItems: RawExamCorrectionItem[] | null;
-  nextStrategy: string;
+  offTopicItems: string[] | null;
+  /** "모범답안" 탭에 대응. */
+  correctedAnswer: string | null;
+  /** "추천답안" 탭에 대응. */
+  recommendedAnswer: string | null;
+  nextStrategy: string | null;
 }
 
 /**
  * Azure Pronunciation Assessment 기반 단어별 발음 채점. Part 1(낭독)에서만 내려오며,
  * word는 실제로 인식된(발화된) 단어 순서라 transcript(정제된 참고 답안)와 1:1로 대응하지 않는다.
+ * 스웨거 스펙은 snake_case로 문서화돼 있지만 실제 응답은 camelCase다 (feedback과 동일한 불일치).
  */
 export interface RawSpokenWord {
   index: number;
@@ -181,16 +193,39 @@ export interface RawSpokenWord {
   errorType: string;
 }
 
+/** GET /api/v1/exams/{examId}/questions/{questionNumber} 의 result.question.questionInfo — 문제 원문. */
+export interface RawExamQuestionInfo {
+  part: number;
+  questionNumber: number;
+  text?: string;
+  referenceText?: string;
+  partIntroText?: string;
+  audioUrl?: string;
+  guideAudioUrl?: string;
+  imageUrl?: string;
+  tableContext?: ExamTableContext;
+  prepTimeSec: number;
+  speakTimeSec: number;
+}
+
 /** GET /api/v1/exams/{examId}/questions/{questionNumber} 의 result.question */
 export interface RawExamQuestionDetail {
   partNumber: number;
   questionNumber: number;
+  /**
+   * 지금 조회 중인 회차로 추정 — 최초 응시가 0이고 재답변마다 1씩 늘어나는 것으로 보이나,
+   * 백엔드와 정확한 의미(0-base 여부, totalRetryCount와의 관계)를 확인 필요.
+   */
+  retryCount: number;
+  /** 지금까지 쌓인 전체 재답변 횟수로 추정 (최초 응시 제외 여부 확인 필요). */
+  totalRetryCount: number;
   audioUrl: string;
   score: number;
   maxScore: number;
   transcript: string;
   feedback: RawExamQuestionFeedback;
   spokenWordSequence?: RawSpokenWord[];
+  questionInfo: RawExamQuestionInfo;
 }
 
 /** GET /api/v1/exams/{examId}/questions/{questionNumber} 의 result */
@@ -221,7 +256,10 @@ export interface ExamQuestionFeedback {
   grammarVocabulary: string;
   actionItems: string[];
   correctionItems: ExamCorrectionItem[];
-  nextStrategy: string;
+  offTopicItems: string[];
+  correctedAnswer: string | null;
+  recommendedAnswer: string | null;
+  nextStrategy: string | null;
 }
 
 export interface SpokenWord {
@@ -235,14 +273,33 @@ export interface SpokenWord {
   duration: number;
 }
 
+/** 문제별 피드백 화면에서 쓰는 문제 원문 — 라이브 응시 화면의 ExamQuestion과 구조는 비슷하지만
+ * isFirstInPart/isLastInPart처럼 응시 흐름 전용인 필드는 없다. */
+export interface ExamQuestionInfo {
+  partNumber: number;
+  questionNumber: number;
+  text?: string;
+  referenceText?: string;
+  partIntroText?: string;
+  audioUrl?: string;
+  guideAudioUrl?: string;
+  imageUrl?: string;
+  tableContext?: ExamTableContext;
+  prepTimeSec: number;
+  speakTimeSec: number;
+}
+
 export interface ExamQuestionDetail {
   examId: string;
   partNumber: number;
   questionNumber: number;
+  retryCount: number;
+  totalRetryCount: number;
   audioUrl: string;
   score: number;
   maxScore: number;
   transcript: string;
   feedback: ExamQuestionFeedback;
   spokenWordSequence: SpokenWord[];
+  questionInfo: ExamQuestionInfo;
 }

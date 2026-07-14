@@ -206,7 +206,7 @@ export function ExamMarkedTranscript({
           }}
         />
         <div aria-hidden className="pointer-events-none absolute top-0 bottom-0 left-8 w-px bg-red-300/60" />
-        <p className="relative p-4 pl-4 font-mono text-[13.5px] leading-[28px] text-zinc-800">
+        <p className="relative p-4 pl-4 text-base leading-7 text-zinc-800 sm:text-lg lg:text-xl lg:leading-8">
           {marked}
         </p>
       </div>

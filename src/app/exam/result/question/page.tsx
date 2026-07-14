@@ -8,20 +8,27 @@ import { ExamQuestionFeedbackScreen } from "@/components/exam/exam-question-feed
 import { getExamQuestionFeedback } from "@/features/exam/api/exam-question-feedback";
 import type { ExamQuestionDetail } from "@/types/exam";
 
-function ExamQuestionFeedbackContent() {
-  const searchParams = useSearchParams();
-  const examId = searchParams.get("examId") ?? "";
-  const questionNumber = Number(searchParams.get("questionNumber"));
-  const hasValidParams = Boolean(examId) && Number.isInteger(questionNumber) && questionNumber > 0;
-
+/**
+ * examId/questionNumber/retryCount로 key를 잡아 부모에서 마운트한다 — 회차가 바뀌면 이 컴포넌트가
+ * 통째로 새로 마운트되면서 detail/error가 자연스럽게 초기화된다(effect 안에서 직접 리셋할 필요 없음).
+ */
+function ExamQuestionFeedbackLoader({
+  examId,
+  questionNumber,
+  retryCount,
+  onNavigateRetry,
+}: {
+  examId: string;
+  questionNumber: number;
+  retryCount: number;
+  onNavigateRetry: (nextRetryCount: number) => void;
+}) {
   const [detail, setDetail] = useState<ExamQuestionDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const isLoading = hasValidParams && !detail && !error;
 
   useEffect(() => {
-    if (!hasValidParams) return;
     let cancelled = false;
-    getExamQuestionFeedback(examId, questionNumber)
+    getExamQuestionFeedback(examId, questionNumber, retryCount)
       .then((data) => {
         if (!cancelled) setDetail(data);
       })
@@ -33,7 +40,43 @@ function ExamQuestionFeedbackContent() {
     return () => {
       cancelled = true;
     };
-  }, [examId, questionNumber, hasValidParams]);
+  }, [examId, questionNumber, retryCount]);
+
+  if (error) {
+    return (
+      <p className="flex flex-1 items-center justify-center text-sm text-red-500 lg:text-base">
+        {error}
+      </p>
+    );
+  }
+
+  if (!detail) {
+    return (
+      <p className="flex flex-1 items-center justify-center text-sm text-zinc-500 lg:text-base">
+        불러오는 중이에요...
+      </p>
+    );
+  }
+
+  return (
+    <ExamQuestionFeedbackScreen
+      examId={examId}
+      detail={detail}
+      onNavigateRetry={onNavigateRetry}
+    />
+  );
+}
+
+function ExamQuestionFeedbackContent() {
+  const searchParams = useSearchParams();
+  const examId = searchParams.get("examId") ?? "";
+  const questionNumber = Number(searchParams.get("questionNumber"));
+  const hasValidParams = Boolean(examId) && Number.isInteger(questionNumber) && questionNumber > 0;
+
+  // 날개 화살표로 회차를 넘기면 이 state만 바뀐다 — URL은 최초 진입 시의 회차만 담당한다.
+  const [retryCount, setRetryCount] = useState(() =>
+    Number(searchParams.get("retryCount") ?? "0"),
+  );
 
   return (
     <div className="flex flex-1 flex-col bg-white">
@@ -43,17 +86,15 @@ function ExamQuestionFeedbackContent() {
           잘못된 접근이에요. examId 또는 questionNumber가 없어요.
         </p>
       )}
-      {isLoading && (
-        <p className="flex flex-1 items-center justify-center text-sm text-zinc-500 lg:text-base">
-          불러오는 중이에요...
-        </p>
+      {hasValidParams && (
+        <ExamQuestionFeedbackLoader
+          key={`${examId}-${questionNumber}-${retryCount}`}
+          examId={examId}
+          questionNumber={questionNumber}
+          retryCount={retryCount}
+          onNavigateRetry={setRetryCount}
+        />
       )}
-      {error && (
-        <p className="flex flex-1 items-center justify-center text-sm text-red-500 lg:text-base">
-          {error}
-        </p>
-      )}
-      {detail && <ExamQuestionFeedbackScreen examId={examId} detail={detail} />}
     </div>
   );
 }
