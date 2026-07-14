@@ -35,7 +35,7 @@ export function ExamPriorityPanel({
   nextStrategy,
 }: {
   correctionItems: ExamCorrectionItem[];
-  nextStrategy: string;
+  nextStrategy: string | null;
 }) {
   const counts = correctionItems.reduce(
     (acc, item) => {

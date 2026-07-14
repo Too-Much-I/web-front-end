@@ -12,7 +12,7 @@ import {
 } from "recharts";
 
 import { getExamPartMeta } from "@/features/exam/part-meta";
-import { gaegu } from "@/lib/fonts";
+import { jua } from "@/lib/fonts";
 import type { ExamPartScores } from "@/types/exam";
 
 const ACCENT = "#fcd34d";
@@ -184,7 +184,7 @@ export function ExamPartScoreRadar({
       {(strengths.length > 0 || weaknesses.length > 0) && (
         <div className="mt-4 grid grid-cols-2 gap-3 rounded-2xl bg-white/10 p-4 ring-1 ring-white/10">
           <div>
-            <p className={`${gaegu.className} text-xs text-emerald-300`}>
+            <p className={`${jua.className} text-xs text-emerald-300`}>
               강점
             </p>
             <p className="mt-1 text-sm font-medium text-white/90">
@@ -192,7 +192,7 @@ export function ExamPartScoreRadar({
             </p>
           </div>
           <div className="border-l border-white/15 pl-3">
-            <p className={`${gaegu.className} text-xs text-rose-300`}>
+            <p className={`${jua.className} text-xs text-rose-300`}>
               보완 필요
             </p>
             <p className="mt-1 text-sm font-medium text-white/90">

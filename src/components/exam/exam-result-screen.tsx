@@ -21,7 +21,7 @@ import {
   getTargetGradeOption,
   type TargetGradeOption,
 } from "@/features/exam/target-grade";
-import { gaegu } from "@/lib/fonts";
+import { jua } from "@/lib/fonts";
 import type { ExamGradingResult } from "@/types/exam";
 
 const PART_MASCOTS = [
@@ -109,13 +109,13 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-amber-300">★</span>
-                  <span className={`${gaegu.className} text-xl text-amber-100 lg:text-2xl`}>
+                  <span className={`${jua.className} text-xl text-amber-100 lg:text-2xl`}>
                     예상 총점
                   </span>
                 </div>
 
                 <p
-                  className={`${gaegu.className} mt-4 text-5xl text-amber-50 sm:text-6xl lg:text-7xl`}
+                  className={`${jua.className} mt-4 text-5xl text-amber-50 sm:text-6xl lg:text-7xl`}
                 >
                   {result.totalScore}
                   <span className="text-2xl text-white/50 lg:text-3xl">
@@ -123,7 +123,7 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
                     / {result.maxScore}
                   </span>
                 </p>
-                <p className={`${gaegu.className} mt-2 text-base text-amber-200 lg:text-lg`}>
+                <p className={`${jua.className} mt-2 text-base text-amber-200 lg:text-lg`}>
                   {result.levelEstimate}
                 </p>
 
@@ -136,14 +136,14 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
 
                 <TypedText
                   text={result.summary}
-                  className={`${gaegu.className} mt-6 text-base leading-relaxed text-white/90 lg:text-lg`}
+                  className={`${jua.className} mt-6 text-base leading-relaxed text-white/90 lg:text-lg`}
                 />
               </div>
 
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-amber-300">★</span>
-                  <span className={`${gaegu.className} text-xl text-amber-100 lg:text-2xl`}>
+                  <span className={`${jua.className} text-xl text-amber-100 lg:text-2xl`}>
                     파트별 세부 점수
                   </span>
                 </div>

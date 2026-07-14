@@ -187,6 +187,18 @@
   }
 }
 
+/** 문제별 피드백 탭 전환 시 슬라이드 인. --exam-tab-slide-x로 방향(왼쪽/오른쪽 탭인지)을 정한다. */
+@keyframes exam-tab-slide {
+  0% {
+    transform: translateX(var(--exam-tab-slide-x, 16px));
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 .no-scrollbar {
   scrollbar-width: none;
   -ms-overflow-style: none;
