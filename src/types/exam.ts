@@ -229,6 +229,10 @@ export interface SpokenWord {
   word: string;
   accuracyScore: number;
   errorType: string;
+  /** Azure Pronunciation Assessment 기준 100ns 단위(tick). 오디오 상 발화 시작 위치. */
+  offset: number;
+  /** Azure Pronunciation Assessment 기준 100ns 단위(tick). 발화 지속 시간. */
+  duration: number;
 }
 
 export interface ExamQuestionDetail {

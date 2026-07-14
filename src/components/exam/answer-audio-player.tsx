@@ -90,9 +90,12 @@ async function extractWaveformPeaks(
 export function AnswerAudioPlayer({
   audioUrl,
   durationSec,
+  onTimeUpdate,
 }: {
   audioUrl: string;
   durationSec: number;
+  /** 재생 위치가 바뀔 때마다(초 단위) 호출된다 — 스크립트 단어 하이라이트 등 재생 위치 동기화용. */
+  onTimeUpdate?: (seconds: number) => void;
 }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const rateMenuRef = useRef<HTMLDivElement>(null);
@@ -182,8 +185,14 @@ export function AnswerAudioPlayer({
         preload="metadata"
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
-        onEnded={() => setIsPlaying(false)}
-        onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
+        onEnded={() => {
+          setIsPlaying(false);
+          onTimeUpdate?.(Number.NaN);
+        }}
+        onTimeUpdate={(e) => {
+          setCurrentTime(e.currentTarget.currentTime);
+          onTimeUpdate?.(e.currentTarget.currentTime);
+        }}
         className="hidden"
       />
 

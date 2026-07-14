@@ -1,6 +1,11 @@
 import { Fragment } from "react";
 
 import { SEVERITY_COLOR } from "@/components/exam/exam-marked-transcript";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { ExamCorrectionItem, SpokenWord } from "@/types/exam";
 
 type WordSeverity = ExamCorrectionItem["severity"];
@@ -18,32 +23,61 @@ function toHighlightColor(color: string): string {
   return `${color}59`;
 }
 
-function ScoredWord({ word }: { word: SpokenWord }) {
+/** 정확도 숫자 대신 액션 플랜 톤으로 안내 — "부정확하다"는 지적보다 뭘 하면 좋을지에 초점을 둔다. */
+const WORD_ACTION_LABEL: Record<WordSeverity, string> = {
+  low: "가볍게 연습",
+  medium: "연습 필요",
+  high: "주의 필요",
+};
+
+/** Azure Pronunciation Assessment의 offset/duration은 100ns 단위(tick)라 초 단위로 바꾸려면 나눠야 한다. */
+const AZURE_TICKS_PER_SECOND = 10_000_000;
+
+function ScoredWord({
+  word,
+  currentTimeSec,
+}: {
+  word: SpokenWord;
+  currentTimeSec: number;
+}) {
   const severity = getWordSeverity(word);
   const color = severity ? SEVERITY_COLOR[severity] : null;
 
+  const startSec = word.offset / AZURE_TICKS_PER_SECOND;
+  const endSec = (word.offset + word.duration) / AZURE_TICKS_PER_SECOND;
+  const isSpeaking = currentTimeSec >= startSec && currentTimeSec < endSec;
+  const isPlayed = currentTimeSec >= endSec;
+
+  const wordClassName = `inline-block rounded-[3px] px-0.5 transition-[transform,opacity] duration-150 ease-out ${
+    isSpeaking ? "scale-125" : "scale-100"
+  } ${isPlayed ? "opacity-50" : "opacity-100"}`;
+  const wordStyle = color ? { backgroundColor: toHighlightColor(color) } : undefined;
+
   return (
-    <span
-      className="rounded-[3px] px-0.5"
-      style={color ? { backgroundColor: toHighlightColor(color) } : undefined}
-      title={`${word.word} · 정확도 ${Math.round(word.accuracyScore)}%`}
-    >
-      {word.word}
-    </span>
+    <Tooltip>
+      <TooltipTrigger
+        delay={150}
+        render={<span tabIndex={0} />}
+        className={wordClassName}
+        style={wordStyle}
+      >
+        {word.word}
+      </TooltipTrigger>
+      <TooltipContent>정확도 {Math.round(word.accuracyScore)}%</TooltipContent>
+    </Tooltip>
   );
 }
 
-const SEVERITY_LEGEND: { severity: WordSeverity; label: string }[] = [
-  { severity: "low", label: "약간 부정확" },
-  { severity: "medium", label: "부정확" },
-  { severity: "high", label: "발음 오류" },
-];
+const SEVERITY_LEGEND: WordSeverity[] = ["low", "medium", "high"];
 
 /** Part 1 낭독 답변을 단어 단위 발음 정확도에 따라 색으로 구분해 보여준다. */
 export function ExamPronunciationTranscript({
   spokenWordSequence,
+  currentTimeSec = 0,
 }: {
   spokenWordSequence: SpokenWord[];
+  /** 답변 오디오의 현재 재생 위치(초) — 발화 중인 단어를 확대 표시하는 데 쓰인다. */
+  currentTimeSec?: number;
 }) {
   return (
     <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
@@ -65,14 +99,14 @@ export function ExamPronunciationTranscript({
         <p className="relative p-4 pl-4 font-mono text-[13.5px] leading-[28px] text-zinc-800">
           {spokenWordSequence.map((word, i) => (
             <Fragment key={i}>
-              <ScoredWord word={word} />{" "}
+              <ScoredWord word={word} currentTimeSec={currentTimeSec} />{" "}
             </Fragment>
           ))}
         </p>
       </div>
 
       <div className="mt-4 flex flex-wrap gap-3">
-        {SEVERITY_LEGEND.map(({ severity, label }) => (
+        {SEVERITY_LEGEND.map((severity) => (
           <span
             key={severity}
             className="inline-flex items-center gap-1.5 text-xs text-zinc-500"
@@ -81,7 +115,7 @@ export function ExamPronunciationTranscript({
               className="h-3 w-4 rounded-[3px]"
               style={{ backgroundColor: toHighlightColor(SEVERITY_COLOR[severity]) }}
             />
-            {label}
+            {WORD_ACTION_LABEL[severity]}
           </span>
         ))}
       </div>

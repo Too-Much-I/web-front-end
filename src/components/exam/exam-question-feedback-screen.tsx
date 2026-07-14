@@ -133,6 +133,7 @@ export function ExamQuestionFeedbackScreen({
     detail.questionNumber,
   );
   const [isBetaTooltipOpen, setIsBetaTooltipOpen] = useState(false);
+  const [answerPlaybackTime, setAnswerPlaybackTime] = useState(0);
   const mainRingRef = useRef<HTMLDivElement>(null);
   const mainRingRevealed = useRevealOnScroll(mainRingRef);
   const subRingsRef = useRef<HTMLDivElement>(null);
@@ -246,6 +247,7 @@ export function ExamQuestionFeedbackScreen({
             <AnswerAudioPlayer
               audioUrl={detail.audioUrl}
               durationSec={speakTimeSec}
+              onTimeUpdate={setAnswerPlaybackTime}
             />
           </div>
         </div>
@@ -259,6 +261,7 @@ export function ExamQuestionFeedbackScreen({
       ) : detail.spokenWordSequence.length > 0 ? (
         <ExamPronunciationTranscript
           spokenWordSequence={detail.spokenWordSequence}
+          currentTimeSec={answerPlaybackTime}
         />
       ) : (
         <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
