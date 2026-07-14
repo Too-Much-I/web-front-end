@@ -38,7 +38,7 @@ export function VoiceConsentPanel({ onAgreed }: { onAgreed: () => void }) {
   };
 
   return (
-    <section className="flex w-full flex-col gap-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-zinc-100">
+    <section className="flex w-full flex-col gap-6 rounded-xl bg-white p-6 shadow-sm ring-1 ring-zinc-100">
       <div className="flex flex-col items-center gap-1 text-center">
         <ShieldCheck className="mb-1 size-8 text-orange-500" />
         <h2 className="text-base font-bold text-orange-500">
@@ -93,7 +93,7 @@ export function VoiceConsentPanel({ onAgreed }: { onAgreed: () => void }) {
           size="lg"
           onClick={handleSubmit}
           disabled={!checked || submitting}
-          className="h-14 w-full rounded-full bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-40"
+          className="h-14 w-full rounded-xl bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-40"
         >
           {submitting ? "저장 중..." : "동의하고 계속하기"}
         </Button>

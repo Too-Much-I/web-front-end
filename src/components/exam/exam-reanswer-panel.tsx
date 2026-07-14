@@ -2,7 +2,7 @@
 
 import { Mic, Square } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import {
   ExamAnswerUploadError,
@@ -12,17 +12,24 @@ import {
   ANSWER_LEVEL_BAR_COUNT,
   useAnswerRecorder,
 } from "@/features/exam/use-answer-recorder";
+import { useQuestionRetryStatus } from "@/features/exam/use-question-retry-status";
 
-type SubmitStatus = "idle" | "submitting" | "submitted" | "error";
+type SubmitStatus = "idle" | "submitting" | "grading" | "error";
 
-/** 문제별 피드백 화면의 "다시 답변하기" 탭 — 녹음 → 제출까지의 흐름. */
+/** 문제별 피드백 화면의 "다시 답변하기" 탭 — 녹음 → 제출 → 채점 완료 폴링까지의 흐름. */
 export function ExamReanswerPanel({
   examId,
   questionNumber,
+  totalRetryCount,
+  onNavigateRetry,
   onUnsavedChange,
 }: {
   examId: string;
   questionNumber: number;
+  /** 최초 응시를 포함한 지금까지의 전체 시도 횟수 — 다음 재시도의 retryCount(0-base)와 같다. */
+  totalRetryCount: number;
+  /** 날개 버튼과 동일한 history.replaceState 기반 회차 전환 콜백 — 채점 완료 시 새 회차로 넘어갈 때도 재사용한다. */
+  onNavigateRetry: (nextRetryCount: number) => void;
   /** 녹음 중이거나 아직 제출하지 않은 녹음본이 있는 동안 true — 탭/회차 이동 시 경고 여부 판단용. */
   onUnsavedChange?: (hasUnsaved: boolean) => void;
 }) {
@@ -31,10 +38,32 @@ export function ExamReanswerPanel({
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [status, setStatus] = useState<SubmitStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [pollingRetryCount, setPollingRetryCount] = useState<number | null>(null);
 
   useEffect(() => {
-    onUnsavedChange?.(isRecording || (recordedBlob !== null && status !== "submitted"));
+    onUnsavedChange?.(isRecording || (recordedBlob !== null && status !== "grading"));
   }, [isRecording, recordedBlob, status, onUnsavedChange]);
+
+  // 날개 버튼과 동일하게 history.replaceState 기반 onNavigateRetry로 다음 회차 결과를 보여준다
+  // (router.push/replace는 App Router 리로드/리마운트를 유발해 크로스페이드 전환과 충돌한다).
+  const handleGradingComplete = useCallback(() => {
+    if (pollingRetryCount === null) return;
+    onNavigateRetry(pollingRetryCount);
+  }, [pollingRetryCount, onNavigateRetry]);
+
+  const handleGradingFailed = useCallback(() => {
+    setPollingRetryCount(null);
+    setStatus("error");
+    setErrorMessage("채점 결과를 확인하지 못했어요. 결과 페이지를 새로고침해서 확인해 주세요.");
+  }, []);
+
+  useQuestionRetryStatus(
+    examId,
+    questionNumber,
+    pollingRetryCount,
+    handleGradingComplete,
+    handleGradingFailed,
+  );
 
   async function handleStartRecording() {
     try {
@@ -53,9 +82,11 @@ export function ExamReanswerPanel({
     if (!recordedBlob) return;
     setStatus("submitting");
     setErrorMessage(null);
+    const nextRetryCount = totalRetryCount;
     try {
-      await uploadExamAnswer(examId, String(questionNumber), recordedBlob);
-      setStatus("submitted");
+      await uploadExamAnswer(examId, String(questionNumber), recordedBlob, nextRetryCount);
+      setStatus("grading");
+      setPollingRetryCount(nextRetryCount);
     } catch (err) {
       setStatus("error");
       setErrorMessage(
@@ -70,6 +101,7 @@ export function ExamReanswerPanel({
     setRecordedBlob(null);
     setStatus("idle");
     setErrorMessage(null);
+    setPollingRetryCount(null);
   }
 
   return (
@@ -96,13 +128,14 @@ export function ExamReanswerPanel({
         </div>
       )}
 
-      {status === "submitted" ? (
-        <div className="flex flex-col items-center gap-1 rounded-2xl bg-emerald-50 p-6 text-center ring-1 ring-emerald-100">
-          <span className="text-sm font-semibold text-emerald-700 lg:text-base">
-            제출했어요! 채점이 끝나면 결과를 확인할 수 있어요.
+      {status === "grading" ? (
+        <div className="flex flex-col items-center gap-1 rounded-2xl bg-orange-50 p-6 text-center ring-1 ring-orange-100">
+          <span className="size-5 animate-spin rounded-full border-2 border-orange-200 border-t-orange-500" />
+          <span className="mt-1 text-sm font-semibold text-orange-600 lg:text-base">
+            제출했어요! 채점 중이에요...
           </span>
-          <span className="text-xs text-emerald-600">
-            잠시 후 새로고침해서 확인해 보세요.
+          <span className="text-xs text-orange-500">
+            채점이 끝나면 자동으로 결과를 보여드릴게요.
           </span>
         </div>
       ) : (

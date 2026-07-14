@@ -199,6 +199,29 @@
   }
 }
 
+/**
+ * 문제별 피드백 콘텐츠가 새 회차로 바뀔 때(제출 후 자동 전환, 날개 버튼 이동) 이전 콘텐츠는 사라지고
+ * 새 콘텐츠는 동시에 나타나는 크로스페이드. animationend에서 정리 로직이 도는 요소가 있으므로,
+ * prefers-reduced-motion에서도 animation-duration만 줄이고 keyframe 자체는 유지한다(이벤트가 안 끊기게).
+ */
+@keyframes exam-page-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes exam-page-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 .no-scrollbar {
   scrollbar-width: none;
   -ms-overflow-style: none;

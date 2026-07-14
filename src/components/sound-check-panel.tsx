@@ -76,7 +76,7 @@ export function SoundCheckPanel({ onCompleted }: { onCompleted: () => void }) {
   };
 
   return (
-    <section className="flex w-full flex-col gap-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-zinc-100">
+    <section className="flex w-full flex-col gap-6 rounded-xl bg-white p-6 shadow-sm ring-1 ring-zinc-100">
       <div className="flex flex-col items-center gap-1 text-center">
         <h2 className="text-base font-bold text-orange-500">사운드 체크</h2>
         <p
@@ -161,7 +161,7 @@ export function SoundCheckPanel({ onCompleted }: { onCompleted: () => void }) {
           size="lg"
           onClick={onCompleted}
           disabled={!hasPlayed}
-          className="h-14 w-full flex-col gap-0.5 rounded-full bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-40"
+          className="h-14 w-full flex-col gap-0.5 rounded-xl bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-40"
         >
           <span className="text-base font-semibold">
             {showQuietNotice ? "조용한 환경에서 모의고사 응시하기" : "모의고사 시작하기"}

@@ -247,7 +247,7 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
   };
 
   return (
-    <section className="flex w-full flex-col gap-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-zinc-100">
+    <section className="flex w-full flex-col gap-6 rounded-xl bg-white p-6 shadow-sm ring-1 ring-zinc-100">
       <div className="flex flex-col items-center gap-1 text-center">
         <h2 className="text-base font-bold text-orange-500">마이크 테스트</h2>
         <p
@@ -330,7 +330,7 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
           <Button
             size="lg"
             onClick={handleNext}
-            className="h-14 w-full flex-col gap-0.5 rounded-full bg-orange-500 text-white hover:bg-orange-600"
+            className="h-14 w-full flex-col gap-0.5 rounded-xl bg-orange-500 text-white hover:bg-orange-600"
           >
             <span className="text-base font-semibold">다음: 사운드 체크</span>
             <span className="text-xs font-normal opacity-80">

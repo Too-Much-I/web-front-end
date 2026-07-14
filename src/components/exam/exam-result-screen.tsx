@@ -232,6 +232,7 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
 
                   <div className="rounded-2xl rounded-tl-none bg-white p-5 text-left shadow-sm lg:p-7">
                     <p className="rounded-xl bg-sky-50 p-3 text-sm leading-relaxed text-sky-900 ring-1 ring-sky-100 lg:text-base">
+                      <span aria-hidden className="float-right h-4 w-14 lg:h-5 lg:w-16" />
                       {part.feedback}
                     </p>
 

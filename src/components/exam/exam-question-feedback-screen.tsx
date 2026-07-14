@@ -538,6 +538,8 @@ export function ExamQuestionFeedbackScreen({
           <ExamReanswerPanel
             examId={examId}
             questionNumber={detail.questionNumber}
+            totalRetryCount={detail.totalRetryCount}
+            onNavigateRetry={handleNavigateRetry}
             onUnsavedChange={setHasUnsavedRecording}
           />
         </TabsContent>

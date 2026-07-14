@@ -48,10 +48,16 @@ function ScoredWord({
   const isSpeaking = currentTimeSec >= startSec && currentTimeSec < endSec;
   const isPlayed = currentTimeSec >= endSec;
 
-  const wordClassName = `inline-block rounded-[3px] px-0.5 transition-[transform,opacity] duration-150 ease-out ${
-    isSpeaking ? "scale-125" : "scale-100"
+  const wordClassName = `relative inline-block rounded-[3px] px-0.5 transition-[transform,opacity] duration-150 ease-out ${
+    isSpeaking ? "z-10 scale-125" : "scale-100"
   } ${isPlayed ? "opacity-50" : "opacity-100"}`;
-  const wordStyle = color ? { backgroundColor: toHighlightColor(color) } : undefined;
+  // 확대되는 동안(scale-125)은 transform이라 옆 글자와 레이아웃상 겹치므로, 불투명 배경으로
+  // 옆 단어 위에 확실히 떠 보이게 한다. 평소엔 형광펜처럼 반투명 하이라이트만 쓴다.
+  const wordStyle = isSpeaking
+    ? { backgroundColor: color ?? "#fdfaf1" }
+    : color
+      ? { backgroundColor: toHighlightColor(color) }
+      : undefined;
 
   return (
     <Tooltip>
