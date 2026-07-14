@@ -81,7 +81,8 @@ function ExamQuestionFeedbackLoader({
       {outgoingDetail && (
         <div
           key={`out-${outgoingDetail.retryCount}`}
-          className="absolute inset-0 animate-[exam-page-fade-out_200ms_ease-in_forwards] motion-reduce:[animation-duration:0.01ms]"
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 animate-[exam-page-fade-out_200ms_ease-in_forwards] motion-reduce:[animation-duration:0.01ms]"
           onAnimationEnd={() => setOutgoingDetail(null)}
         >
           <ExamQuestionFeedbackScreen

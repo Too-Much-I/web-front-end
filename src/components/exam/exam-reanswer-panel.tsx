@@ -2,7 +2,6 @@
 
 import { Mic, Square } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import {
@@ -22,16 +21,18 @@ export function ExamReanswerPanel({
   examId,
   questionNumber,
   totalRetryCount,
+  onNavigateRetry,
   onUnsavedChange,
 }: {
   examId: string;
   questionNumber: number;
   /** 최초 응시를 포함한 지금까지의 전체 시도 횟수 — 다음 재시도의 retryCount(0-base)와 같다. */
   totalRetryCount: number;
+  /** 날개 버튼과 동일한 history.replaceState 기반 회차 전환 콜백 — 채점 완료 시 새 회차로 넘어갈 때도 재사용한다. */
+  onNavigateRetry: (nextRetryCount: number) => void;
   /** 녹음 중이거나 아직 제출하지 않은 녹음본이 있는 동안 true — 탭/회차 이동 시 경고 여부 판단용. */
   onUnsavedChange?: (hasUnsaved: boolean) => void;
 }) {
-  const router = useRouter();
   const { isRecording, startRecording, stopRecording, levelBarRefs } =
     useAnswerRecorder();
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
@@ -43,14 +44,12 @@ export function ExamReanswerPanel({
     onUnsavedChange?.(isRecording || (recordedBlob !== null && status !== "grading"));
   }, [isRecording, recordedBlob, status, onUnsavedChange]);
 
-  // 채점이 끝나면 날개 버튼의 조용한 history.replaceState 방식이 아니라, 채점 대기 화면이 결과
-  // 페이지로 넘어갈 때와 같은 실제 페이지 전환(router.replace)으로 다음 회차 결과를 보여준다.
+  // 날개 버튼과 동일하게 history.replaceState 기반 onNavigateRetry로 다음 회차 결과를 보여준다
+  // (router.push/replace는 App Router 리로드/리마운트를 유발해 크로스페이드 전환과 충돌한다).
   const handleGradingComplete = useCallback(() => {
     if (pollingRetryCount === null) return;
-    router.replace(
-      `/exam/result/question?examId=${encodeURIComponent(examId)}&questionNumber=${questionNumber}&retryCount=${pollingRetryCount}`,
-    );
-  }, [pollingRetryCount, router, examId, questionNumber]);
+    onNavigateRetry(pollingRetryCount);
+  }, [pollingRetryCount, onNavigateRetry]);
 
   const handleGradingFailed = useCallback(() => {
     setPollingRetryCount(null);
