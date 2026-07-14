@@ -212,12 +212,13 @@ export interface RawExamQuestionInfo {
 export interface RawExamQuestionDetail {
   partNumber: number;
   questionNumber: number;
-  /**
-   * 지금 조회 중인 회차로 추정 — 최초 응시가 0이고 재답변마다 1씩 늘어나는 것으로 보이나,
-   * 백엔드와 정확한 의미(0-base 여부, totalRetryCount와의 관계)를 확인 필요.
-   */
+  /** 지금 조회 중인 회차. 최초 응시가 0-base 인덱스 0이고, 재답변마다 1씩 늘어난다. */
   retryCount: number;
-  /** 지금까지 쌓인 전체 재답변 횟수로 추정 (최초 응시 제외 여부 확인 필요). */
+  /**
+   * 최초 응시를 포함한 전체 시도 "횟수"(1부터 시작 — 실제 응답으로 확인됨: 재시도가 전혀
+   * 없는 문제도 1로 내려온다). retryCount가 0-base 인덱스이므로 유효한 마지막 인덱스는
+   * totalRetryCount - 1이다.
+   */
   totalRetryCount: number;
   audioUrl: string;
   score: number;
