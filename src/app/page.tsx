@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 export default function Home() {
   return (
     <div className="flex flex-1 flex-col bg-orange-50/40">
-      <header className="flex items-center justify-between px-6 py-5 sm:px-10">
+      <header className="sticky top-0 z-50 flex items-center justify-between bg-orange-50 px-6 py-5 sm:px-10">
         <div className="flex items-center gap-2">
           <Image
             src="/logo.png"
