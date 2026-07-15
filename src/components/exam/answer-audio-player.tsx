@@ -2,7 +2,13 @@
 
 import { ChevronDown, Pause, Play } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import {
+  type Ref,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 const PLAYBACK_RATES = [0.75, 1, 1.25, 1.5, 2] as const;
 /** 파형을 이 해상도로 디코딩해두고, 실제 렌더링 막대 수는 컨테이너 폭에 맞춰 리샘플링한다. */
@@ -78,6 +84,11 @@ async function extractWaveformPeaks(
   }
 }
 
+/** 스크립트 단어 클릭 등 외부에서 특정 위치로 넘겨 재생을 시키기 위한 imperative handle. */
+export interface AnswerAudioPlayerHandle {
+  seekTo: (seconds: number) => void;
+}
+
 /**
  * 답변 녹음(내 발화) 재생 플레이어. 답변 시간은 문제별로 고정된 값(`durationSec`, TOEIC Speaking
  * 정규 시험 구성 기준)을 그대로 총 길이로 쓴다 — 실제 배포 전 제거될 QA 이동 바로 답변을 중간에
@@ -91,15 +102,26 @@ export function AnswerAudioPlayer({
   audioUrl,
   durationSec,
   onTimeUpdate,
+  ref,
 }: {
   audioUrl: string;
   durationSec: number;
   /** 재생 위치가 바뀔 때마다(초 단위) 호출된다 — 스크립트 단어 하이라이트 등 재생 위치 동기화용. */
   onTimeUpdate?: (seconds: number) => void;
+  ref?: Ref<AnswerAudioPlayerHandle>;
 }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const rateMenuRef = useRef<HTMLDivElement>(null);
   const waveformRef = useRef<HTMLButtonElement>(null);
+
+  useImperativeHandle(ref, () => ({
+    seekTo(seconds: number) {
+      const audio = audioRef.current;
+      if (!audio) return;
+      audio.currentTime = seconds;
+      audio.play();
+    },
+  }));
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);

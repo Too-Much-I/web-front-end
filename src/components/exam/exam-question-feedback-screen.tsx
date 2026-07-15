@@ -5,7 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
 
-import { AnswerAudioPlayer } from "@/components/exam/answer-audio-player";
+import {
+  AnswerAudioPlayer,
+  type AnswerAudioPlayerHandle,
+} from "@/components/exam/answer-audio-player";
 import { ExamMarkedTranscript } from "@/components/exam/exam-marked-transcript";
 import { ExamPriorityPanel } from "@/components/exam/exam-priority-panel";
 import { ExamPronunciationTranscript } from "@/components/exam/exam-pronunciation-transcript";
@@ -206,6 +209,7 @@ export function ExamQuestionFeedbackScreen({
   );
   const [isBetaTooltipOpen, setIsBetaTooltipOpen] = useState(false);
   const [answerPlaybackTime, setAnswerPlaybackTime] = useState(0);
+  const audioPlayerRef = useRef<AnswerAudioPlayerHandle>(null);
   const mainRingRef = useRef<HTMLDivElement>(null);
   const mainRingRevealed = useRevealOnScroll(mainRingRef);
   const subRingsRef = useRef<HTMLDivElement>(null);
@@ -388,6 +392,7 @@ export function ExamQuestionFeedbackScreen({
               </span>
               <div className="mt-3">
                 <AnswerAudioPlayer
+                  ref={audioPlayerRef}
                   audioUrl={detail.audioUrl}
                   durationSec={speakTimeSec}
                   onTimeUpdate={setAnswerPlaybackTime}
@@ -405,6 +410,7 @@ export function ExamQuestionFeedbackScreen({
             <ExamPronunciationTranscript
               spokenWordSequence={detail.spokenWordSequence}
               currentTimeSec={answerPlaybackTime}
+              onWordClick={(sec) => audioPlayerRef.current?.seekTo(sec)}
             />
           ) : (
             <div className="rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
