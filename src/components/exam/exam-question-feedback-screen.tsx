@@ -630,48 +630,6 @@ export function ExamQuestionFeedbackScreen({
             </div>
           )}
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
-            <div className="relative rounded-3xl bg-white p-6 lg:p-8">
-              <SketchyDashBorder />
-              <span
-                className={`${jua.className} inline-flex items-center gap-1.5 text-base text-blue-950 lg:text-lg`}
-              >
-                <ThumbsUp className="size-4 text-orange-500" aria-hidden />
-                강점
-              </span>
-              <ul className="mt-4 flex flex-col gap-2">
-                {detail.feedback.strengths.map((item, i) => (
-                  <li
-                    key={i}
-                    className="rounded-xl bg-zinc-50 p-3 text-sm leading-relaxed text-zinc-700 ring-1 ring-zinc-100 lg:text-base"
-                  >
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="relative rounded-3xl bg-white p-6 lg:p-8">
-              <SketchyDashBorder />
-              <span
-                className={`${jua.className} inline-flex items-center gap-1.5 text-base text-blue-950 lg:text-lg`}
-              >
-                <TriangleAlert className="size-4 text-orange-500" aria-hidden />
-                보완 필요
-              </span>
-              <ul className="mt-4 flex flex-col gap-2">
-                {detail.feedback.weaknesses.map((item, i) => (
-                  <li
-                    key={i}
-                    className="rounded-xl bg-zinc-50 p-3 text-sm leading-relaxed text-zinc-700 ring-1 ring-zinc-100 lg:text-base"
-                  >
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
           <div className="flex flex-col gap-4 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
             <span
               className={`${jua.className} text-base text-blue-950 lg:text-lg`}
@@ -733,6 +691,48 @@ export function ExamQuestionFeedbackScreen({
           />
         </TabsContent>
       </Tabs>
+
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
+        <div className="relative rounded-3xl bg-white p-6 lg:p-8">
+          <SketchyDashBorder />
+          <span
+            className={`${jua.className} inline-flex items-center gap-1.5 text-base text-blue-950 lg:text-lg`}
+          >
+            <ThumbsUp className="size-4 text-orange-500" aria-hidden />
+            강점
+          </span>
+          <ul className="mt-4 flex flex-col gap-2">
+            {detail.feedback.strengths.map((item, i) => (
+              <li
+                key={i}
+                className="rounded-xl bg-zinc-50 p-3 text-sm leading-relaxed text-zinc-700 ring-1 ring-zinc-100 lg:text-base"
+              >
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="relative rounded-3xl bg-white p-6 lg:p-8">
+          <SketchyDashBorder />
+          <span
+            className={`${jua.className} inline-flex items-center gap-1.5 text-base text-blue-950 lg:text-lg`}
+          >
+            <TriangleAlert className="size-4 text-orange-500" aria-hidden />
+            보완 필요
+          </span>
+          <ul className="mt-4 flex flex-col gap-2">
+            {detail.feedback.weaknesses.map((item, i) => (
+              <li
+                key={i}
+                className="rounded-xl bg-zinc-50 p-3 text-sm leading-relaxed text-zinc-700 ring-1 ring-zinc-100 lg:text-base"
+              >
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
 
       {/* 전체 모의고사 사용자는 요약 결과 화면(/exam/result)에서 이미 이 팝업을 봤으므로,
           여기서는 종합 결과 화면을 거치지 않는 맛보기 플로우에서만 보여준다. */}
