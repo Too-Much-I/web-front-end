@@ -408,32 +408,66 @@ export function ExamQuestionFeedbackScreen({
             ref={mainRingRef}
             className="mt-8 flex flex-wrap items-center justify-center gap-3"
           >
-            <button
-              type="button"
-              onClick={toggleShowSubScores}
-              aria-pressed={showSubScores}
-              aria-label={
-                showSubScores ? "전체 점수로 보기" : "세부 평가 지표로 보기"
-              }
+            {/* 두 상태를 같은 그리드 셀에 겹쳐 두고 보이지 않는 쪽은 visibility로만 숨겨서,
+                토글해도 칠판 높이가 더 큰 쪽 기준으로 고정되도록 한다. */}
+            <div
               style={{ viewTransitionName: "exam-score-display" }}
-              className="relative flex cursor-pointer items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
+              className="relative grid place-items-center"
             >
-              {showSubScores ? (
-                <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
-                  <ScoreCircleStat
-                    label="발음 & 유창성"
-                    ratio={
-                      detail.feedback.pronunciationFluencyScore /
-                      PRONUNCIATION_FLUENCY_MAX
-                    }
-                    size={96}
-                    strokeWidth={9}
-                    trackClassName="stroke-white/15"
-                    progressClassName="stroke-amber-300"
-                    valueClassName="absolute text-sm font-bold text-amber-50"
-                    labelClassName="w-20 text-center text-[11px] leading-tight font-semibold text-white/60"
-                  />
-                  {detail.feedback.contentRelevanceScore === null ? (
+              <button
+                type="button"
+                onClick={toggleShowSubScores}
+                aria-pressed={showSubScores}
+                aria-label="세부 평가 지표로 보기"
+                className={`relative col-start-1 row-start-1 flex cursor-pointer items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-amber-300 ${
+                  showSubScores ? "invisible" : ""
+                }`}
+              >
+                <ScoreRing
+                  percent={mainRingRevealed ? scorePercent : 0}
+                  size={140}
+                  strokeWidth={12}
+                  trackClassName="stroke-white/15"
+                  progressClassName="stroke-amber-300"
+                />
+                <div className="absolute flex flex-col items-center">
+                  <span
+                    className={`${jua.className} text-4xl text-amber-50 lg:text-5xl`}
+                  >
+                    {detail.score}
+                  </span>
+                  <span
+                    className={`${jua.className} text-sm text-white/60 lg:text-base`}
+                  >
+                    / {detail.maxScore}
+                  </span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={toggleShowSubScores}
+                aria-pressed={showSubScores}
+                aria-label="전체 점수로 보기"
+                className={`col-start-1 row-start-1 flex cursor-pointer flex-col items-center gap-3 outline-none focus-visible:ring-2 focus-visible:ring-amber-300 sm:flex-row sm:gap-4 ${
+                  showSubScores ? "" : "invisible"
+                }`}
+              >
+                <ScoreCircleStat
+                  label="발음 & 유창성"
+                  ratio={
+                    detail.feedback.pronunciationFluencyScore /
+                    PRONUNCIATION_FLUENCY_MAX
+                  }
+                  size={96}
+                  strokeWidth={9}
+                  trackClassName="stroke-white/15"
+                  progressClassName="stroke-amber-300"
+                  valueClassName="absolute text-sm font-bold text-amber-50"
+                  labelClassName="w-20 text-center text-[11px] leading-tight font-semibold text-white/60"
+                />
+                {detail.partNumber !== 1 &&
+                  (detail.feedback.contentRelevanceScore === null ? (
                     <div className="flex flex-col items-center gap-1.5">
                       <div
                         className="relative flex items-center justify-center"
@@ -468,43 +502,20 @@ export function ExamQuestionFeedbackScreen({
                       valueClassName="absolute text-sm font-bold text-amber-50"
                       labelClassName="w-20 text-center text-[11px] leading-tight font-semibold text-white/60"
                     />
-                  )}
-                </div>
-              ) : (
-                <>
-                  <ScoreRing
-                    percent={mainRingRevealed ? scorePercent : 0}
-                    size={140}
-                    strokeWidth={12}
-                    trackClassName="stroke-white/15"
-                    progressClassName="stroke-amber-300"
-                  />
-                  <div className="absolute flex flex-col items-center">
-                    <span
-                      className={`${jua.className} text-4xl text-amber-50 lg:text-5xl`}
-                    >
-                      {detail.score}
-                    </span>
-                    <span
-                      className={`${jua.className} text-sm text-white/60 lg:text-base`}
-                    >
-                      / {detail.maxScore}
-                    </span>
-                  </div>
-                </>
-              )}
-            </button>
+                  ))}
+              </button>
+            </div>
 
-            {!showSubScores && (
-              <div className="flex items-center gap-1.5">
-                <HintArrow className="h-8 w-10 shrink-0 text-amber-300" />
-                <span
-                  className={`${jua.className} max-w-32 text-sm leading-tight text-amber-200`}
-                >
-                  그래프를 클릭하면 세부 평가 지표가 보여요
-                </span>
-              </div>
-            )}
+            <div
+              className={`flex items-center gap-1.5 ${showSubScores ? "invisible" : ""}`}
+            >
+              <HintArrow className="h-8 w-10 shrink-0 text-amber-300" />
+              <span
+                className={`${jua.className} max-w-32 text-sm leading-tight text-amber-200`}
+              >
+                그래프를 클릭하면 세부 평가 지표가 보여요
+              </span>
+            </div>
           </div>
 
           <TypedText
