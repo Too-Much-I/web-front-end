@@ -222,6 +222,18 @@
   }
 }
 
+/** 모범·추천답안 토글 시 이전 답안이 즉시 스냅되지 않고 방향에 맞춰 슬라이드 인. --exam-model-answer-slide-x로 좌우 방향을 정한다. */
+@keyframes exam-model-answer-slide {
+  from {
+    transform: translateX(var(--exam-model-answer-slide-x, 12px));
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 .no-scrollbar {
   scrollbar-width: none;
   -ms-overflow-style: none;

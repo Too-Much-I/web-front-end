@@ -18,9 +18,9 @@ const FALLBACK_RAW_PEAKS = Array(RAW_PEAK_COUNT).fill(0.3);
 const MIN_BAR_SLOT_PX = 4;
 const MIN_BAR_COUNT = 12;
 /** 말하는 토끼 아이콘 크기를 파형 트랙 실측 폭에 비례해 정한다 — 화면이 넓을수록 커지고, 좁을수록 최소 크기로 수렴한다. */
-const RABBIT_SIZE_RATIO = 0.11;
-const MIN_RABBIT_SIZE_PX = 26;
-const MAX_RABBIT_SIZE_PX = 56;
+const RABBIT_SIZE_RATIO = 0.14;
+const MIN_RABBIT_SIZE_PX = 32;
+const MAX_RABBIT_SIZE_PX = 68;
 
 function resamplePeaks(rawPeaks: number[], targetCount: number): number[] {
   if (targetCount <= 0 || rawPeaks.length === 0) return [];
