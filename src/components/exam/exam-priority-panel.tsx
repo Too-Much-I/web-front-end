@@ -1,12 +1,17 @@
 import Image from "next/image";
 
+import {
+  normalizeSeverity,
+  type Severity,
+} from "@/components/exam/exam-marked-transcript";
+import { jua } from "@/lib/fonts";
 import type { ExamCorrectionItem } from "@/types/exam";
 
-const SEVERITY_ORDER: ExamCorrectionItem["severity"][] = ["high", "medium", "low"];
+const SEVERITY_ORDER: Severity[] = ["high", "medium", "low"];
 
 /** 심각도는 색을 늘리지 않고 주황의 진한 정도로만 구분한다. */
 const SEVERITY_META: Record<
-  ExamCorrectionItem["severity"],
+  Severity,
   { label: string; dotClassName: string; chipClassName: string }
 > = {
   high: {
@@ -39,17 +44,17 @@ export function ExamPriorityPanel({
 }) {
   const counts = correctionItems.reduce(
     (acc, item) => {
-      acc[item.severity] += 1;
+      acc[normalizeSeverity(item.severity)] += 1;
       return acc;
     },
-    { high: 0, medium: 0, low: 0 } as Record<ExamCorrectionItem["severity"], number>,
+    { high: 0, medium: 0, low: 0 } as Record<Severity, number>,
   );
   const hasIssues = correctionItems.length > 0;
 
   return (
     <div className="mt-6 flex flex-col gap-4 rounded-3xl bg-white p-5 shadow-md ring-1 ring-zinc-100">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <span className="text-sm font-bold text-blue-950">
+        <span className={`${jua.className} text-base text-blue-950`}>
           {hasIssues ? "수정이 필요해요" : "고칠 부분이 없어요"}
         </span>
         {hasIssues && (
@@ -59,7 +64,9 @@ export function ExamPriorityPanel({
                 key={sev}
                 className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${SEVERITY_META[sev].chipClassName}`}
               >
-                <span className={`size-1.5 rounded-full ${SEVERITY_META[sev].dotClassName}`} />
+                <span
+                  className={`size-1.5 rounded-full ${SEVERITY_META[sev].dotClassName}`}
+                />
                 {SEVERITY_META[sev].label} {counts[sev]}
               </span>
             ))}
@@ -80,7 +87,7 @@ export function ExamPriorityPanel({
           </div>
           <div className="relative flex-1 rounded-2xl bg-orange-50 p-4 ring-1 ring-orange-100">
             <div className="absolute bottom-3 -left-2.5 h-3 w-2.5 bg-orange-50 [clip-path:polygon(100%_0%,100%_100%,0%_100%)]" />
-            <span className="text-xs font-bold text-orange-600">
+            <span className={`${jua.className} text-sm text-orange-600`}>
               토선생의 한마디
             </span>
             <p className="mt-1 text-sm leading-relaxed text-zinc-700">

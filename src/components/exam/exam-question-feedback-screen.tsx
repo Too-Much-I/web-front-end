@@ -105,7 +105,9 @@ function ScoreCircleStat({ label, ratio }: { label: string; ratio: number }) {
           {Math.round(percent)}%
         </span>
       </div>
-      <span className="text-xs font-semibold text-zinc-500 lg:text-sm">{label}</span>
+      <span className="text-xs font-semibold text-zinc-500 lg:text-sm">
+        {label}
+      </span>
     </div>
   );
 }
@@ -113,7 +115,9 @@ function ScoreCircleStat({ label, ratio }: { label: string; ratio: number }) {
 function DetailBlock({ title, body }: { title: string; body: string }) {
   return (
     <div className="rounded-2xl bg-sky-50 p-4 ring-1 ring-sky-100 lg:p-5">
-      <p className="text-xs font-bold text-sky-700 lg:text-sm">{title}</p>
+      <p className={`${jua.className} text-sm text-sky-700 lg:text-base`}>
+        {title}
+      </p>
       <p className="mt-1.5 text-sm leading-relaxed text-sky-900 lg:text-base">
         {body}
       </p>
@@ -222,7 +226,9 @@ export function ExamQuestionFeedbackScreen({
 
   function handleTabChange(next: TabValue) {
     if (!confirmDiscardUnsavedRecording()) return;
-    setSlideDir(TAB_VALUES.indexOf(next) > TAB_VALUES.indexOf(activeTab) ? 1 : -1);
+    setSlideDir(
+      TAB_VALUES.indexOf(next) > TAB_VALUES.indexOf(activeTab) ? 1 : -1,
+    );
     setActiveTab(next);
   }
 
@@ -266,8 +272,8 @@ export function ExamQuestionFeedbackScreen({
               />
             </TooltipTrigger>
             <TooltipContent side="right" align="start">
-              현재 POC 단계에서 채점 결과에 부정확한 내용이 있을 수 있어요.
-              정식 출시 시 더 정확한 채점을 제공해 드릴게요.
+              현재 POC 단계에서 채점 결과에 부정확한 내용이 있을 수 있어요. 정식
+              출시 시 더 정확한 채점을 제공해 드릴게요.
             </TooltipContent>
           </Tooltip>
 
@@ -275,7 +281,9 @@ export function ExamQuestionFeedbackScreen({
             <p className="text-sm font-semibold tracking-wide text-orange-600 lg:text-base">
               Part {detail.partNumber} · {partMeta.titleKo}
             </p>
-            <h1 className="mt-1 text-2xl font-bold text-blue-950 sm:text-3xl lg:text-4xl">
+            <h1
+              className={`${jua.className} mt-1 text-3xl text-blue-950 sm:text-4xl lg:text-5xl`}
+            >
               문제 {detail.questionNumber}번 피드백
             </h1>
           </div>
@@ -298,7 +306,9 @@ export function ExamQuestionFeedbackScreen({
 
         <div className="relative rounded-3xl border-[10px] border-amber-900 bg-emerald-950 py-6 pr-6 pl-32 shadow-xl sm:pl-36 lg:p-10 lg:pl-40">
           <div className="absolute -top-5 left-4 z-20 -rotate-3 rounded-lg bg-amber-400 px-4 py-2 shadow-md">
-            <span className={`${jua.className} text-lg text-emerald-950 lg:text-xl`}>
+            <span
+              className={`${jua.className} text-lg text-emerald-950 lg:text-xl`}
+            >
               이 문제 점수
             </span>
           </div>
@@ -312,10 +322,14 @@ export function ExamQuestionFeedbackScreen({
                 progressClassName="stroke-amber-300"
               />
               <div className="absolute flex flex-col items-center">
-                <span className={`${jua.className} text-4xl text-amber-50 lg:text-5xl`}>
+                <span
+                  className={`${jua.className} text-4xl text-amber-50 lg:text-5xl`}
+                >
                   {detail.score}
                 </span>
-                <span className={`${jua.className} text-sm text-white/60 lg:text-base`}>
+                <span
+                  className={`${jua.className} text-sm text-white/60 lg:text-base`}
+                >
                   / {detail.maxScore}
                 </span>
               </div>
@@ -335,13 +349,18 @@ export function ExamQuestionFeedbackScreen({
         value={activeTab}
         onValueChange={(value) => handleTabChange(value as TabValue)}
         className="mt-6"
-        style={{ "--exam-tab-slide-x": `${slideDir * 16}px` } as React.CSSProperties}
+        style={
+          { "--exam-tab-slide-x": `${slideDir * 16}px` } as React.CSSProperties
+        }
       >
         <TabsList className="h-auto w-full gap-1 bg-zinc-100 p-1">
           <TabsTrigger value="my-answer" className="h-9 text-sm lg:text-base">
             내 답변
           </TabsTrigger>
-          <TabsTrigger value="model-answer" className="h-9 text-sm lg:text-base">
+          <TabsTrigger
+            value="model-answer"
+            className="h-9 text-sm lg:text-base"
+          >
             모범·추천답안
           </TabsTrigger>
           <TabsTrigger value="reanswer" className="h-9 text-sm lg:text-base">
@@ -362,7 +381,9 @@ export function ExamQuestionFeedbackScreen({
 
           {detail.audioUrl && (
             <div className="rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
-              <span className="text-sm font-bold text-blue-950 lg:text-base">
+              <span
+                className={`${jua.className} text-base text-blue-950 lg:text-lg`}
+              >
                 내 답변 음성
               </span>
               <div className="mt-3">
@@ -387,7 +408,9 @@ export function ExamQuestionFeedbackScreen({
             />
           ) : (
             <div className="rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
-              <span className="text-sm font-bold text-blue-950 lg:text-base">
+              <span
+                className={`${jua.className} text-base text-blue-950 lg:text-lg`}
+              >
                 답변 스크립트
               </span>
               <div className="mt-3 flex flex-col items-center justify-center gap-2 rounded-2xl bg-zinc-50 p-6 text-center ring-1 ring-zinc-100">
@@ -415,7 +438,8 @@ export function ExamQuestionFeedbackScreen({
               label="발음 & 유창성"
               ratio={
                 subRingsRevealed
-                  ? detail.feedback.pronunciationFluencyScore / PRONUNCIATION_FLUENCY_MAX
+                  ? detail.feedback.pronunciationFluencyScore /
+                    PRONUNCIATION_FLUENCY_MAX
                   : 0
               }
             />
@@ -452,7 +476,9 @@ export function ExamQuestionFeedbackScreen({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
             <div className="relative rounded-3xl bg-white p-6 lg:p-8">
               <SketchyDashBorder />
-              <span className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-950 lg:text-base">
+              <span
+                className={`${jua.className} inline-flex items-center gap-1.5 text-base text-blue-950 lg:text-lg`}
+              >
                 <ThumbsUp className="size-4 text-orange-500" aria-hidden />
                 강점
               </span>
@@ -470,7 +496,9 @@ export function ExamQuestionFeedbackScreen({
 
             <div className="relative rounded-3xl bg-white p-6 lg:p-8">
               <SketchyDashBorder />
-              <span className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-950 lg:text-base">
+              <span
+                className={`${jua.className} inline-flex items-center gap-1.5 text-base text-blue-950 lg:text-lg`}
+              >
                 <TriangleAlert className="size-4 text-orange-500" aria-hidden />
                 보완 필요
               </span>
@@ -488,7 +516,9 @@ export function ExamQuestionFeedbackScreen({
           </div>
 
           <div className="flex flex-col gap-4 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
-            <span className="text-sm font-bold text-blue-950 lg:text-base">
+            <span
+              className={`${jua.className} text-base text-blue-950 lg:text-lg`}
+            >
               세부 피드백
             </span>
             <DetailBlock title="발음" body={detail.feedback.pronunciation} />
@@ -505,7 +535,9 @@ export function ExamQuestionFeedbackScreen({
           </div>
 
           <div className="rounded-3xl bg-orange-50 p-6 ring-1 ring-orange-100 lg:p-8">
-            <span className="text-sm font-bold text-blue-950 lg:text-base">
+            <span
+              className={`${jua.className} text-base text-blue-950 lg:text-lg`}
+            >
               실천 과제
             </span>
             <ol className="mt-4 flex flex-col gap-3">

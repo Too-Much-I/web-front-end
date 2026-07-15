@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+import { jua } from "@/lib/fonts";
 import type { ExamQuestionInfo } from "@/types/exam";
 
 /** 문제별 피드백 화면에서 문제 원문을 파트별 구성 요소(지문 소개/읽기 지문/사진/표/질문)에 맞춰 보여준다. */
@@ -10,11 +11,15 @@ export function ExamQuestionPrompt({
 }) {
   return (
     <div className="mt-6 flex flex-col gap-4 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
-      <span className="text-sm font-bold text-blue-950 lg:text-base">문제</span>
+      <span className={`${jua.className} text-base text-blue-950 lg:text-lg`}>
+        문제
+      </span>
 
       {questionInfo.partNumber === 3 && questionInfo.partIntroText && (
         <div className="rounded-2xl bg-sky-50 p-4 ring-1 ring-sky-100 lg:p-5">
-          <p className="text-xs font-bold text-sky-700 lg:text-sm">지문 소개</p>
+          <p className={`${jua.className} text-sm text-sky-700 lg:text-base`}>
+            지문 소개
+          </p>
           <p className="mt-1.5 text-sm leading-relaxed text-sky-900 lg:text-base">
             {questionInfo.partIntroText}
           </p>
@@ -23,7 +28,7 @@ export function ExamQuestionPrompt({
 
       {questionInfo.partNumber === 1 && questionInfo.referenceText && (
         <div>
-          <p className="text-xs font-bold text-slate-600 lg:text-sm">
+          <p className={`${jua.className} text-sm text-slate-600 lg:text-base`}>
             읽었던 지문
           </p>
           <div className="relative mt-2 overflow-hidden rounded-2xl bg-[#f4f7fb] ring-1 ring-slate-200">
@@ -61,14 +66,18 @@ export function ExamQuestionPrompt({
               {questionInfo.tableContext.title}
             </p>
             <p className="mt-0.5 text-xs text-zinc-500 lg:text-sm">
-              {questionInfo.tableContext.location} · {questionInfo.tableContext.date}{" "}
-              · Fee: {questionInfo.tableContext.fee}
+              {questionInfo.tableContext.location} ·{" "}
+              {questionInfo.tableContext.date} · Fee:{" "}
+              {questionInfo.tableContext.fee}
             </p>
           </div>
           <table className="w-full text-xs lg:text-sm">
             <tbody>
               {questionInfo.tableContext.items.map((item) => (
-                <tr key={item.time} className="border-b border-zinc-100 last:border-0">
+                <tr
+                  key={item.time}
+                  className="border-b border-zinc-100 last:border-0"
+                >
                   <td className="px-4 py-2 font-medium whitespace-nowrap text-zinc-500">
                     {item.time}
                   </td>

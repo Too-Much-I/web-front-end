@@ -1,14 +1,18 @@
 import { Fragment } from "react";
 
-import { SEVERITY_COLOR } from "@/components/exam/exam-marked-transcript";
+import {
+  SEVERITY_COLOR,
+  type Severity,
+} from "@/components/exam/exam-marked-transcript";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { ExamCorrectionItem, SpokenWord } from "@/types/exam";
+import { jua } from "@/lib/fonts";
+import type { SpokenWord } from "@/types/exam";
 
-type WordSeverity = ExamCorrectionItem["severity"];
+type WordSeverity = Severity;
 
 /** Azure 발음 평가(accuracyScore/errorType)를 기존 첨삭 색상 언어(주황 3단계)로 환산한다. */
 function getWordSeverity(word: SpokenWord): WordSeverity | null {
@@ -87,7 +91,9 @@ export function ExamPronunciationTranscript({
 }) {
   return (
     <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
-      <span className="text-sm font-bold text-blue-950">답변 스크립트</span>
+      <span className={`${jua.className} text-base text-blue-950`}>
+        답변 스크립트
+      </span>
 
       <div className="relative mt-3 overflow-hidden rounded-2xl bg-[#fdfaf1] pl-12 ring-1 ring-zinc-100">
         <div
@@ -102,7 +108,9 @@ export function ExamPronunciationTranscript({
           aria-hidden
           className="pointer-events-none absolute top-0 bottom-0 left-8 w-px bg-red-300/60"
         />
-        <p className="relative p-4 pl-4 text-base leading-7 text-zinc-800 sm:text-lg lg:text-xl">
+        <p
+          className={`${jua.className} relative p-4 pl-4 text-base leading-7 text-zinc-800 sm:text-lg lg:text-xl`}
+        >
           {spokenWordSequence.map((word, i) => (
             <Fragment key={i}>
               <ScoredWord word={word} currentTimeSec={currentTimeSec} />{" "}
@@ -119,7 +127,9 @@ export function ExamPronunciationTranscript({
           >
             <span
               className="h-3 w-4 rounded-[3px]"
-              style={{ backgroundColor: toHighlightColor(SEVERITY_COLOR[severity]) }}
+              style={{
+                backgroundColor: toHighlightColor(SEVERITY_COLOR[severity]),
+              }}
             />
             {WORD_ACTION_LABEL[severity]}
           </span>
