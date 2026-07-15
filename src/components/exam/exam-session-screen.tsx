@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { ExamDirectionsScreen } from "@/components/exam/exam-directions-screen";
@@ -249,6 +249,11 @@ export function ExamSessionScreen({
     window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
   }, [question, phase]);
 
+  const showTerminateConfirmRef = useRef(showTerminateConfirm);
+  useEffect(() => {
+    showTerminateConfirmRef.current = showTerminateConfirm;
+  }, [showTerminateConfirm]);
+
   useEffect(() => {
     // 시험 도중 브라우저/제스처 "뒤로가기"를 누르면 곧장 준비 화면으로 이동해버려
     // 진행 중이던 시험이 그대로 날아간다. 더미 history 엔트리를 하나 쌓아두고
@@ -257,6 +262,8 @@ export function ExamSessionScreen({
     window.history.pushState(null, "", window.location.href);
     const handlePopState = () => {
       window.history.pushState(null, "", window.location.href);
+      // 중단 확인 다이얼로그가 떠 있는 상태라면 뒤로가기 다이얼로그를 겹쳐 띄우지 않는다.
+      if (showTerminateConfirmRef.current) return;
       setShowExitConfirm(true);
     };
     window.addEventListener("popstate", handlePopState);
