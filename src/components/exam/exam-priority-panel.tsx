@@ -17,7 +17,7 @@ const SEVERITY_META: Record<
   high: {
     label: "심각",
     dotClassName: "bg-orange-600",
-    chipClassName: "bg-orange-600 text-white",
+    chipClassName: "bg-orange-200 text-orange-900",
   },
   medium: {
     label: "보통",
@@ -52,7 +52,7 @@ export function ExamPriorityPanel({
   const hasIssues = correctionItems.length > 0;
 
   return (
-    <div className="mt-6 flex flex-col gap-4 rounded-3xl bg-white p-5 shadow-md ring-1 ring-zinc-100">
+    <div className="flex h-full flex-col gap-4 rounded-3xl bg-white p-5 shadow-md ring-1 ring-zinc-100">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <span className={`${jua.className} text-base text-blue-950`}>
           {hasIssues ? "수정이 필요해요" : "고칠 부분이 없어요"}
