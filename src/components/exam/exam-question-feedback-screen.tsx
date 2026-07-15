@@ -629,46 +629,6 @@ export function ExamQuestionFeedbackScreen({
               </div>
             </div>
           )}
-
-          <div className="flex flex-col gap-4 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
-            <span
-              className={`${jua.className} text-base text-blue-950 lg:text-lg`}
-            >
-              세부 피드백
-            </span>
-            <DetailBlock title="발음" body={detail.feedback.pronunciation} />
-            <DetailBlock title="유창성" body={detail.feedback.fluency} />
-            {detail.partNumber !== 1 && (
-              <>
-                <DetailBlock title="내용" body={detail.feedback.content} />
-                <DetailBlock
-                  title="문법 & 어휘"
-                  body={detail.feedback.grammarVocabulary}
-                />
-              </>
-            )}
-          </div>
-
-          <div className="rounded-3xl bg-orange-50 p-6 ring-1 ring-orange-100 lg:p-8">
-            <span
-              className={`${jua.className} text-base text-blue-950 lg:text-lg`}
-            >
-              실천 과제
-            </span>
-            <ol className="mt-4 flex flex-col gap-3">
-              {detail.feedback.actionItems.map((item, i) => (
-                <li
-                  key={i}
-                  className="flex gap-3 rounded-2xl bg-white p-4 text-sm leading-relaxed text-zinc-700 shadow-sm lg:text-base"
-                >
-                  <span className="shrink-0 font-bold text-orange-600">
-                    {i + 1}
-                  </span>
-                  {item}
-                </li>
-              ))}
-            </ol>
-          </div>
         </TabsContent>
 
         <TabsContent
@@ -732,6 +692,42 @@ export function ExamQuestionFeedbackScreen({
             ))}
           </ul>
         </div>
+      </div>
+
+      <div className="mt-6 flex flex-col gap-4 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
+        <span className={`${jua.className} text-base text-blue-950 lg:text-lg`}>
+          세부 피드백
+        </span>
+        <DetailBlock title="발음" body={detail.feedback.pronunciation} />
+        <DetailBlock title="유창성" body={detail.feedback.fluency} />
+        {detail.partNumber !== 1 && (
+          <>
+            <DetailBlock title="내용" body={detail.feedback.content} />
+            <DetailBlock
+              title="문법 & 어휘"
+              body={detail.feedback.grammarVocabulary}
+            />
+          </>
+        )}
+      </div>
+
+      <div className="mt-6 rounded-3xl bg-orange-50 p-6 ring-1 ring-orange-100 lg:p-8">
+        <span className={`${jua.className} text-base text-blue-950 lg:text-lg`}>
+          실천 과제
+        </span>
+        <ol className="mt-4 flex flex-col gap-3">
+          {detail.feedback.actionItems.map((item, i) => (
+            <li
+              key={i}
+              className="flex gap-3 rounded-2xl bg-white p-4 text-sm leading-relaxed text-zinc-700 shadow-sm lg:text-base"
+            >
+              <span className="shrink-0 font-bold text-orange-600">
+                {i + 1}
+              </span>
+              {item}
+            </li>
+          ))}
+        </ol>
       </div>
 
       {/* 전체 모의고사 사용자는 요약 결과 화면(/exam/result)에서 이미 이 팝업을 봤으므로,
