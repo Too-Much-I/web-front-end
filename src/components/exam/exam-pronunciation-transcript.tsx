@@ -93,15 +93,20 @@ function ScoredWord({
     clickTimeoutRef.current = setTimeout(() => setJustClicked(false), 300);
   }
 
-  const wordClassName = `relative inline-block cursor-pointer rounded-[3px] px-0.5 transition-[transform,opacity,box-shadow] duration-150 ease-out ${
+  const wordClassName = `relative inline-block cursor-pointer rounded-[3px] px-0.5 leading-tight transition-[transform,opacity,box-shadow,margin] duration-150 ease-out ${
     isSpeaking ? "z-10 scale-125" : "scale-100"
   } ${isPlayed ? "opacity-50" : "opacity-100"} ${
     justClicked ? "ring-2 ring-orange-400" : ""
   }`;
-  // 확대되는 동안(scale-125)은 transform이라 옆 글자와 레이아웃상 겹치므로, 불투명 배경으로
-  // 옆 단어 위에 확실히 떠 보이게 한다. 평소엔 형광펜처럼 반투명 하이라이트만 쓴다.
+  // scale-125는 transform이라 레이아웃 공간을 차지하지 않아 옆 단어와 겹친다. 확대분(양쪽 12.5%)만큼
+  // 단어 길이에 비례한 마진을 줘서 옆 단어를 실제로 밀어내 겹침을 없애고, 150ms 트랜지션이 도는
+  // 동안의 순간 겹침만 불투명 배경으로 가린다. 평소엔 형광펜처럼 반투명 하이라이트만 쓴다.
+  const speakingMarginEm = Math.max(0.2, word.word.length * 0.08);
   const wordStyle = isSpeaking
-    ? { backgroundColor: color ?? "#fdfaf1" }
+    ? {
+        backgroundColor: color ?? "#fdfaf1",
+        marginInline: `${speakingMarginEm}em`,
+      }
     : color
       ? { backgroundColor: toHighlightColor(color) }
       : undefined;
@@ -166,7 +171,7 @@ export function ExamPronunciationTranscript({
           className="pointer-events-none absolute inset-0"
           style={{
             backgroundImage:
-              "repeating-linear-gradient(to bottom, transparent, transparent 27px, rgba(120,53,15,0.10) 27px, rgba(120,53,15,0.10) 28px)",
+              "repeating-linear-gradient(to bottom, transparent, transparent 31px, rgba(120,53,15,0.10) 31px, rgba(120,53,15,0.10) 32px)",
           }}
         />
         <div
@@ -174,7 +179,7 @@ export function ExamPronunciationTranscript({
           className="pointer-events-none absolute top-0 bottom-0 left-8 w-px bg-red-300/60"
         />
         <p
-          className={`${jua.className} relative p-4 pl-4 text-base leading-7 text-zinc-800 sm:text-lg lg:text-xl`}
+          className={`${jua.className} relative p-4 pl-4 text-base leading-8 text-zinc-800 sm:text-lg lg:text-xl`}
         >
           {spokenWordSequence.map((word, i) => (
             <Fragment key={i}>
