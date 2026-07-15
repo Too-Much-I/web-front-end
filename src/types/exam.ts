@@ -150,7 +150,9 @@ export interface RawExamCorrectionItem {
   issue: string;
   explanation: string;
   suggested: string;
-  severity: "high" | "medium" | "low";
+  /** AI 채점 결과라 어휘가 고정돼 있지 않다 — "high"/"medium"/"low"뿐 아니라 "major"/"minor" 등
+   * 다른 값도 실측으로 확인됐다. 문자열 그대로 두고 소비하는 쪽에서 정규화한다. */
+  severity: string;
 }
 
 /**
@@ -249,7 +251,9 @@ export interface ExamCorrectionItem {
   issue: string;
   explanation: string;
   suggested: string;
-  severity: "high" | "medium" | "low";
+  /** AI 채점 결과라 어휘가 고정돼 있지 않다 — "high"/"medium"/"low"뿐 아니라 "major"/"minor" 등
+   * 다른 값도 실측으로 확인됐다. 문자열 그대로 두고 소비하는 쪽에서 정규화한다. */
+  severity: string;
 }
 
 export interface ExamQuestionFeedback {

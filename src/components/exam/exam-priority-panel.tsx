@@ -1,12 +1,16 @@
 import Image from "next/image";
 
+import {
+  normalizeSeverity,
+  type Severity,
+} from "@/components/exam/exam-marked-transcript";
 import type { ExamCorrectionItem } from "@/types/exam";
 
-const SEVERITY_ORDER: ExamCorrectionItem["severity"][] = ["high", "medium", "low"];
+const SEVERITY_ORDER: Severity[] = ["high", "medium", "low"];
 
 /** 심각도는 색을 늘리지 않고 주황의 진한 정도로만 구분한다. */
 const SEVERITY_META: Record<
-  ExamCorrectionItem["severity"],
+  Severity,
   { label: string; dotClassName: string; chipClassName: string }
 > = {
   high: {
@@ -39,10 +43,10 @@ export function ExamPriorityPanel({
 }) {
   const counts = correctionItems.reduce(
     (acc, item) => {
-      acc[item.severity] += 1;
+      acc[normalizeSeverity(item.severity)] += 1;
       return acc;
     },
-    { high: 0, medium: 0, low: 0 } as Record<ExamCorrectionItem["severity"], number>,
+    { high: 0, medium: 0, low: 0 } as Record<Severity, number>,
   );
   const hasIssues = correctionItems.length > 0;
 
@@ -59,7 +63,9 @@ export function ExamPriorityPanel({
                 key={sev}
                 className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${SEVERITY_META[sev].chipClassName}`}
               >
-                <span className={`size-1.5 rounded-full ${SEVERITY_META[sev].dotClassName}`} />
+                <span
+                  className={`size-1.5 rounded-full ${SEVERITY_META[sev].dotClassName}`}
+                />
                 {SEVERITY_META[sev].label} {counts[sev]}
               </span>
             ))}
