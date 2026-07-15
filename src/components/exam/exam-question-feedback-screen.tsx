@@ -97,20 +97,66 @@ function ScoreRing({
   );
 }
 
-function ScoreCircleStat({ label, ratio }: { label: string; ratio: number }) {
+/**
+ * 손글씨로 쓱 그은 듯한 화살표 — 클릭을 유도할 때 시선을 끌기 위한 장식.
+ * 몸통은 완만하게만 휘고, 화살촉은 몸통보다 굵고 크게 벌려서 방향이 분명하게 보이도록 했다.
+ */
+function HintArrow({ className }: { className?: string }) {
+  return (
+    <svg aria-hidden viewBox="0 0 48 32" fill="none" className={className}>
+      <path
+        d="M44 6 C 30 4, 16 12, 8 20"
+        stroke="currentColor"
+        strokeWidth={2.5}
+        strokeLinecap="round"
+        fill="none"
+      />
+      <path
+        d="M16 15 L8 20 L15 25"
+        stroke="currentColor"
+        strokeWidth={3}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+    </svg>
+  );
+}
+
+function ScoreCircleStat({
+  label,
+  ratio,
+  size = 104,
+  strokeWidth = 10,
+  trackClassName,
+  progressClassName,
+  valueClassName = "absolute text-lg font-bold text-orange-600 lg:text-xl",
+  labelClassName = "text-xs font-semibold text-zinc-500 lg:text-sm",
+}: {
+  label: string;
+  ratio: number;
+  size?: number;
+  strokeWidth?: number;
+  trackClassName?: string;
+  progressClassName?: string;
+  valueClassName?: string;
+  labelClassName?: string;
+}) {
   const percent = clampPercent(ratio);
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center gap-1.5">
       <div className="relative flex items-center justify-center">
-        <ScoreRing percent={percent} size={104} strokeWidth={10} />
-        <span className="absolute text-lg font-bold text-orange-600 lg:text-xl">
-          {Math.round(percent)}%
-        </span>
+        <ScoreRing
+          percent={percent}
+          size={size}
+          strokeWidth={strokeWidth}
+          trackClassName={trackClassName}
+          progressClassName={progressClassName}
+        />
+        <span className={valueClassName}>{Math.round(percent)}%</span>
       </div>
-      <span className="text-xs font-semibold text-zinc-500 lg:text-sm">
-        {label}
-      </span>
+      <span className={labelClassName}>{label}</span>
     </div>
   );
 }
@@ -209,11 +255,31 @@ export function ExamQuestionFeedbackScreen({
   );
   const [isBetaTooltipOpen, setIsBetaTooltipOpen] = useState(false);
   const [answerPlaybackTime, setAnswerPlaybackTime] = useState(0);
+  const [showSubScores, setShowSubScores] = useState(false);
+
+  /**
+   * 메인 점수 원 ↔ 서브 점수 원 전환이 조건부 렌더링만으로는 순식간에 스냅되어 보여서,
+   * 지원 브라우저에서는 View Transitions API로 전/후 스냅샷을 자동 크로스페이드시킨다.
+   * 미지원 브라우저·"모션 줄이기" 설정에서는 그냥 즉시 전환된다.
+   */
+  function toggleShowSubScores() {
+    const flip = () => setShowSubScores((v) => !v);
+    const supportsViewTransition =
+      typeof document !== "undefined" && "startViewTransition" in document;
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (supportsViewTransition && !prefersReducedMotion) {
+      document.startViewTransition(flip);
+    } else {
+      flip();
+    }
+  }
+
   const audioPlayerRef = useRef<AnswerAudioPlayerHandle>(null);
   const mainRingRef = useRef<HTMLDivElement>(null);
   const mainRingRevealed = useRevealOnScroll(mainRingRef);
-  const subRingsRef = useRef<HTMLDivElement>(null);
-  const subRingsRevealed = useRevealOnScroll(subRingsRef);
 
   const [activeTab, setActiveTab] = useState<TabValue>("my-answer");
   // 이전 탭보다 오른쪽으로 이동하면 오른쪽에서, 왼쪽으로 이동하면 왼쪽에서 슬라이드 인.
@@ -316,28 +382,107 @@ export function ExamQuestionFeedbackScreen({
               이 문제 점수
             </span>
           </div>
-          <div ref={mainRingRef} className="mt-8 flex justify-center">
-            <div className="relative flex items-center justify-center">
-              <ScoreRing
-                percent={mainRingRevealed ? scorePercent : 0}
-                size={140}
-                strokeWidth={12}
-                trackClassName="stroke-white/15"
-                progressClassName="stroke-amber-300"
-              />
-              <div className="absolute flex flex-col items-center">
+          <div
+            ref={mainRingRef}
+            className="mt-8 flex flex-wrap items-center justify-center gap-3"
+          >
+            <button
+              type="button"
+              onClick={toggleShowSubScores}
+              aria-pressed={showSubScores}
+              aria-label={
+                showSubScores ? "전체 점수로 보기" : "세부 평가 지표로 보기"
+              }
+              style={{ viewTransitionName: "exam-score-display" }}
+              className="relative flex cursor-pointer items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
+            >
+              {showSubScores ? (
+                <div className="flex items-center gap-4">
+                  <ScoreCircleStat
+                    label="발음 & 유창성"
+                    ratio={
+                      detail.feedback.pronunciationFluencyScore /
+                      PRONUNCIATION_FLUENCY_MAX
+                    }
+                    size={96}
+                    strokeWidth={9}
+                    trackClassName="stroke-white/15"
+                    progressClassName="stroke-amber-300"
+                    valueClassName="absolute text-sm font-bold text-amber-50"
+                    labelClassName="w-20 text-center text-[11px] leading-tight font-semibold text-white/60"
+                  />
+                  {detail.feedback.contentRelevanceScore === null ? (
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div
+                        className="relative flex items-center justify-center"
+                        style={{ width: 96, height: 96 }}
+                      >
+                        <ScoreRing
+                          percent={0}
+                          size={96}
+                          strokeWidth={9}
+                          trackClassName="stroke-white/15"
+                          progressClassName="stroke-amber-300"
+                        />
+                        <span className="absolute text-sm font-bold text-white/40">
+                          —
+                        </span>
+                      </div>
+                      <span className="w-20 text-center text-[11px] leading-tight font-semibold text-white/60">
+                        내용 적합성 (미채점)
+                      </span>
+                    </div>
+                  ) : (
+                    <ScoreCircleStat
+                      label="내용 적합성"
+                      ratio={
+                        detail.feedback.contentRelevanceScore /
+                        CONTENT_RELEVANCE_MAX[detail.partNumber]
+                      }
+                      size={96}
+                      strokeWidth={9}
+                      trackClassName="stroke-white/15"
+                      progressClassName="stroke-amber-300"
+                      valueClassName="absolute text-sm font-bold text-amber-50"
+                      labelClassName="w-20 text-center text-[11px] leading-tight font-semibold text-white/60"
+                    />
+                  )}
+                </div>
+              ) : (
+                <>
+                  <ScoreRing
+                    percent={mainRingRevealed ? scorePercent : 0}
+                    size={140}
+                    strokeWidth={12}
+                    trackClassName="stroke-white/15"
+                    progressClassName="stroke-amber-300"
+                  />
+                  <div className="absolute flex flex-col items-center">
+                    <span
+                      className={`${jua.className} text-4xl text-amber-50 lg:text-5xl`}
+                    >
+                      {detail.score}
+                    </span>
+                    <span
+                      className={`${jua.className} text-sm text-white/60 lg:text-base`}
+                    >
+                      / {detail.maxScore}
+                    </span>
+                  </div>
+                </>
+              )}
+            </button>
+
+            {!showSubScores && (
+              <div className="flex items-center gap-1.5">
+                <HintArrow className="h-8 w-10 shrink-0 text-amber-300" />
                 <span
-                  className={`${jua.className} text-4xl text-amber-50 lg:text-5xl`}
+                  className={`${jua.className} max-w-32 text-sm leading-tight text-amber-200`}
                 >
-                  {detail.score}
-                </span>
-                <span
-                  className={`${jua.className} text-sm text-white/60 lg:text-base`}
-                >
-                  / {detail.maxScore}
+                  그래프를 클릭하면 세부 평가 지표가 보여요
                 </span>
               </div>
-            </div>
+            )}
           </div>
 
           <TypedText
@@ -445,49 +590,6 @@ export function ExamQuestionFeedbackScreen({
               </div>
             </div>
           )}
-
-          <div
-            ref={subRingsRef}
-            className="grid grid-cols-2 gap-5 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8"
-          >
-            <ScoreCircleStat
-              label="발음 & 유창성"
-              ratio={
-                subRingsRevealed
-                  ? detail.feedback.pronunciationFluencyScore /
-                    PRONUNCIATION_FLUENCY_MAX
-                  : 0
-              }
-            />
-            {detail.feedback.contentRelevanceScore === null ? (
-              <div className="flex flex-col items-center justify-center gap-2 text-center">
-                <div className="relative h-[104px] w-[104px] shrink-0">
-                  <Image
-                    src="/mascots/no_score.png"
-                    alt="채점하지 않는 항목을 안내하는 캐릭터"
-                    fill
-                    sizes="104px"
-                    className="object-contain"
-                  />
-                </div>
-                <span className="text-xs font-semibold text-zinc-400 lg:text-sm">
-                  이 파트는 내용 적합성을
-                  <br />
-                  채점하지 않아요
-                </span>
-              </div>
-            ) : (
-              <ScoreCircleStat
-                label="내용 적합성"
-                ratio={
-                  subRingsRevealed
-                    ? detail.feedback.contentRelevanceScore /
-                      CONTENT_RELEVANCE_MAX[detail.partNumber]
-                    : 0
-                }
-              />
-            )}
-          </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
             <div className="relative rounded-3xl bg-white p-6 lg:p-8">
