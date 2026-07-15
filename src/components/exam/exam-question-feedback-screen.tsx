@@ -181,6 +181,13 @@ function ExamModelAnswerTab({ feedback }: { feedback: ExamQuestionFeedback }) {
   const [active, setActive] = useState<"model" | "recommended">(
     hasModel ? "model" : "recommended",
   );
+  // 모범답안(왼쪽) → 추천답안(오른쪽)으로 이동하면 오른쪽에서, 반대면 왼쪽에서 슬라이드 인.
+  const [slideDir, setSlideDir] = useState(1);
+
+  function switchActive(next: "model" | "recommended") {
+    setSlideDir(next === "recommended" ? 1 : -1);
+    setActive(next);
+  }
 
   if (!hasModel && !hasRecommended) {
     return (
@@ -201,7 +208,7 @@ function ExamModelAnswerTab({ feedback }: { feedback: ExamQuestionFeedback }) {
         <div className="flex gap-2">
           <button
             type="button"
-            onClick={() => setActive("model")}
+            onClick={() => switchActive("model")}
             aria-pressed={active === "model"}
             className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
               active === "model"
@@ -213,7 +220,7 @@ function ExamModelAnswerTab({ feedback }: { feedback: ExamQuestionFeedback }) {
           </button>
           <button
             type="button"
-            onClick={() => setActive("recommended")}
+            onClick={() => switchActive("recommended")}
             aria-pressed={active === "recommended"}
             className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
               active === "recommended"
@@ -225,7 +232,15 @@ function ExamModelAnswerTab({ feedback }: { feedback: ExamQuestionFeedback }) {
           </button>
         </div>
       )}
-      <p className="rounded-2xl bg-zinc-50 p-4 text-sm leading-relaxed text-zinc-700 ring-1 ring-zinc-100 lg:p-5 lg:text-base">
+      <p
+        key={active}
+        style={
+          {
+            "--exam-model-answer-slide-x": `${slideDir * 12}px`,
+          } as React.CSSProperties
+        }
+        className="animate-[exam-model-answer-slide_220ms_ease-out] rounded-2xl bg-zinc-50 p-4 text-sm leading-relaxed text-zinc-700 ring-1 ring-zinc-100 motion-reduce:animate-none lg:p-5 lg:text-base"
+      >
         {shown}
       </p>
     </div>
@@ -341,7 +356,11 @@ export function ExamQuestionFeedbackScreen({
                 className="drop-shadow-sm lg:h-20 lg:w-20"
               />
             </TooltipTrigger>
-            <TooltipContent side="right" align="start">
+            <TooltipContent
+              side="right"
+              align="start"
+              className="max-w-72 lg:max-w-80"
+            >
               현재 POC 단계에서 채점 결과에 부정확한 내용이 있을 수 있어요. 정식
               출시 시 더 정확한 채점을 제공해 드릴게요.
             </TooltipContent>
