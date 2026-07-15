@@ -161,6 +161,7 @@ function MarkedSpan({
     <Popover>
       <PopoverTrigger
         render={<span tabIndex={0} />}
+        nativeButton={false}
         onClick={(e) => e.stopPropagation()}
         className="cursor-pointer rounded-[3px] whitespace-pre-wrap outline-none"
         style={hasExplanation ? { backgroundColor: `${color}33` } : undefined}
@@ -267,6 +268,12 @@ export function ExamMarkedTranscript({
         답변 스크립트
       </span>
 
+      {correctionItems.length > 0 && (
+        <p className={`${jua.className} mt-1 text-base text-orange-500`}>
+          형광펜으로 칠해진 부분을 클릭하면 감점 이유를 확인할 수 있어요.
+        </p>
+      )}
+
       <div className="relative mt-3 overflow-hidden rounded-2xl bg-[#fdfaf1] pl-12 ring-1 ring-zinc-100">
         <div
           aria-hidden
@@ -286,12 +293,6 @@ export function ExamMarkedTranscript({
           {marked}
         </p>
       </div>
-
-      {correctionItems.length > 0 && (
-        <p className="mt-3 text-xs text-zinc-400">
-          형광펜으로 칠해진 부분을 클릭하면 감점 이유를 확인할 수 있어요.
-        </p>
-      )}
     </div>
   );
 }

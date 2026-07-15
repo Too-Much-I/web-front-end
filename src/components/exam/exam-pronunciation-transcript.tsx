@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 
 import {
   SEVERITY_COLOR,
@@ -79,9 +79,25 @@ function ScoredWord({
   const isSpeaking = currentTimeSec >= startSec && currentTimeSec < endSec;
   const isPlayed = currentTimeSec >= endSec;
 
-  const wordClassName = `relative inline-block cursor-pointer rounded-[3px] px-0.5 transition-[transform,opacity] duration-150 ease-out ${
+  // 클릭한 순간 즉시 "여기서부터 재생한다"는 걸 보여주는 링 효과 — isSpeaking은 오디오의
+  // timeupdate 이벤트를 한 박자 기다려야 켜지므로, 그 텀 동안 클릭 반응이 없어 보이는 걸 막는다.
+  const [justClicked, setJustClicked] = useState(false);
+  const clickTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => () => clearTimeout(clickTimeoutRef.current), []);
+
+  function handleWordClick() {
+    onWordClick?.(startSec);
+    setJustClicked(true);
+    clearTimeout(clickTimeoutRef.current);
+    clickTimeoutRef.current = setTimeout(() => setJustClicked(false), 300);
+  }
+
+  const wordClassName = `relative inline-block cursor-pointer rounded-[3px] px-0.5 transition-[transform,opacity,box-shadow] duration-150 ease-out ${
     isSpeaking ? "z-10 scale-125" : "scale-100"
-  } ${isPlayed ? "opacity-50" : "opacity-100"}`;
+  } ${isPlayed ? "opacity-50" : "opacity-100"} ${
+    justClicked ? "ring-2 ring-orange-400" : ""
+  }`;
   // 확대되는 동안(scale-125)은 transform이라 옆 글자와 레이아웃상 겹치므로, 불투명 배경으로
   // 옆 단어 위에 확실히 떠 보이게 한다. 평소엔 형광펜처럼 반투명 하이라이트만 쓴다.
   const wordStyle = isSpeaking
@@ -97,7 +113,7 @@ function ScoredWord({
         render={<span tabIndex={0} />}
         className={wordClassName}
         style={wordStyle}
-        onClick={() => onWordClick?.(startSec)}
+        onClick={handleWordClick}
       >
         {errorMeta && (
           <span
@@ -137,6 +153,12 @@ export function ExamPronunciationTranscript({
       <span className={`${jua.className} text-base text-blue-950`}>
         답변 스크립트
       </span>
+
+      {onWordClick && (
+        <p className={`${jua.className} mt-1 text-base text-orange-500`}>
+          단어를 클릭하면 그 부분부터 다시 들을 수 있어요.
+        </p>
+      )}
 
       <div className="relative mt-3 overflow-hidden rounded-2xl bg-[#fdfaf1] pl-12 ring-1 ring-zinc-100">
         <div

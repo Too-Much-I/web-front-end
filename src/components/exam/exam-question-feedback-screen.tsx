@@ -376,28 +376,38 @@ export function ExamQuestionFeedbackScreen({
           value="my-answer"
           className="mt-6 flex animate-[exam-tab-slide_220ms_ease-out] flex-col gap-6 motion-reduce:animate-none"
         >
-          {detail.partNumber !== 1 && (
-            <ExamPriorityPanel
-              correctionItems={detail.feedback.correctionItems}
-              nextStrategy={detail.feedback.nextStrategy}
-            />
-          )}
-
-          {detail.audioUrl && (
-            <div className="rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
-              <span
-                className={`${jua.className} text-base text-blue-950 lg:text-lg`}
-              >
-                내 답변 음성
-              </span>
-              <div className="mt-3">
-                <AnswerAudioPlayer
-                  ref={audioPlayerRef}
-                  audioUrl={detail.audioUrl}
-                  durationSec={speakTimeSec}
-                  onTimeUpdate={setAnswerPlaybackTime}
+          {(detail.partNumber !== 1 || detail.audioUrl) && (
+            <div
+              className={`grid grid-cols-1 gap-4 lg:gap-6 ${
+                detail.partNumber !== 1 && detail.audioUrl
+                  ? "lg:grid-cols-2"
+                  : ""
+              }`}
+            >
+              {detail.partNumber !== 1 && (
+                <ExamPriorityPanel
+                  correctionItems={detail.feedback.correctionItems}
+                  nextStrategy={detail.feedback.nextStrategy}
                 />
-              </div>
+              )}
+
+              {detail.audioUrl && (
+                <div className="rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
+                  <span
+                    className={`${jua.className} text-base text-blue-950 lg:text-lg`}
+                  >
+                    내 답변 음성
+                  </span>
+                  <div className="mt-3">
+                    <AnswerAudioPlayer
+                      ref={audioPlayerRef}
+                      audioUrl={detail.audioUrl}
+                      durationSec={speakTimeSec}
+                      onTimeUpdate={setAnswerPlaybackTime}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
