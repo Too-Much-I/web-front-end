@@ -1,11 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { ExamStartButton } from "@/components/exam/exam-start-button";
 import { FaqSection } from "@/components/faq-section";
 import { HeroVideo } from "@/components/hero-video";
 import { PhoneDemo } from "@/components/phone-demo";
 import { ScrollToSectionLink } from "@/components/scroll-to-section-link";
-import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
@@ -37,14 +37,9 @@ export default function Home() {
             문의하기
           </Link>
         </nav>
-        <Button
-          size="lg"
-          className="h-11 rounded-full bg-orange-500 px-6 text-base text-white hover:bg-orange-600 lg:h-12 lg:px-7 lg:text-lg"
-          render={<Link href="/exam/prepare" />}
-          nativeButton={false}
-        >
+        <ExamStartButton className="h-11 rounded-full bg-orange-500 px-6 text-base text-white hover:bg-orange-600 lg:h-12 lg:px-7 lg:text-lg">
           시작하기
-        </Button>
+        </ExamStartButton>
       </header>
 
       <main className="mx-auto flex w-full max-w-6xl flex-col items-center gap-10 px-6 pt-10 pb-20 lg:max-w-7xl lg:flex-row lg:items-center lg:gap-8 xl:gap-10 2xl:max-w-[100rem] 2xl:gap-12">
@@ -70,14 +65,9 @@ export default function Home() {
               <span className="text-orange-500">✓</span> 즉시 피드백 제공
             </li>
           </ul>
-          <Button
-            size="lg"
-            className="h-14 rounded-full bg-orange-500 px-9 text-lg text-white hover:bg-orange-600 lg:h-16 lg:px-10 lg:text-xl"
-            render={<Link href="/exam/prepare" />}
-            nativeButton={false}
-          >
+          <ExamStartButton className="h-14 rounded-full bg-orange-500 px-9 text-lg text-white hover:bg-orange-600 lg:h-16 lg:px-10 lg:text-xl">
             실제 시험 전, 무료 모의고사 체험하기
-          </Button>
+          </ExamStartButton>
         </div>
 
         <div className="w-full overflow-hidden rounded-3xl bg-white shadow-sm lg:w-2/5">

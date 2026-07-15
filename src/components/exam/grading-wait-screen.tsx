@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { useGradingProgress } from "@/features/exam/use-grading-progress";
+import { useTrialQuestionProgress } from "@/features/exam/use-trial-question-progress";
 
 const STATUS_MESSAGES = [
   "답변을 서버에 안전하게 업로드하고 있어요",
@@ -54,14 +55,57 @@ export function GradingWaitScreen({
   estimatedWaitLabel?: string;
 }) {
   const router = useRouter();
-  const [messageIndex, setMessageIndex] = useState(0);
-  const [tipIndex, setTipIndex] = useState(0);
 
   const handleComplete = useCallback(() => {
     router.replace(`/exam/result?examId=${encodeURIComponent(examId)}`);
   }, [router, examId]);
 
   const { progress, failed } = useGradingProgress(examId, handleComplete);
+
+  return <GradingWaitVisual progress={progress} failed={failed} estimatedWaitLabel={estimatedWaitLabel} />;
+}
+
+/**
+ * 맛보기(문항 1개) 전용. 종합 채점 상태 대신 문항별 채점 상태를 폴링하고,
+ * 완료되면 종합 결과 화면이 아니라 그 문항의 피드백 화면으로 곧장 이동한다 —
+ * 문항이 하나뿐이라 종합 피드백을 줄 수 없기 때문이다.
+ */
+export function TrialGradingWaitScreen({
+  examId,
+  questionNumber,
+  estimatedWaitLabel = "약 15초",
+}: {
+  examId: string;
+  questionNumber: number;
+  estimatedWaitLabel?: string;
+}) {
+  const router = useRouter();
+
+  const handleComplete = useCallback(() => {
+    // mode=trial 플래그로 이 문항별 피드백 화면이 맛보기 플로우에서 왔다는 걸 표시한다 —
+    // 같은 화면을 전체 모의고사 사용자도 요약 결과에서 문항을 눌러 들어올 수 있어서
+    // (exam-result-screen.tsx), 이 플래그 없이는 둘을 구분할 방법이 없다.
+    router.replace(
+      `/exam/result/question?examId=${encodeURIComponent(examId)}&questionNumber=${questionNumber}&retryCount=0&mode=trial`,
+    );
+  }, [router, examId, questionNumber]);
+
+  const { progress, failed } = useTrialQuestionProgress(examId, questionNumber, handleComplete);
+
+  return <GradingWaitVisual progress={progress} failed={failed} estimatedWaitLabel={estimatedWaitLabel} />;
+}
+
+function GradingWaitVisual({
+  progress,
+  failed,
+  estimatedWaitLabel,
+}: {
+  progress: number;
+  failed: boolean;
+  estimatedWaitLabel: string;
+}) {
+  const [messageIndex, setMessageIndex] = useState(0);
+  const [tipIndex, setTipIndex] = useState(0);
 
   useEffect(() => {
     const id = setInterval(() => {

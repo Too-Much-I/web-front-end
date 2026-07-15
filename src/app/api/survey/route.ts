@@ -15,6 +15,10 @@ import { createIpRateLimiter } from "@/lib/rate-limit";
  * - GOOGLE_SURVEY_SHEET_RANGE: (선택) 시트/범위. 기본값 "Survey!A:G"
  *
  * 시트는 서비스 계정 이메일을 "편집자"로 공유해야 쓰기가 가능하다.
+ *
+ * source(전체/맛보기 구분) 컬럼은 H열에 추가된다. append의 range는 표를 찾는 용도일 뿐
+ * 실제로 쓰이는 값 개수를 제한하지 않으므로, range를 "Survey!A:G"로 유지해도 H열까지 그대로
+ * 써진다 — 이 컬럼을 위해 GOOGLE_SURVEY_SHEET_RANGE를 바꿀 필요는 없다.
  */
 
 const surveyRecordSchema = z.object({
@@ -25,6 +29,7 @@ const surveyRecordSchema = z.object({
   opinion: z.string(),
   contact: z.string(),
   submittedAt: z.iso.datetime(),
+  source: z.enum(["trial", "full"]),
 });
 
 // 단일 인스턴스 기준 IP당 요청 제한 (PoC 배포 범위 한정 — 다중 인스턴스 환경에서는 공유 스토어로 교체 필요)
@@ -75,6 +80,7 @@ export async function POST(request: Request) {
     opinion,
     contact,
     submittedAt,
+    source,
   } = parsed.data;
 
   try {
@@ -100,6 +106,7 @@ export async function POST(request: Request) {
               opinion,
               contact,
               submittedAt,
+              source === "trial" ? "맛보기" : "전체모의고사",
             ],
           ],
         },

@@ -10,11 +10,12 @@ function ExamSurveyContent() {
   const searchParams = useSearchParams();
   const satisfactionParam = searchParams.get("satisfaction");
   const initialSatisfaction = satisfactionParam ? Number(satisfactionParam) : null;
+  const mode = searchParams.get("mode") === "trial" ? "trial" : "full";
 
   return (
     <div className="flex flex-1 flex-col bg-white">
       <ExamHeader label="만족도 조사" />
-      <ExamFeedbackSurvey initialSatisfaction={initialSatisfaction} />
+      <ExamFeedbackSurvey initialSatisfaction={initialSatisfaction} mode={mode} />
     </div>
   );
 }

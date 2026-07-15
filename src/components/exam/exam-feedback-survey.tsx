@@ -41,9 +41,13 @@ const CONFETTI = Array.from({ length: 8 }, (_, i) => {
 
 export function ExamFeedbackSurvey({
   initialSatisfaction = null,
+  mode,
 }: {
   initialSatisfaction?: number | null;
+  mode: "trial" | "full";
 }) {
+  const isTrial = mode === "trial";
+  const rewardCount = isTrial ? 1 : 3;
   const [contact, setContact] = useState("");
   const [satisfaction, setSatisfaction] = useState<number | null>(
     initialSatisfaction,
@@ -79,15 +83,16 @@ export function ExamFeedbackSurvey({
       await submitExamSurvey({
         anonymousId: getOrCreateAnonymousId(),
         satisfaction,
-        previousGrade: previousGradeId,
-        priceWillingness: priceId,
+        previousGrade: isTrial ? null : previousGradeId,
+        priceWillingness: isTrial ? null : priceId,
         opinion,
         contact,
         submittedAt: new Date().toISOString(),
+        source: mode,
       });
       setSubmitted(true);
       toast.success("설문 제출 완료!", {
-        description: "프리미엄형 모의고사 1회 응시권을 곧 보내드릴게요.",
+        description: `프리미엄형 모의고사 ${rewardCount}회 응시권을 곧 보내드릴게요.`,
         className: "toast-face-icon",
         icon: (
           <Image
@@ -185,11 +190,11 @@ export function ExamFeedbackSurvey({
           EVENT
         </span>
         <h2 className="relative mt-3 text-xl font-bold text-blue-950 sm:text-2xl lg:text-3xl">
-          설문에 참여하고 프리미엄형 모의고사 1회 받기
+          설문에 참여하고 프리미엄형 모의고사 {rewardCount}회 받기
         </h2>
         <p className="relative mt-2 text-sm leading-relaxed text-blue-800 lg:text-base">
-          아래 설문에 답해주시면 프리미엄형 모의고사 1회 응시권을 무료로
-          드려요. 만족도만 필수이고 나머지 항목은 선택이에요.
+          아래 설문에 답해주시면 프리미엄형 모의고사 {rewardCount}회 응시권을
+          무료로 드려요. 만족도만 필수이고 나머지 항목은 선택이에요.
         </p>
 
         <div className="relative mx-auto mt-2 h-16 w-full max-w-md sm:h-24 lg:h-28 lg:max-w-lg">
@@ -212,7 +217,7 @@ export function ExamFeedbackSurvey({
               소중한 의견 감사해요!
             </p>
             <p className="mt-1 text-sm text-zinc-500 lg:text-base">
-              프리미엄형 모의고사 1회 응시권을 곧 보내드릴게요.
+              프리미엄형 모의고사 {rewardCount}회 응시권을 곧 보내드릴게요.
             </p>
           </div>
         ) : (
@@ -232,72 +237,76 @@ export function ExamFeedbackSurvey({
               />
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <span className="text-sm font-semibold text-blue-950 lg:text-base">
-                이전에 실제로 응시했던 토익스피킹 등급{" "}
-                <span className="font-normal text-zinc-400">(선택)</span>
-              </span>
-              <div
-                role="radiogroup"
-                aria-label="이전 실제 응시 등급"
-                className="flex flex-wrap gap-2"
-              >
-                {PREVIOUS_GRADE_OPTIONS.map((option) => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    role="radio"
-                    aria-checked={previousGradeId === option.id}
-                    onClick={() =>
-                      setPreviousGradeId((prev) =>
-                        prev === option.id ? null : option.id,
-                      )
-                    }
-                    className={cn(
-                      "rounded-full px-3.5 py-1.5 text-sm font-semibold ring-1 transition-colors lg:px-4 lg:py-2 lg:text-base",
-                      previousGradeId === option.id
-                        ? "bg-orange-50 text-orange-600 ring-orange-300"
-                        : "text-zinc-600 ring-zinc-200 hover:bg-zinc-50",
-                    )}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+            {!isTrial && (
+              <div className="flex flex-col gap-1.5">
+                <span className="text-sm font-semibold text-blue-950 lg:text-base">
+                  이전에 실제로 응시했던 토익스피킹 등급{" "}
+                  <span className="font-normal text-zinc-400">(선택)</span>
+                </span>
+                <div
+                  role="radiogroup"
+                  aria-label="이전 실제 응시 등급"
+                  className="flex flex-wrap gap-2"
+                >
+                  {PREVIOUS_GRADE_OPTIONS.map((option) => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={previousGradeId === option.id}
+                      onClick={() =>
+                        setPreviousGradeId((prev) =>
+                          prev === option.id ? null : option.id,
+                        )
+                      }
+                      className={cn(
+                        "rounded-full px-3.5 py-1.5 text-sm font-semibold ring-1 transition-colors lg:px-4 lg:py-2 lg:text-base",
+                        previousGradeId === option.id
+                          ? "bg-orange-50 text-orange-600 ring-orange-300"
+                          : "text-zinc-600 ring-zinc-200 hover:bg-zinc-50",
+                      )}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-zinc-400 lg:text-sm">
+                  토익 스피킹을 이미 응시해 본 적이 있다면 실제로 받았던 등급을
+                  선택해 주세요. 응시한 적이 없다면 &apos;안 봄&apos;을
+                  선택해 주세요.
+                </p>
               </div>
-              <p className="text-xs text-zinc-400 lg:text-sm">
-                토익 스피킹을 이미 응시해 본 적이 있다면 실제로 받았던 등급을
-                선택해 주세요. 응시한 적이 없다면 &apos;안 봄&apos;을
-                선택해 주세요.
-              </p>
-            </div>
+            )}
 
-            <div className="flex flex-col gap-1.5">
-              <span className="text-sm font-semibold text-blue-950 lg:text-base">
-                이 모의고사에 지불할 의향이 있는 금액{" "}
-                <span className="font-normal text-zinc-400">(선택)</span>
-              </span>
-              <div role="radiogroup" aria-label="지불 의향 금액" className="flex flex-wrap gap-2">
-                {PRICE_OPTIONS.map((option) => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    role="radio"
-                    aria-checked={priceId === option.id}
-                    onClick={() =>
-                      setPriceId((prev) => (prev === option.id ? null : option.id))
-                    }
-                    className={cn(
-                      "rounded-full px-3.5 py-1.5 text-sm font-semibold ring-1 transition-colors lg:px-4 lg:py-2 lg:text-base",
-                      priceId === option.id
-                        ? "bg-orange-50 text-orange-600 ring-orange-300"
-                        : "text-zinc-600 ring-zinc-200 hover:bg-zinc-50",
-                    )}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+            {!isTrial && (
+              <div className="flex flex-col gap-1.5">
+                <span className="text-sm font-semibold text-blue-950 lg:text-base">
+                  이 모의고사에 지불할 의향이 있는 금액{" "}
+                  <span className="font-normal text-zinc-400">(선택)</span>
+                </span>
+                <div role="radiogroup" aria-label="지불 의향 금액" className="flex flex-wrap gap-2">
+                  {PRICE_OPTIONS.map((option) => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={priceId === option.id}
+                      onClick={() =>
+                        setPriceId((prev) => (prev === option.id ? null : option.id))
+                      }
+                      className={cn(
+                        "rounded-full px-3.5 py-1.5 text-sm font-semibold ring-1 transition-colors lg:px-4 lg:py-2 lg:text-base",
+                        priceId === option.id
+                          ? "bg-orange-50 text-orange-600 ring-orange-300"
+                          : "text-zinc-600 ring-zinc-200 hover:bg-zinc-50",
+                      )}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="flex flex-col gap-1.5">
               <label htmlFor="survey-opinion" className="text-sm font-semibold text-blue-950 lg:text-base">

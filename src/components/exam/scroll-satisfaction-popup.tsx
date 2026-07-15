@@ -7,10 +7,17 @@ import { useEffect, useState } from "react";
 
 const SCROLL_TRIGGER_RATIO = 0.6;
 
-export function ScrollSatisfactionPopup({ examId }: { examId: string }) {
+export function ScrollSatisfactionPopup({
+  examId,
+  mode,
+}: {
+  examId: string;
+  mode: "trial" | "full";
+}) {
   const router = useRouter();
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const rewardCount = mode === "trial" ? 1 : 3;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,7 +35,7 @@ export function ScrollSatisfactionPopup({ examId }: { examId: string }) {
   if (!visible || dismissed) return null;
 
   const handleGoToSurvey = () => {
-    router.push(`/exam/survey?examId=${examId}`);
+    router.push(`/exam/survey?examId=${examId}&mode=${mode}`);
   };
 
   const dismissButton = (
@@ -62,7 +69,7 @@ export function ScrollSatisfactionPopup({ examId }: { examId: string }) {
           <div>
             <p className="text-sm font-bold text-blue-950">설문 남기고 선물 받기</p>
             <p className="mt-0.5 text-xs text-zinc-500">
-              프리미엄형 모의고사 1회를 무료로 드려요
+              프리미엄형 모의고사 {rewardCount}회를 무료로 드려요
             </p>
           </div>
         </button>

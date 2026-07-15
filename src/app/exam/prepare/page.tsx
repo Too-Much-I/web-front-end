@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { ExamPrepareFlow } from "@/components/exam/exam-prepare-flow";
 
@@ -28,7 +29,9 @@ export default function ExamPreparePage() {
       </header>
 
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 py-10 lg:max-w-7xl">
-        <ExamPrepareFlow />
+        <Suspense fallback={null}>
+          <ExamPrepareFlow />
+        </Suspense>
       </main>
 
       <footer className="border-t border-orange-200/60 px-6 py-8 sm:px-10">

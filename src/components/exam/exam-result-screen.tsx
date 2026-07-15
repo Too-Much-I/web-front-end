@@ -278,7 +278,7 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
         </ol>
       </section>
 
-      <ScrollSatisfactionPopup examId={result.examId} />
+      <ScrollSatisfactionPopup examId={result.examId} mode="full" />
     </>
   );
 }

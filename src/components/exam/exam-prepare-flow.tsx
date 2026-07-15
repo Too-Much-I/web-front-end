@@ -1,7 +1,7 @@
 "use client";
 
 import { HelpCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { TargetGradeSelect } from "@/components/exam/target-grade-select";
@@ -23,6 +23,8 @@ const CHECKLIST = [
 
 export function ExamPrepareFlow() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isTrial = searchParams.get("mode") === "trial";
   const [dialogStep, setDialogStep] = useState<PrepareDialogStep>(null);
 
   useEffect(() => {
@@ -40,7 +42,7 @@ export function ExamPrepareFlow() {
       <div className="grid gap-6 lg:grid-cols-[3fr_2fr] lg:items-start xl:gap-8">
         <section className="flex w-full flex-col gap-5 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-zinc-100 lg:p-8">
           <Badge className="w-fit bg-orange-50 text-orange-600 hover:bg-orange-50">
-            notification
+            {isTrial ? "맛보기" : "notification"}
           </Badge>
 
           <div className="flex flex-col gap-1">
@@ -48,7 +50,9 @@ export function ExamPrepareFlow() {
               TOEIC® Speaking Mock Exam
             </h1>
             <p className="text-sm text-zinc-500 lg:text-base">
-              토익 스피킹 실전 모의고사
+              {isTrial
+                ? "Part 1 - 1번 문제만 짧게 풀어보는 맛보기예요"
+                : "토익 스피킹 실전 모의고사"}
             </p>
           </div>
 
@@ -60,7 +64,7 @@ export function ExamPrepareFlow() {
                 Total Duration
               </span>
               <p className="text-lg font-semibold text-zinc-900 lg:text-xl xl:text-2xl">
-                약 20분
+                {isTrial ? "약 1분" : "약 20분"}
               </p>
             </div>
             <div>
@@ -68,7 +72,7 @@ export function ExamPrepareFlow() {
                 Questions
               </span>
               <p className="text-lg font-semibold text-orange-600 lg:text-xl xl:text-2xl">
-                11문항
+                {isTrial ? "1문항 (Part 1)" : "11문항"}
               </p>
             </div>
           </div>
@@ -118,7 +122,11 @@ export function ExamPrepareFlow() {
             <MicTestPanel onVerified={() => setDialogStep("sound")} />
           )}
           {dialogStep === "sound" && (
-            <SoundCheckPanel onCompleted={() => router.push("/exam/session")} />
+            <SoundCheckPanel
+              onCompleted={() =>
+                router.push(isTrial ? "/exam/session?mode=trial" : "/exam/session")
+              }
+            />
           )}
         </DialogContent>
       </Dialog>
