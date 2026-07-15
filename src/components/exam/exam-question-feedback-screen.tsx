@@ -28,6 +28,7 @@ import {
   getExamPartMeta,
   getExamPartTimingByQuestionNumber,
 } from "@/features/exam/part-meta";
+import { useReanswerSubmission } from "@/features/exam/use-reanswer-submission";
 import { useRevealOnScroll } from "@/features/exam/use-reveal-on-scroll";
 import { jua } from "@/lib/fonts";
 import type { ExamQuestionDetail, ExamQuestionFeedback } from "@/types/exam";
@@ -324,6 +325,14 @@ export function ExamQuestionFeedbackScreen({
     if (!confirmDiscardUnsavedRecording()) return;
     onNavigateRetry(nextRetryCount);
   }
+
+  // 탭 상위(여기)에서 들고 있어야, "다시 답변하기" 탭을 벗어나 ExamReanswerPanel이 언마운트돼도
+  // 제출~채점 진행 상태가 사라지지 않는다 (자세한 이유는 useReanswerSubmission 참고).
+  const reanswerSubmission = useReanswerSubmission({
+    examId,
+    questionNumber: detail.questionNumber,
+    onNavigateRetry: handleNavigateRetry,
+  });
 
   return (
     <section className="relative mx-auto w-full max-w-3xl px-6 py-10 lg:max-w-4xl xl:max-w-5xl">
@@ -643,10 +652,12 @@ export function ExamQuestionFeedbackScreen({
           className="mt-6 animate-[exam-tab-slide_220ms_ease-out] motion-reduce:animate-none"
         >
           <ExamReanswerPanel
-            examId={examId}
-            questionNumber={detail.questionNumber}
-            totalRetryCount={detail.totalRetryCount}
-            onNavigateRetry={handleNavigateRetry}
+            status={reanswerSubmission.status}
+            errorMessage={reanswerSubmission.errorMessage}
+            onSubmit={(blob) =>
+              reanswerSubmission.submit(blob, detail.totalRetryCount)
+            }
+            onReset={reanswerSubmission.reset}
             onUnsavedChange={setHasUnsavedRecording}
           />
         </TabsContent>
