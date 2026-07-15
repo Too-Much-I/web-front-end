@@ -11,9 +11,10 @@ export async function terminateExam(
   examId: string,
   questionNumber: number,
 ): Promise<ExamAnswerSubmitResult> {
+  console.log("[terminateExam] request query", { examId, questionNumber });
   const { result } = await apiFetch<ApiEnvelope<ExamAnswerSubmitResult>>(
-    `/api/v1/exams/${examId}/terminate`,
-    { method: "POST", body: JSON.stringify({ questionNumber }) },
+    `/api/v1/exams/${examId}/terminate?questionNumber=${questionNumber}`,
+    { method: "POST" },
   );
   return result;
 }
