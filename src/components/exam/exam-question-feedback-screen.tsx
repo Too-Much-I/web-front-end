@@ -333,15 +333,17 @@ export function ExamQuestionFeedbackScreen({
         onNavigate={handleNavigateRetry}
       />
 
-      <Link
-        href={`/exam/result?examId=${examId}`}
-        className="group inline-flex items-center gap-1.5 text-sm font-semibold text-zinc-500 hover:text-zinc-700 lg:text-base"
-      >
-        <span className="flex size-6 items-center justify-center rounded-full bg-zinc-100 transition-transform duration-200 group-hover:-translate-x-0.5">
-          <ArrowLeft className="size-3.5" aria-hidden />
-        </span>
-        채점 결과로 돌아가기
-      </Link>
+      {!isTrial && (
+        <Link
+          href={`/exam/result?examId=${examId}`}
+          className="group inline-flex items-center gap-1.5 text-sm font-semibold text-zinc-500 hover:text-zinc-700 lg:text-base"
+        >
+          <span className="flex size-6 items-center justify-center rounded-full bg-zinc-100 transition-transform duration-200 group-hover:-translate-x-0.5">
+            <ArrowLeft className="size-3.5" aria-hidden />
+          </span>
+          채점 결과로 돌아가기
+        </Link>
+      )}
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-5">

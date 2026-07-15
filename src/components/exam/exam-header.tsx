@@ -10,10 +10,13 @@ import { ExamLeaveConfirmPopup } from "@/components/exam/exam-leave-confirm-popu
 export function ExamHeader({
   label,
   confirmBeforeLeave = false,
+  onStopClick,
 }: {
   label: string;
   /** true면 로고/텍스트 클릭 시 바로 이동하지 않고, URL을 저장해두라는 확인 팝업을 먼저 띄운다. */
   confirmBeforeLeave?: boolean;
+  /** 전달하면 헤더 우측에 "중단하기" 버튼을 노출한다 (풀 모의고사 응시 중에만 사용). */
+  onStopClick?: () => void;
 }) {
   const router = useRouter();
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
@@ -49,9 +52,19 @@ export function ExamHeader({
           토선생
         </span>
       </Link>
-      <span className="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center text-lg font-bold text-white sm:text-xl md:text-2xl lg:text-3xl">
+      <span className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 text-center text-lg font-bold text-white sm:text-xl md:text-2xl lg:text-3xl">
         {label}
       </span>
+
+      {onStopClick && (
+        <button
+          type="button"
+          onClick={onStopClick}
+          className="absolute top-1/2 right-6 -translate-y-1/2 rounded-full border border-white/50 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-white/10 sm:right-10 sm:px-4 sm:py-2 sm:text-sm"
+        >
+          중단하기
+        </button>
+      )}
 
       {showLeaveConfirm && (
         <ExamLeaveConfirmPopup
