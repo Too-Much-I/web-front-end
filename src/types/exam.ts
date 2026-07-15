@@ -115,12 +115,17 @@ export interface RawExamSummaryResult {
   examId: string;
   totalScore: number;
   levelEstimate: string;
+  /** 중단(terminate)한 응시는 여기까지만 풀렸다 — 앞/뒤로 이동 없이 순서대로 응시하므로,
+   * 1부터 이 값까지의 전체 문제 번호(EXAM_PART_QUESTION_NUMBERS 참고)가 곧 풀린 문제다. */
+  totalSolvedQuestions: number;
   summary: string;
   overallFeedback: string;
   partFeedback: RawExamPartFeedback;
-  strengths: string[];
-  weaknesses: string[];
-  recommendedPractice: string[];
+  /** 다른 AI 채점 필드처럼(RawExamQuestionFeedback 참고) 내용이 없으면 빈 배열 대신 null로
+   * 내려올 수 있다 — 특히 중단(terminate)해서 일부 파트만 채점된 경우 관측됨. */
+  strengths: string[] | null;
+  weaknesses: string[] | null;
+  recommendedPractice: string[] | null;
   partScores: ExamPartScores;
 }
 
@@ -134,6 +139,7 @@ export interface ExamGradingResult {
   totalScore: number;
   maxScore: number;
   levelEstimate: string;
+  totalSolvedQuestions: number;
   summary: string;
   overallFeedback: string;
   partFeedback: ExamPartFeedback[];

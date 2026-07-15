@@ -88,7 +88,9 @@ export function ExamLeaveConfirmPopup({
             메인 페이지로 이동하시겠어요?
           </h2>
           <p id="exam-leave-confirm-description" className="text-sm text-zinc-500">
-            이 페이지 주소를 저장해두지 않으면 나중에 이 채점 결과를 다시 볼 수 없어요.
+            이 페이지 주소를 저장해두지 않으면
+            <br />
+            나중에 이 채점 결과를 다시 볼 수 없어요.
             <br />
             주소창의 URL을 미리 저장해두는 걸 추천해요.
           </p>

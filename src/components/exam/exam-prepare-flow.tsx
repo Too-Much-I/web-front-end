@@ -15,17 +15,21 @@ import { Separator } from "@/components/ui/separator";
 
 type PrepareDialogStep = "consent" | "mic" | "sound" | null;
 
-const CHECKLIST = [
+const CHECKLIST_BASE = [
   "주변 소음이 차단된 조용한 환경에서 응시해 주세요.",
   "정확한 채점을 위해 이어폰 또는 헤드셋 마이크 사용을 권장합니다.",
-  "시험 도중 중단하거나 일시 정지할 수 없으니 충분한 시간을 확보해 주세요.",
 ];
+const CHECKLIST_FULL_EXAM_EXTRA =
+  "시험 도중 중단해도 그때까지 응시한 문제까지는 채점 결과를 받아볼 수 있어요. 다만 완주하는 게 가장 정확한 결과를 받는 방법이에요.";
 
 export function ExamPrepareFlow() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isTrial = searchParams.get("mode") === "trial";
   const [dialogStep, setDialogStep] = useState<PrepareDialogStep>(null);
+  const checklist = isTrial
+    ? CHECKLIST_BASE
+    : [...CHECKLIST_BASE, CHECKLIST_FULL_EXAM_EXTRA];
 
   useEffect(() => {
     // router.push/replace always round-trips to the server in the App Router (no
@@ -86,7 +90,7 @@ export function ExamPrepareFlow() {
                 시험 전 필수 안내 사항
               </p>
               <ul className="flex flex-col gap-1.5">
-                {CHECKLIST.map((item) => (
+                {checklist.map((item) => (
                   <li key={item} className="flex items-start gap-1.5">
                     <span className="text-sky-500">✓</span>
                     {item}
