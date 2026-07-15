@@ -38,7 +38,13 @@ const CUE_FALLBACK_MS = 2000;
 // Part 4는 Q8 오디오가 나오기 전, 표/일정 정보를 읽을 45초를 별도로 준다.
 const PART4_READING_TIME_SEC = 45;
 
-export function ExamSessionScreen({ session }: { session: ExamSession }) {
+export function ExamSessionScreen({
+  session,
+  isTrial = false,
+}: {
+  session: ExamSession;
+  isTrial?: boolean;
+}) {
   const { questions } = session;
   const total = questions.length;
   const router = useRouter();
@@ -109,10 +115,16 @@ export function ExamSessionScreen({ session }: { session: ExamSession }) {
       } else {
         setPhase(nextQuestion.question ? "question-audio" : "prep-cue");
       }
+    } else if (isTrial) {
+      // 맛보기는 문항이 1개뿐이라 종합 피드백을 줄 수 없어서, 문항별 채점 폴링을 거쳐
+      // 곧바로 문제별 피드백 페이지로 보낸다 (채점 대기 화면 → /exam/result 요약 화면 대신).
+      router.replace(
+        `/exam/grading?examId=${encodeURIComponent(session.examId)}&mode=trial&questionNumber=${questions[0].questionNumber}`,
+      );
     } else {
       router.replace(`/exam/grading?examId=${encodeURIComponent(session.examId)}`);
     }
-  }, [phase, index, total, questions, question, router, session.examId]);
+  }, [phase, index, total, questions, question, router, session.examId, isTrial]);
 
   const isReadingTime = phase === "reading-time";
   const isCounting =

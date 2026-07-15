@@ -15,6 +15,7 @@ import { ExamPronunciationTranscript } from "@/components/exam/exam-pronunciatio
 import { ExamQuestionPrompt } from "@/components/exam/exam-question-prompt";
 import { ExamReanswerPanel } from "@/components/exam/exam-reanswer-panel";
 import { ExamRetryWingNav } from "@/components/exam/exam-retry-wing-nav";
+import { ScrollSatisfactionPopup } from "@/components/exam/scroll-satisfaction-popup";
 import { SketchyDashBorder } from "@/components/exam/sketchy-dash-border";
 import { TypedText } from "@/components/exam/typed-text";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -250,10 +251,12 @@ function ExamModelAnswerTab({ feedback }: { feedback: ExamQuestionFeedback }) {
 export function ExamQuestionFeedbackScreen({
   examId,
   detail,
+  isTrial,
   onNavigateRetry,
 }: {
   examId: string;
   detail: ExamQuestionDetail;
+  isTrial: boolean;
   onNavigateRetry: (nextRetryCount: number) => void;
 }) {
   const partMeta = getExamPartMeta(detail.partNumber);
@@ -717,6 +720,10 @@ export function ExamQuestionFeedbackScreen({
           />
         </TabsContent>
       </Tabs>
+
+      {/* 전체 모의고사 사용자는 요약 결과 화면(/exam/result)에서 이미 이 팝업을 봤으므로,
+          여기서는 종합 결과 화면을 거치지 않는 맛보기 플로우에서만 보여준다. */}
+      {isTrial && <ScrollSatisfactionPopup examId={examId} mode="trial" />}
     </section>
   );
 }

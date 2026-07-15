@@ -17,4 +17,6 @@ export interface ExamSurveyRecord {
   contact: string;
   /** 제출한 정확한 시각 (ISO 8601, UTC). */
   submittedAt: string;
+  /** 전체 모의고사(응시권 3회) vs 맛보기(응시권 1회) — 운영팀이 보상 수량을 구분해서 발송하기 위한 필드. */
+  source: "trial" | "full";
 }

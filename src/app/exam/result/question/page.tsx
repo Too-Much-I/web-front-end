@@ -24,11 +24,13 @@ function ExamQuestionFeedbackLoader({
   examId,
   questionNumber,
   retryCount,
+  isTrial,
   onNavigateRetry,
 }: {
   examId: string;
   questionNumber: number;
   retryCount: number;
+  isTrial: boolean;
   onNavigateRetry: (nextRetryCount: number) => void;
 }) {
   const [shownDetail, setShownDetail] = useState<ExamQuestionDetail | null>(null);
@@ -88,6 +90,7 @@ function ExamQuestionFeedbackLoader({
           <ExamQuestionFeedbackScreen
             examId={examId}
             detail={outgoingDetail}
+            isTrial={isTrial}
             onNavigateRetry={onNavigateRetry}
           />
         </div>
@@ -100,6 +103,7 @@ function ExamQuestionFeedbackLoader({
         <ExamQuestionFeedbackScreen
           examId={examId}
           detail={shownDetail}
+          isTrial={isTrial}
           onNavigateRetry={onNavigateRetry}
         />
       </div>
@@ -112,6 +116,7 @@ function ExamQuestionFeedbackContent() {
   const examId = searchParams.get("examId") ?? "";
   const questionNumber = Number(searchParams.get("questionNumber"));
   const hasValidParams = Boolean(examId) && Number.isInteger(questionNumber) && questionNumber > 0;
+  const isTrial = searchParams.get("mode") === "trial";
 
   const [retryCount, setRetryCount] = useState(() =>
     parseRetryCount(searchParams.get("retryCount")),
@@ -150,6 +155,7 @@ function ExamQuestionFeedbackContent() {
           examId={examId}
           questionNumber={questionNumber}
           retryCount={retryCount}
+          isTrial={isTrial}
           onNavigateRetry={handleNavigateRetry}
         />
       )}
