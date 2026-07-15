@@ -263,7 +263,9 @@ export function ExamMarkedTranscript({
 
   return (
     <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
-      <span className="text-sm font-bold text-blue-950">답변 스크립트</span>
+      <span className={`${jua.className} text-base text-blue-950`}>
+        답변 스크립트
+      </span>
 
       <div className="relative mt-3 overflow-hidden rounded-2xl bg-[#fdfaf1] pl-12 ring-1 ring-zinc-100">
         <div
