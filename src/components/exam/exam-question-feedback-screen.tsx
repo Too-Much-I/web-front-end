@@ -397,7 +397,7 @@ export function ExamQuestionFeedbackScreen({
               className="relative flex cursor-pointer items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
             >
               {showSubScores ? (
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
                   <ScoreCircleStat
                     label="발음 & 유창성"
                     ratio={
@@ -565,7 +565,11 @@ export function ExamQuestionFeedbackScreen({
             <ExamPronunciationTranscript
               spokenWordSequence={detail.spokenWordSequence}
               currentTimeSec={answerPlaybackTime}
-              onWordClick={(sec) => audioPlayerRef.current?.seekTo(sec)}
+              onWordClick={
+                detail.audioUrl
+                  ? (sec) => audioPlayerRef.current?.seekTo(sec)
+                  : undefined
+              }
             />
           ) : (
             <div className="rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
