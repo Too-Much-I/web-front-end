@@ -22,6 +22,7 @@ import {
   type TargetGradeOption,
 } from "@/features/exam/target-grade";
 import { jua } from "@/lib/fonts";
+import { useCountUp } from "@/lib/use-count-up";
 import type { ExamGradingResult } from "@/types/exam";
 
 const PART_MASCOTS = [
@@ -38,7 +39,16 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
     Math.max(0, (result.totalScore / result.maxScore) * 100),
   );
 
-  const [targetGrade, setTargetGrade] = useState<TargetGradeOption | null>(null);
+  // 총점 숫자와 프로그레스 바가 0부터 실제 점수까지 차오르는 카운트업.
+  const displayScore = useCountUp(result.totalScore);
+  const displayPercent = Math.min(
+    100,
+    Math.max(0, (displayScore / result.maxScore) * 100),
+  );
+
+  const [targetGrade, setTargetGrade] = useState<TargetGradeOption | null>(
+    null,
+  );
   const [isBetaTooltipOpen, setIsBetaTooltipOpen] = useState(false);
 
   useEffect(() => {
@@ -69,7 +79,10 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
       <section className="mx-auto w-full max-w-5xl px-6 py-10 xl:max-w-6xl">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex items-center gap-5">
-            <Tooltip open={isBetaTooltipOpen} onOpenChange={setIsBetaTooltipOpen}>
+            <Tooltip
+              open={isBetaTooltipOpen}
+              onOpenChange={setIsBetaTooltipOpen}
+            >
               <TooltipTrigger
                 className="shrink-0 cursor-help rounded-full"
                 onClick={() => setIsBetaTooltipOpen((open) => !open)}
@@ -120,7 +133,9 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-amber-300">★</span>
-                  <span className={`${jua.className} text-xl text-amber-100 lg:text-2xl`}>
+                  <span
+                    className={`${jua.className} text-xl text-amber-100 lg:text-2xl`}
+                  >
                     예상 총점
                   </span>
                 </div>
@@ -128,20 +143,22 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
                 <p
                   className={`${jua.className} mt-4 text-5xl text-amber-50 sm:text-6xl lg:text-7xl`}
                 >
-                  {result.totalScore}
+                  {displayScore}
                   <span className="text-2xl text-white/50 lg:text-3xl">
                     {" "}
                     / {result.maxScore}
                   </span>
                 </p>
-                <p className={`${jua.className} mt-2 text-base text-amber-200 lg:text-lg`}>
+                <p
+                  className={`${jua.className} mt-2 text-base text-amber-200 lg:text-lg`}
+                >
                   {result.levelEstimate}
                 </p>
 
                 <div className="mt-6 h-2 w-full rounded-full bg-white/15 lg:h-2.5">
                   <div
-                    className="h-full rounded-full bg-amber-300 transition-[width] duration-500"
-                    style={{ width: `${scorePercent}%` }}
+                    className="h-full rounded-full bg-amber-300"
+                    style={{ width: `${displayPercent}%` }}
                   />
                 </div>
 
@@ -154,7 +171,9 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-amber-300">★</span>
-                  <span className={`${jua.className} text-xl text-amber-100 lg:text-2xl`}>
+                  <span
+                    className={`${jua.className} text-xl text-amber-100 lg:text-2xl`}
+                  >
                     파트별 세부 점수
                   </span>
                 </div>
@@ -207,7 +226,9 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
 
         <div className="relative mt-6 rounded-3xl bg-white p-6 lg:p-8">
           <SketchyDashBorder />
-          <span className="text-sm font-bold text-blue-950 lg:text-base">종합 피드백</span>
+          <span className="text-sm font-bold text-blue-950 lg:text-base">
+            종합 피드백
+          </span>
           <p className="mt-3 text-sm leading-relaxed text-zinc-700 lg:text-base">
             {result.overallFeedback}
           </p>
@@ -243,7 +264,10 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
 
                   <div className="rounded-2xl rounded-tl-none bg-white p-5 text-left shadow-sm lg:p-7">
                     <p className="rounded-xl bg-sky-50 p-3 text-sm leading-relaxed text-sky-900 ring-1 ring-sky-100 lg:text-base">
-                      <span aria-hidden className="float-right h-4 w-14 lg:h-5 lg:w-16" />
+                      <span
+                        aria-hidden
+                        className="float-right h-4 w-14 lg:h-5 lg:w-16"
+                      />
                       {part.feedback}
                     </p>
 
@@ -273,7 +297,9 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
       </section>
 
       <section className="mx-auto w-full max-w-5xl px-6 py-10 xl:max-w-6xl">
-        <h2 className="text-lg font-bold text-blue-950 lg:text-xl">추천 학습법</h2>
+        <h2 className="text-lg font-bold text-blue-950 lg:text-xl">
+          추천 학습법
+        </h2>
         <ol className="mt-4 flex flex-col gap-3">
           {result.recommendedPractice.map((item, i) => (
             <li

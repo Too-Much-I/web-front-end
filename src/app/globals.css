@@ -137,6 +137,28 @@
   }
 }
 
+/** 히어로 CTA 오른쪽 위의 손가락(+말풍선)이 버튼을 사선으로 콕콕 찌르는 모션. */
+@keyframes cta-poke {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-6px, 6px);
+  }
+}
+
+@keyframes demo-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes gift-wiggle {
   0%,
   100% {
@@ -242,7 +264,7 @@
   display: none;
 }
 
-[data-sonner-toast][data-styled='true'].toast-face-icon [data-icon] {
+[data-sonner-toast][data-styled="true"].toast-face-icon [data-icon] {
   height: 40px !important;
   width: 40px !important;
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronRight, ThumbsUp, TriangleAlert } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -11,6 +12,10 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+import { SketchyDashBorder } from "@/components/exam/sketchy-dash-border";
+import { jua } from "@/lib/fonts";
+import { useCountUp } from "@/lib/use-count-up";
+
 const WAVE_BARS = [18, 32, 24, 40, 28, 20, 36, 26, 42, 22, 34, 18];
 
 const PART_RADAR_DATA = [
@@ -21,9 +26,30 @@ const PART_RADAR_DATA = [
   { part: "Part 5", percent: 80 },
 ];
 
-const STRENGTHS = ["답변 구조가 논리적이고 명확해요", "핵심 어휘 사용이 적절해요"];
+const STRENGTHS = [
+  "답변 구조가 논리적이고 명확해요",
+  "핵심 어휘 사용이 적절해요",
+];
 
-const WEAKNESSES = ["일부 단어에서 강세 위치가 부정확해요", "답변 사이 침묵이 다소 길어요"];
+const WEAKNESSES = [
+  "일부 단어에서 강세 위치가 부정확해요",
+  "답변 사이 침묵이 다소 길어요",
+];
+
+const TOTAL_SCORE = 160;
+const MAX_SCORE = 200;
+
+/** 자동 재생 시 각 화면을 보여주는 시간(ms). 피드백 화면은 볼 게 많아 더 길게 둔다. */
+const AUTOPLAY_RECORDING_MS = 3500;
+const AUTOPLAY_FEEDBACK_MS = 6500;
+
+/** 피드백 화면 블록들의 순차 등장 애니메이션. i가 커질수록 늦게 나타난다. */
+function fadeUp(i: number) {
+  return {
+    animation: "demo-fade-up 0.45s ease-out both",
+    animationDelay: `${i * 0.12}s`,
+  };
+}
 
 export function PhoneDemo() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -31,6 +57,11 @@ export function PhoneDemo() {
   const [screen, setScreen] = useState<"recording" | "feedback">("recording");
   const [hasInteracted, setHasInteracted] = useState(false);
   const [elapsed, setElapsed] = useState(0);
+
+  // 피드백 화면에 들어올 때마다 0 → 총점 카운트업.
+  const displayScore = useCountUp(TOTAL_SCORE, {
+    enabled: screen === "feedback",
+  });
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -55,6 +86,20 @@ export function PhoneDemo() {
     return () => clearInterval(id);
   }, [screen]);
 
+  // 스크롤만 하고 지나가는 방문자도 채점 리포트 화면을 보도록, 탭하기 전까지는
+  // 녹음 ↔ 피드백 화면을 자동으로 오간다. 한 번이라도 탭하면 수동 조작으로 전환.
+  useEffect(() => {
+    if (!revealed || hasInteracted) return;
+    const id = setTimeout(
+      () => {
+        setScreen((s) => (s === "recording" ? "feedback" : "recording"));
+        setElapsed(0);
+      },
+      screen === "recording" ? AUTOPLAY_RECORDING_MS : AUTOPLAY_FEEDBACK_MS,
+    );
+    return () => clearTimeout(id);
+  }, [revealed, hasInteracted, screen]);
+
   const handleTap = () => {
     setHasInteracted(true);
     setScreen((s) => (s === "recording" ? "feedback" : "recording"));
@@ -75,7 +120,8 @@ export function PhoneDemo() {
         피드백 받기
       </h2>
       <p className="max-w-lg text-zinc-500 sm:text-lg lg:text-xl">
-        핸드폰 화면을 눌러서 녹음 화면과 채점 결과 화면을 직접 확인해보세요.
+        모의고사가 끝나면 이런 채점 리포트를 바로 받아요. 화면을 눌러 직접
+        넘겨볼 수도 있어요.
       </p>
 
       <div
@@ -146,42 +192,66 @@ export function PhoneDemo() {
                   </div>
                 </div>
               ) : (
-                <div className="no-scrollbar h-full space-y-5 overflow-y-auto bg-white px-5 py-7 text-center">
-                  <div>
-                    <span className="inline-block rounded-full bg-orange-50 px-2.5 py-0.5 text-[10px] font-semibold text-orange-600">
-                      예상 총점
-                    </span>
-                    <div className="mt-1.5 flex items-end justify-center gap-1">
-                      <span className="text-5xl font-extrabold text-orange-600">
-                        160
-                      </span>
-                      <span className="pb-1.5 text-sm text-zinc-400">
-                        / 200
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs font-semibold text-blue-950">
-                      Intermediate High
+                <div className="no-scrollbar h-full space-y-4 overflow-y-auto bg-white px-4 py-6 text-left">
+                  <div style={fadeUp(0)}>
+                    <p className="text-[8px] font-semibold tracking-wide text-orange-600">
+                      SESSION ANALYSIS
                     </p>
-
-                    <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-orange-100">
-                      <div
-                        className="h-full rounded-full bg-orange-500"
-                        style={{ width: "80%" }}
-                      />
-                    </div>
+                    <p className="text-sm font-bold text-blue-950">
+                      채점 결과 리포트
+                    </p>
                   </div>
 
-                  <div>
-                    <h3 className="text-left text-xs font-bold text-blue-950">
-                      파트별 점수
-                    </h3>
-                    <div className="mx-auto h-36 w-full max-w-[220px]">
+                  <div
+                    className="rounded-2xl border-4 border-amber-900 bg-emerald-950 p-3 shadow-md"
+                    style={fadeUp(1)}
+                  >
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px] text-amber-300">★</span>
+                      <span
+                        className={`${jua.className} text-xs text-amber-100`}
+                      >
+                        예상 총점
+                      </span>
+                    </div>
+                    <p
+                      className={`${jua.className} mt-1.5 text-3xl text-amber-50`}
+                    >
+                      {displayScore}
+                      <span className="text-sm text-white/50">
+                        {" "}
+                        / {MAX_SCORE}
+                      </span>
+                    </p>
+                    <p
+                      className={`${jua.className} mt-0.5 text-[10px] text-amber-200`}
+                    >
+                      Intermediate High
+                    </p>
+                    <div className="mt-2 h-1 w-full rounded-full bg-white/15">
+                      <div
+                        className="h-full rounded-full bg-amber-300"
+                        style={{
+                          width: `${(displayScore / MAX_SCORE) * 100}%`,
+                        }}
+                      />
+                    </div>
+
+                    <div className="mt-3 flex items-center gap-1">
+                      <span className="text-[10px] text-amber-300">★</span>
+                      <span
+                        className={`${jua.className} text-xs text-amber-100`}
+                      >
+                        파트별 세부 점수
+                      </span>
+                    </div>
+                    <div className="mx-auto h-32 w-full">
                       <ResponsiveContainer width="100%" height="100%">
-                        <RadarChart data={PART_RADAR_DATA} outerRadius="70%">
-                          <PolarGrid stroke="#f0f0f0" />
+                        <RadarChart data={PART_RADAR_DATA} outerRadius="66%">
+                          <PolarGrid stroke="rgba(255,255,255,0.15)" />
                           <PolarAngleAxis
                             dataKey="part"
-                            tick={{ fontSize: 9, fill: "#71717a" }}
+                            tick={{ fontSize: 8, fill: "#e4e4e7" }}
                           />
                           <PolarRadiusAxis
                             domain={[0, 100]}
@@ -190,8 +260,8 @@ export function PhoneDemo() {
                           />
                           <Radar
                             dataKey="percent"
-                            stroke="#f97316"
-                            fill="#f97316"
+                            stroke="#fcd34d"
+                            fill="#fcd34d"
                             fillOpacity={0.35}
                             strokeWidth={2}
                           />
@@ -200,54 +270,82 @@ export function PhoneDemo() {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl bg-zinc-50 p-3 text-left">
-                    <p className="text-[10px] font-bold text-emerald-600">
+                  <div
+                    className="relative rounded-2xl bg-white p-3"
+                    style={fadeUp(2)}
+                  >
+                    <SketchyDashBorder radius={16} />
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-950">
+                      <ThumbsUp
+                        className="size-3 text-orange-500"
+                        aria-hidden
+                      />
                       강점
-                    </p>
-                    <ul className="mt-1 space-y-1">
+                    </span>
+                    <ul className="mt-1.5 space-y-1">
                       {STRENGTHS.map((item) => (
                         <li
                           key={item}
-                          className="flex gap-1.5 text-[10px] leading-relaxed text-zinc-600"
+                          className="rounded-lg bg-zinc-50 p-1.5 text-[10px] leading-relaxed text-zinc-700 ring-1 ring-zinc-100"
                         >
-                          <span className="text-emerald-500">+</span>
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-
-                    <p className="mt-2.5 text-[10px] font-bold text-rose-600">
-                      약점
-                    </p>
-                    <ul className="mt-1 space-y-1">
-                      {WEAKNESSES.map((item) => (
-                        <li
-                          key={item}
-                          className="flex gap-1.5 text-[10px] leading-relaxed text-zinc-600"
-                        >
-                          <span className="text-rose-500">−</span>
                           {item}
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  <div className="rounded-2xl border-l-4 border-orange-400 bg-orange-50/60 p-3 text-left">
-                    <span className="text-[10px] font-semibold text-orange-600">
+                  <div
+                    className="relative rounded-2xl bg-white p-3"
+                    style={fadeUp(3)}
+                  >
+                    <SketchyDashBorder radius={16} />
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-950">
+                      <TriangleAlert
+                        className="size-3 text-orange-500"
+                        aria-hidden
+                      />
+                      보완 필요
+                    </span>
+                    <ul className="mt-1.5 space-y-1">
+                      {WEAKNESSES.map((item) => (
+                        <li
+                          key={item}
+                          className="rounded-lg bg-zinc-50 p-1.5 text-[10px] leading-relaxed text-zinc-700 ring-1 ring-zinc-100"
+                        >
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div
+                    className="relative rounded-2xl bg-white p-3"
+                    style={fadeUp(4)}
+                  >
+                    <SketchyDashBorder radius={16} />
+                    <span className="text-[10px] font-bold text-blue-950">
                       종합 피드백
                     </span>
-                    <p className="mt-1 text-[11px] leading-relaxed text-zinc-600">
+                    <p className="mt-1 text-[10px] leading-relaxed text-zinc-700">
                       논리적 구성은 훌륭해요! 발음 강세만 조금 더 연습하면
                       다음엔 더 높은 점수를 받을 수 있어요.
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-gradient-to-br from-orange-500 to-orange-300 p-3">
+                  <div
+                    className="rounded-2xl bg-gradient-to-br from-orange-500 to-orange-300 p-2.5"
+                    style={fadeUp(5)}
+                  >
                     <p className="text-center text-xs font-extrabold text-white">
                       파트별 피드백
                     </p>
-                    <div className="relative mt-3 rounded-xl bg-white p-3 text-left">
-                      <div className="absolute -top-4 right-2 size-9">
+                    <div className="relative mt-3 pt-4">
+                      <div className="absolute top-0 left-0 z-10 rounded-t-lg bg-white px-2 py-1">
+                        <span className="text-[9px] font-extrabold text-orange-600">
+                          Part 3
+                        </span>
+                      </div>
+                      <div className="absolute -top-2 right-1.5 z-10 size-9">
                         <Image
                           src="/mascots/mike.png"
                           alt="마이크를 든 앵무새 캐릭터"
@@ -256,19 +354,29 @@ export function PhoneDemo() {
                           className="object-contain drop-shadow-sm"
                         />
                       </div>
-                      <span className="text-[10px] font-extrabold text-orange-600">
-                        Part 3
-                      </span>
-                      <p className="mt-1 rounded-lg bg-sky-50 p-2 text-[10px] leading-relaxed text-sky-900 ring-1 ring-sky-100">
-                        질문 의도 파악은 좋았지만, 답변 길이가 조금 짧아요.
-                      </p>
-                      <div className="mt-2 flex gap-1.5">
-                        <span className="inline-flex items-center rounded-full bg-sky-500 px-2 py-0.5 text-[9px] font-semibold text-white">
-                          Q5
-                        </span>
-                        <span className="inline-flex items-center rounded-full bg-sky-500 px-2 py-0.5 text-[9px] font-semibold text-white">
-                          Q6
-                        </span>
+                      <div className="rounded-xl rounded-tl-none bg-white p-2.5 text-left shadow-sm">
+                        <p className="rounded-lg bg-sky-50 p-1.5 text-[10px] leading-relaxed text-sky-900 ring-1 ring-sky-100">
+                          질문 의도 파악은 좋았지만, 답변 길이가 조금 짧아요.
+                        </p>
+                        <div className="mt-1.5 flex flex-wrap items-center gap-1">
+                          <span className="text-[9px] font-semibold text-sky-700">
+                            문제별 피드백 보기
+                          </span>
+                          {["Q5", "Q6"].map((q) => (
+                            <span
+                              key={q}
+                              className="inline-flex items-center gap-0.5 rounded-full bg-sky-500 py-0.5 pr-1 pl-2 text-[9px] font-semibold text-white"
+                            >
+                              {q}
+                              <span className="flex size-3 items-center justify-center rounded-full bg-white/25">
+                                <ChevronRight
+                                  className="size-2.5"
+                                  aria-hidden
+                                />
+                              </span>
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
