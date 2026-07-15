@@ -303,14 +303,16 @@ export function ExamSessionScreen({
   const handleConfirmTerminate = useCallback(async () => {
     setIsTerminating(true);
     try {
-      await terminateExam(session.examId);
+      // 현재 index의 문제는 아직 답변 제출 전이라(directions~speaking 어느 단계든) 카운트에서 제외하고,
+      // 실제로 제출까지 끝난 마지막 문제 번호만 보낸다.
+      await terminateExam(session.examId, lastAnsweredQuestion?.questionNumber ?? 0);
       router.replace(`/exam/grading?examId=${encodeURIComponent(session.examId)}`);
     } catch (err) {
       console.error(err);
       toast.error("시험 중단에 실패했어요. 잠시 후 다시 시도해주세요.");
       setIsTerminating(false);
     }
-  }, [router, session.examId]);
+  }, [router, session.examId, lastAnsweredQuestion]);
 
   const terminateConfirmDialog = showTerminateConfirm && (
     <ExamTerminateConfirmPopup
