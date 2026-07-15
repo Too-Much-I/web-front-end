@@ -25,6 +25,7 @@ There is no test suite/framework configured in this repo.
 ## Environment
 
 Copy `.env.local.example` to `.env.local`. Two groups of env vars:
+
 - `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_CLARITY_PROJECT_ID` — public, used client-side.
 - `GOOGLE_SERVICE_ACCOUNT_EMAIL` / `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` / `GOOGLE_CONSENT_SHEET_ID` / `GOOGLE_CONSENT_SHEET_RANGE` — server-only (never `NEXT_PUBLIC_*`), used by `src/app/api/consent/route.ts` to append voice-consent records to a Google Sheet via a service account. The sheet must share edit access with that service account email.
 
@@ -52,6 +53,7 @@ Note: `src/types/report.ts` and `src/features/report/api/use-report.ts` define a
 - **Mic voice verification** (`src/components/mic-test-panel.tsx`) uses a volume threshold + spectral-flatness gate (not an ML VAD library — a Silero VAD bundle was measured at ~13MB and rejected as disproportionate to this project's otherwise tiny bundle) and accumulates total voice-like time rather than requiring an unbroken streak. The thresholds (`VOICE_THRESHOLD`, `SPECTRAL_FLATNESS_THRESHOLD`, `VOICE_SUSTAIN_MS`) went through several rounds of real-usage retuning — read `docs/mic-test-voice-verification.md` before changing them again.
 - **URL query params during the exam flow are written via `window.history.replaceState` directly**, not `router.push`/`router.replace` — because the App Router always round-trips to the server on those (no Pages Router-style shallow routing), which would cause visible reloads/remounts mid-exam. This is intentional; it exists so Microsoft Clarity (`src/components/clarity-analytics.tsx`) can distinguish funnel drop-off points (`step`, `phase`, `part`, `question` params) without affecting app behavior.
 - The consent API route (`src/app/api/consent/route.ts`) validates `consentItem`/`consentVersion` as `z.literal()` against the canonical constants in `src/features/consent/consent-content.ts`, and rate-limits by IP in-memory (single-instance only — replace with a shared store, e.g. Redis, before scaling to multiple instances). Bump `VOICE_CONSENT_VERSION` (and update the constant) whenever consent copy changes, since version is how past consent records stay distinguishable from consent to updated terms.
+- **This repo is on React 19 (`package.json`) — write code against current React idioms, not patterns that became legacy in 19.** Concretely: `ref` is a plain prop on function components now, so don't wrap a component in `forwardRef` just to accept a `ref` — destructure `ref` directly out of props instead. Still reach for `useImperativeHandle` when a parent genuinely needs a curated method surface instead of the raw DOM node (e.g. `AnswerAudioPlayer`'s `seekTo`), just without the `forwardRef` wrapper around it. When in doubt about whether an API is current, check the installed React version before defaulting to older training-data patterns.
 
 ### UI stack
 
