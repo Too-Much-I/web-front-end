@@ -22,12 +22,13 @@ export function mapExamGradingResult(raw: RawExamSummaryResult): ExamGradingResu
     totalScore: raw.totalScore,
     maxScore: TOEIC_SPEAKING_MAX_SCORE,
     levelEstimate: raw.levelEstimate,
+    totalSolvedQuestions: raw.totalSolvedQuestions,
     summary: raw.summary,
     overallFeedback: raw.overallFeedback,
     partFeedback: mapPartFeedback(raw.partFeedback),
-    strengths: raw.strengths,
-    weaknesses: raw.weaknesses,
-    recommendedPractice: raw.recommendedPractice,
+    strengths: raw.strengths ?? [],
+    weaknesses: raw.weaknesses ?? [],
+    recommendedPractice: raw.recommendedPractice ?? [],
     partScores: raw.partScores,
   };
 }

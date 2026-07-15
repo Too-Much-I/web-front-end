@@ -2,17 +2,19 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { ExamDirectionsScreen } from "@/components/exam/exam-directions-screen";
 import { ExamExitConfirmPopup } from "@/components/exam/exam-exit-confirm-popup";
 import { ExamHeader } from "@/components/exam/exam-header";
 import { ExamPartIntroScreen } from "@/components/exam/exam-part-intro-screen";
+import { ExamTerminateConfirmPopup } from "@/components/exam/exam-terminate-confirm-popup";
 import {
   ExamAnswerUploadError,
   uploadExamAnswer,
 } from "@/features/exam/api/exam-answer-upload"; // TODO: 서버 배포 후 주석 해제
+import { terminateExam } from "@/features/exam/api/exam-terminate";
 import { AUDIO_CUES } from "@/features/exam/audio-cues";
 import { getExamPartMeta } from "@/features/exam/part-meta";
 import { useAnswerRecorder } from "@/features/exam/use-answer-recorder";
@@ -52,6 +54,8 @@ export function ExamSessionScreen({
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("directions");
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showTerminateConfirm, setShowTerminateConfirm] = useState(false);
+  const [isTerminating, setIsTerminating] = useState(false);
 
   const question = questions[index];
 
@@ -126,9 +130,11 @@ export function ExamSessionScreen({
     }
   }, [phase, index, total, questions, question, router, session.examId, isTrial]);
 
+  const isAnyDialogOpen = showExitConfirm || showTerminateConfirm;
+
   const isReadingTime = phase === "reading-time";
   const isCounting =
-    (phase === "prep" || phase === "speaking" || isReadingTime) && !showExitConfirm;
+    (phase === "prep" || phase === "speaking" || isReadingTime) && !isAnyDialogOpen;
   const isPrepGroup = phase === "prep-cue" || phase === "prep";
   const isSpeakGroup = phase === "speak-cue" || phase === "speaking";
   const isListeningPhase =
@@ -157,7 +163,7 @@ export function ExamSessionScreen({
     questionAudioFallbackMs,
     handlePhaseComplete,
     `${question?.questionNumber}-question-audio`,
-    phase === "question-audio" && !showExitConfirm,
+    phase === "question-audio" && !isAnyDialogOpen,
   );
 
   useAudioCue(
@@ -165,7 +171,7 @@ export function ExamSessionScreen({
     CUE_FALLBACK_MS,
     handlePhaseComplete,
     `${question?.questionNumber}-repeat-cue`,
-    phase === "repeat-cue" && !showExitConfirm,
+    phase === "repeat-cue" && !isAnyDialogOpen,
   );
 
   useAudioCue(
@@ -173,7 +179,7 @@ export function ExamSessionScreen({
     questionAudioFallbackMs,
     handlePhaseComplete,
     `${question?.questionNumber}-question-audio-repeat`,
-    phase === "question-audio-repeat" && !showExitConfirm,
+    phase === "question-audio-repeat" && !isAnyDialogOpen,
   );
 
   useAudioSequence(
@@ -181,7 +187,7 @@ export function ExamSessionScreen({
     CUE_FALLBACK_MS,
     handlePhaseComplete,
     `${question?.questionNumber}-prep-cue`,
-    phase === "prep-cue" && !showExitConfirm,
+    phase === "prep-cue" && !isAnyDialogOpen,
   );
 
   const speakCueClip =
@@ -196,7 +202,7 @@ export function ExamSessionScreen({
     CUE_FALLBACK_MS,
     handlePhaseComplete,
     `${question?.questionNumber}-speak-cue`,
-    phase === "speak-cue" && !showExitConfirm,
+    phase === "speak-cue" && !isAnyDialogOpen,
   );
 
   useEffect(() => {
@@ -243,6 +249,11 @@ export function ExamSessionScreen({
     window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
   }, [question, phase]);
 
+  const showTerminateConfirmRef = useRef(showTerminateConfirm);
+  useEffect(() => {
+    showTerminateConfirmRef.current = showTerminateConfirm;
+  }, [showTerminateConfirm]);
+
   useEffect(() => {
     // 시험 도중 브라우저/제스처 "뒤로가기"를 누르면 곧장 준비 화면으로 이동해버려
     // 진행 중이던 시험이 그대로 날아간다. 더미 history 엔트리를 하나 쌓아두고
@@ -251,6 +262,8 @@ export function ExamSessionScreen({
     window.history.pushState(null, "", window.location.href);
     const handlePopState = () => {
       window.history.pushState(null, "", window.location.href);
+      // 중단 확인 다이얼로그가 떠 있는 상태라면 뒤로가기 다이얼로그를 겹쳐 띄우지 않는다.
+      if (showTerminateConfirmRef.current) return;
       setShowExitConfirm(true);
     };
     window.addEventListener("popstate", handlePopState);
@@ -279,18 +292,56 @@ export function ExamSessionScreen({
     />
   );
 
+  const handleStopClick = useCallback(() => {
+    if (phase === "speaking") {
+      toast.error("답변을 녹음하는 중에는 중단할 수 없어요. 녹음이 끝난 후 시도해주세요.");
+      return;
+    }
+    setShowTerminateConfirm(true);
+  }, [phase]);
+
+  const handleConfirmTerminate = useCallback(async () => {
+    setIsTerminating(true);
+    try {
+      await terminateExam(session.examId);
+      router.replace(`/exam/grading?examId=${encodeURIComponent(session.examId)}`);
+    } catch (err) {
+      console.error(err);
+      toast.error("시험 중단에 실패했어요. 잠시 후 다시 시도해주세요.");
+      setIsTerminating(false);
+    }
+  }, [router, session.examId]);
+
+  const terminateConfirmDialog = showTerminateConfirm && (
+    <ExamTerminateConfirmPopup
+      lastAnsweredQuestion={
+        lastAnsweredQuestion
+          ? { questionNumber: lastAnsweredQuestion.questionNumber }
+          : null
+      }
+      totalQuestions={total}
+      isSubmitting={isTerminating}
+      onStay={() => setShowTerminateConfirm(false)}
+      onTerminate={handleConfirmTerminate}
+    />
+  );
+
   if (!question) return null;
 
   if (phase === "directions") {
     return (
       <div className="flex flex-1 flex-col bg-white">
-        <ExamHeader label={`Part ${question.partNumber}`} />
+        <ExamHeader
+          label={`Part ${question.partNumber}`}
+          onStopClick={isTrial ? undefined : handleStopClick}
+        />
         <ExamDirectionsScreen
           partNumber={question.partNumber}
           onComplete={handlePhaseComplete}
-          enabled={!showExitConfirm}
+          enabled={!isAnyDialogOpen}
         />
         {exitConfirmDialog}
+        {terminateConfirmDialog}
       </div>
     );
   }
@@ -298,16 +349,20 @@ export function ExamSessionScreen({
   if (phase === "part-intro") {
     return (
       <div className="flex flex-1 flex-col bg-white">
-        <ExamHeader label={`Part ${question.partNumber}`} />
+        <ExamHeader
+          label={`Part ${question.partNumber}`}
+          onStopClick={isTrial ? undefined : handleStopClick}
+        />
         <ExamPartIntroScreen
           partNumber={question.partNumber}
           text={question.partIntroText ?? ""}
           audioUrl={question.guideAudioUrl}
           resetKey={`part-intro-${question.questionNumber}`}
           onComplete={handlePhaseComplete}
-          enabled={!showExitConfirm}
+          enabled={!isAnyDialogOpen}
         />
         {exitConfirmDialog}
+        {terminateConfirmDialog}
       </div>
     );
   }
@@ -321,7 +376,10 @@ export function ExamSessionScreen({
 
   return (
     <div className="flex flex-1 flex-col bg-white">
-      <ExamHeader label={`Question ${index + 1} of ${total}`} />
+      <ExamHeader
+        label={`Question ${index + 1} of ${total}`}
+        onStopClick={isTrial ? undefined : handleStopClick}
+      />
 
       <main className="mx-auto flex w-full min-h-0 max-w-2xl flex-1 flex-col items-center gap-4 overflow-y-auto px-6 pt-8 pb-6 text-center md:max-w-3xl md:gap-6 lg:max-w-4xl lg:gap-8 xl:max-w-5xl">
         <span className="w-fit shrink-0 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600 sm:text-sm lg:text-base">
@@ -482,11 +540,14 @@ export function ExamSessionScreen({
         )}
 
         <p className="px-6 text-center text-xs text-zinc-400 lg:text-sm">
-          다음 문제로 자동으로 전환됩니다. 시험 도중 중단하거나 뒤로 갈 수 없어요.
+          {isTrial
+            ? "다음 문제로 자동으로 전환됩니다. 시험 도중 뒤로 갈 수 없어요."
+            : "다음 문제로 자동으로 전환되며 뒤로 갈 수 없어요. 중단하기를 누르면 지금까지 응시한 문제까지 채점 결과를 받을 수 있어요."}
         </p>
       </footer>
 
       {exitConfirmDialog}
+      {terminateConfirmDialog}
     </div>
   );
 }

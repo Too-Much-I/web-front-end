@@ -48,6 +48,17 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
   }, []);
 
   const scoreGap = targetGrade ? targetGrade.score - result.totalScore : null;
+
+  // 중단(terminate)한 응시는 앞/뒤 이동 없이 순서대로 풀기 때문에, totalSolvedQuestions까지의
+  // 전체 문제 번호만 실제로 풀린 문제다 — 파트에 풀린 문제가 하나도 없으면 그 파트 카드 자체를 숨긴다.
+  const partFeedbackWithSolvedQuestions = result.partFeedback
+    .map((part) => ({
+      ...part,
+      solvedQuestionNumbers: getExamPartQuestionNumbers(part.partNumber).filter(
+        (questionNumber) => questionNumber <= result.totalSolvedQuestions,
+      ),
+    }))
+    .filter((part) => part.solvedQuestionNumbers.length > 0);
   const mascot =
     scorePercent > 50
       ? { src: "/mascots/good_rabbit.png", alt: "만족스러워하는 토끼 캐릭터" }
@@ -210,7 +221,7 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
           </h2>
 
           <div className="mt-8 flex flex-col gap-10">
-            {result.partFeedback.map((part, i) => {
+            {partFeedbackWithSolvedQuestions.map((part, i) => {
               const mascot = PART_MASCOTS[i % PART_MASCOTS.length];
               return (
                 <div key={part.partNumber} className="relative pt-5">
@@ -240,7 +251,7 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
                       <span className="text-xs font-semibold text-sky-700 lg:text-sm">
                         문제별 피드백 보기
                       </span>
-                      {getExamPartQuestionNumbers(part.partNumber).map((questionNumber) => (
+                      {part.solvedQuestionNumbers.map((questionNumber) => (
                         <Link
                           key={questionNumber}
                           href={`/exam/result/question?examId=${result.examId}&questionNumber=${questionNumber}`}
