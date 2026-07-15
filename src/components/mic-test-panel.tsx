@@ -16,17 +16,18 @@ const VOICE_THRESHOLD = 0.08;
 const SPEECH_BAND_HZ: [number, number] = [300, 3400];
 /**
  * 스펙트럼 평탄도(기하평균/산술평균) 임계값. 0에 가까울수록 목소리처럼 특정 대역에 에너지가 몰려있고,
- * 1에 가까울수록 백색소음처럼 평평하다. spectralFlatness()가 선형 파워 도메인으로 바뀌면서
- * (로그 압축이 풀려 값의 스케일 자체가 달라짐) 목소리는 이 값보다 한참 아래, 평평한 잡음은 1 근처로
- * 나올 것으로 기대하고 잡은 잠정값. 디버그의 p50 실측으로 확정한다.
+ * 1에 가까울수록 백색소음처럼 평평하다. spectralFlatness()를 선형 파워 도메인으로 고친 뒤
+ * (로그 압축이 풀려 값의 스케일 자체가 달라짐) 실측에서 발화 중 p50은 이 값보다 확실히 아래,
+ * 무음·배경 소음은 1 근처로 갈라지는 것을 확인하고 그 사이로 잡은 값이다.
+ * 튜닝 이력과 근거는 docs/mic-test-voice-verification.md 11절 참고.
  */
 const SPECTRAL_FLATNESS_THRESHOLD = 0.5;
 /**
  * 목소리로 판정된 시간을 누적한 합이 이 값을 넘으면 통과 처리한다. 자음·숨쉬기·문장 사이 pause처럼
- * 자연스러운 발화에 포함된 끊김은 매번 초기화하지 않고 그대로 건너뛴 채 누적만 이어간다("연속 200ms"가
- * 아니라 "총합 200ms"). 짧은 문장을 읽어도 대부분 이 정도는 금방 채워진다.
+ * 자연스러운 발화에 포함된 끊김은 매번 초기화하지 않고 그대로 건너뛴 채 누적만 이어간다
+ *  짧은 문장을 읽어도 대부분 이 정도는 금방 채워진다.
  */
-const VOICE_SUSTAIN_MS = 700;
+const VOICE_SUSTAIN_MS = 400;
 /** 녹음을 시작하고 이 시간이 지나도 통과하지 못하면 안내 문구를 보여준다. */
 const HINT_DELAY_MS = 3000;
 const HINT_VOLUME_TOO_LOW = "목소리를 조금 더 크게 내주세요.";
@@ -81,19 +82,6 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
   const [voiceVerified, setVoiceVerified] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hint, setHint] = useState<string | null>(null);
-  /** TODO: 임계값 튜닝이 끝나면 제거할 임시 디버그 표시용 상태. */
-  const [debugInfo, setDebugInfo] = useState<{
-    avg: number;
-    flatness: number;
-    /** 음량 조건을 넘긴 프레임들의 평탄도 중앙값. 임계값을 정하는 실질 기준. */
-    flatnessP50: number;
-    /** 음량 조건을 넘긴 프레임 중 관측된 평탄도 최소값. 값이 빨리 변해 눈으로 못 쫓는 문제 보완용. */
-    flatnessMin: number;
-    /** 음량 조건(avg)을 넘긴 시간 누적(ms). voice 누적이 안 차는 게 음량 탓인지 평탄도 탓인지 구분용. */
-    loudMs: number;
-    isVoiceLike: boolean;
-    accumulatedMs: number;
-  } | null>(null);
 
   const streamRef = useRef<MediaStream | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -114,14 +102,6 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
   const everVoiceLikeRef = useRef(false);
   /** 마지막으로 화면에 표시한 안내 문구. 매 프레임 동일한 값으로 setState하는 것을 방지한다. */
   const shownHintRef = useRef<string | null>(null);
-  /** 디버그 표시를 마지막으로 갱신한 시각. 매 프레임 setState하지 않도록 쓰로틀링한다. */
-  const lastDebugUpdateRef = useRef(0);
-  /** 이번 세션에서 음량 조건을 넘긴 프레임 중 평탄도 최소값. 디버그 표시용. */
-  const flatnessMinRef = useRef(1);
-  /** 음량 조건을 넘긴 프레임들의 평탄도 샘플. p50 계산용(세션당 수백 개 수준이라 정렬 비용 무시 가능). */
-  const flatnessSamplesRef = useRef<number[]>([]);
-  /** 음량 조건을 넘긴 시간 누적(ms). 디버그 표시용. */
-  const loudMsRef = useRef(0);
 
   const resetVisuals = () => {
     barRefs.current.forEach((el) => {
@@ -141,7 +121,6 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
     dataRef.current = null;
     setIsRecording(false);
     setHint(null);
-    setDebugInfo(null);
     shownHintRef.current = null;
     resetVisuals();
   }, []);
@@ -154,9 +133,6 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
     setHint(null);
     voiceAccumulatedMsRef.current = 0;
     lastTickAtRef.current = null;
-    flatnessMinRef.current = 1;
-    flatnessSamplesRef.current = [];
-    loudMsRef.current = 0;
     everExceededThresholdRef.current = false;
     everVoiceLikeRef.current = false;
     shownHintRef.current = null;
@@ -232,9 +208,6 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
 
         if (avg >= VOICE_THRESHOLD) {
           everExceededThresholdRef.current = true;
-          flatnessMinRef.current = Math.min(flatnessMinRef.current, flatness);
-          flatnessSamplesRef.current.push(flatness);
-          loudMsRef.current += dt;
         }
 
         let verified = false;
@@ -245,22 +218,6 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
             verified = true;
             setVoiceVerified(true);
           }
-        }
-
-        if (now - lastDebugUpdateRef.current >= 100) {
-          lastDebugUpdateRef.current = now;
-          const sorted = [...flatnessSamplesRef.current].sort((a, b) => a - b);
-          setDebugInfo({
-            avg,
-            flatness,
-            flatnessP50: sorted.length
-              ? (sorted[Math.floor(sorted.length / 2)] ?? 1)
-              : 1,
-            flatnessMin: flatnessMinRef.current,
-            loudMs: loudMsRef.current,
-            isVoiceLike,
-            accumulatedMs: voiceAccumulatedMsRef.current,
-          });
         }
 
         if (verified) {
@@ -380,19 +337,6 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
         </div>
 
         {error && <p className="text-center text-xs text-red-500">{error}</p>}
-
-        {/* TODO: 임계값 튜닝이 끝나면 제거할 임시 디버그 표시. */}
-        {debugInfo && (
-          <p className="text-center font-mono text-[10px] text-zinc-400">
-            avg {debugInfo.avg.toFixed(3)} · flat{" "}
-            {debugInfo.flatness.toFixed(3)} (p50{" "}
-            {debugInfo.flatnessP50.toFixed(3)} · min{" "}
-            {debugInfo.flatnessMin.toFixed(3)}) ·{" "}
-            {debugInfo.isVoiceLike ? "voice" : "----"} · voice{" "}
-            {Math.round(debugInfo.accumulatedMs)}ms / loud{" "}
-            {Math.round(debugInfo.loudMs)}ms
-          </p>
-        )}
       </div>
 
       <div className="flex flex-col gap-2">
