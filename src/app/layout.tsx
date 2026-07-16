@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 const jua = Jua({
-  variable: "--font-jua",
+  variable: "--font-jua-kr",
   weight: "400",
   subsets: ["latin"],
 });
