@@ -25,12 +25,15 @@ function MockFrame({
   badge,
   highlightQnum = false,
   highlightStop = false,
+  // 맛보기 모드 시험 화면에는 중단하기 버튼이 없다 (ExamHeader onStopClick 미전달)
+  showStop = true,
   children,
 }: {
   qnum: string;
   badge: string;
   highlightQnum?: boolean;
   highlightStop?: boolean;
+  showStop?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -51,14 +54,18 @@ function MockFrame({
         >
           {qnum}
         </span>
-        <span
-          className={cn(
-            "rounded-full border border-red-200 px-2 py-0.5 text-[9px] font-semibold text-red-500",
-            highlightStop && HL,
-          )}
-        >
-          중단하기
-        </span>
+        {showStop ? (
+          <span
+            className={cn(
+              "rounded-full border border-red-200 px-2 py-0.5 text-[9px] font-semibold text-red-500",
+              highlightStop && HL,
+            )}
+          >
+            중단하기
+          </span>
+        ) : (
+          <span aria-hidden className="w-10" />
+        )}
       </div>
       <span className="rounded-full bg-orange-50 px-2.5 py-0.5 text-[9px] font-bold text-orange-600">
         {badge}
@@ -143,12 +150,14 @@ function MockText({ children }: { children: ReactNode }) {
   );
 }
 
-const TUTORIAL_STEPS: {
+type TutorialStep = {
   title: string;
   description: string;
   tip?: string;
   mock: ReactNode;
-}[] = [
+};
+
+const FULL_TUTORIAL_STEPS: TutorialStep[] = [
   {
     title: "11문항이 차례대로 진행돼요",
     description:
@@ -227,7 +236,60 @@ const TUTORIAL_STEPS: {
   },
 ];
 
-type Stage = "intro" | "done" | number; // number = TUTORIAL_STEPS 인덱스
+// 맛보기(Part 1 낭독 1문항)용 — 질문 듣기·중단하기 단계가 없어 3단계로 줄이고,
+// 지문을 소리 내어 읽는 Part 1 기준으로 설명한다.
+const TRIAL_TUTORIAL_STEPS: TutorialStep[] = [
+  {
+    title: "Part 1 문제를 하나만 풀어봐요",
+    description:
+      "맛보기는 약 1분이에요. 실제 시험(5개 파트, 11문항)의 첫 문제 유형을 그대로 체험해요.",
+    tip: "끝나면 바로 채점 결과와 피드백을 확인할 수 있어요.",
+    mock: (
+      <MockFrame qnum="Question 1 of 1" badge="Part 1 · Read a Text Aloud" highlightQnum showStop={false}>
+        <MockText>
+          Welcome aboard Flight 207 to Chicago. In a few minutes, our crew will begin the
+          in-flight service with drinks, snacks, and magazines…
+        </MockText>
+        <MockTimer label="PREPARATION TIME" value="00:45" />
+      </MockFrame>
+    ),
+  },
+  {
+    title: "타이머가 보이면 읽을 준비를 해요",
+    description: "PREPARATION TIME 동안 화면의 지문을 눈으로 미리 읽어봐요.",
+    tip: "준비가 일찍 끝났다면 버튼으로 바로 시작할 수 있어요.",
+    mock: (
+      <MockFrame qnum="Question 1 of 1" badge="Part 1 · Read a Text Aloud" showStop={false}>
+        <MockTimer label="PREPARATION TIME" value="00:23" />
+        <span className="text-[9px] text-zinc-500">곧 답변 시간이 시작돼요.</span>
+        <MockPillButton highlight>준비 완료, 바로 답변 시작하기</MockPillButton>
+      </MockFrame>
+    ),
+  },
+  {
+    title: "빨간 타이머가 켜지면 녹음 중이에요",
+    description: "지문을 소리 내어 읽어주세요. 시간이 끝나면 자동으로 제출돼요.",
+    tip: "낭독을 일찍 마쳤다면 '답변 완료' 버튼으로 바로 제출할 수 있어요.",
+    mock: (
+      <MockFrame qnum="Question 1 of 1" badge="Part 1 · Read a Text Aloud" showStop={false}>
+        <MockTimer label="RESPONSE TIME" value="00:12" red />
+        <MockIndicator color="red" text="답변을 녹음하고 있어요" />
+        <div className="flex h-5 items-center gap-[3px]">
+          {BAR_HEIGHTS.map((height, i) => (
+            <span
+              key={i}
+              className="w-[3px] rounded-full bg-red-300"
+              style={{ height: `${height}px` }}
+            />
+          ))}
+        </div>
+        <MockPillButton highlight>답변 완료, 제출하고 넘어가기</MockPillButton>
+      </MockFrame>
+    ),
+  },
+];
+
+type Stage = "intro" | "done" | number; // number = 튜토리얼 단계 인덱스
 
 export function ExamTutorialPanel({
   examMode,
@@ -243,13 +305,14 @@ export function ExamTutorialPanel({
   onFinish: () => void;
 }) {
   const [stage, setStage] = useState<Stage>("intro");
+  const steps = examMode === "trial" ? TRIAL_TUTORIAL_STEPS : FULL_TUTORIAL_STEPS;
 
   const handleStart = () => {
     if (!isReview) trackEvent("tutorial_start", { exam_mode: examMode });
     setStage(0);
   };
 
-  // step: 0 = 인트로에서 건너뜀(경험자), 1~5 = 해당 단계까지 보다가 건너뜀
+  // step: 0 = 인트로에서 건너뜀(경험자), 1~ = 해당 단계까지 보다가 건너뜀
   const handleSkip = (step: number) => {
     if (!isReview) trackEvent("tutorial_skip", { exam_mode: examMode, step });
     onFinish();
@@ -257,7 +320,7 @@ export function ExamTutorialPanel({
 
   const handleNext = () => {
     if (typeof stage !== "number") return;
-    if (stage + 1 < TUTORIAL_STEPS.length) {
+    if (stage + 1 < steps.length) {
       setStage(stage + 1);
       return;
     }
@@ -308,7 +371,7 @@ export function ExamTutorialPanel({
         <>
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold tracking-widest text-zinc-400">
-              STEP {stage + 1} / {TUTORIAL_STEPS.length}
+              STEP {stage + 1} / {steps.length}
             </span>
             <button
               type="button"
@@ -320,18 +383,18 @@ export function ExamTutorialPanel({
           </div>
 
           <div className="flex flex-col items-center gap-5 sm:flex-row sm:gap-6">
-            {TUTORIAL_STEPS[stage].mock}
+            {steps[stage].mock}
             <div className="flex flex-1 flex-col gap-2.5 text-center sm:text-left">
               <h3 className="text-base font-bold text-blue-950 sm:text-lg">
-                {TUTORIAL_STEPS[stage].title}
+                {steps[stage].title}
               </h3>
               <p className="text-sm leading-relaxed text-zinc-500">
-                {TUTORIAL_STEPS[stage].description}
+                {steps[stage].description}
               </p>
-              {TUTORIAL_STEPS[stage].tip && (
+              {steps[stage].tip && (
                 <p className="rounded-lg bg-orange-50 p-2.5 text-xs leading-relaxed text-zinc-600">
                   <span className="font-bold text-orange-600">참고</span> ·{" "}
-                  {TUTORIAL_STEPS[stage].tip}
+                  {steps[stage].tip}
                 </p>
               )}
             </div>
@@ -347,7 +410,7 @@ export function ExamTutorialPanel({
               이전
             </Button>
             <div className="flex gap-1.5" aria-hidden>
-              {TUTORIAL_STEPS.map((_, i) => (
+              {steps.map((_, i) => (
                 <button
                   key={i}
                   type="button"
@@ -364,7 +427,7 @@ export function ExamTutorialPanel({
               onClick={handleNext}
               className="rounded-full bg-orange-500 px-5 text-white hover:bg-orange-600"
             >
-              {stage + 1 === TUTORIAL_STEPS.length ? "완료" : "다음"}
+              {stage + 1 === steps.length ? "완료" : "다음"}
             </Button>
           </div>
         </>
