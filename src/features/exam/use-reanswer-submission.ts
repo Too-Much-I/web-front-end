@@ -7,6 +7,7 @@ import {
   uploadExamAnswer,
 } from "@/features/exam/api/exam-answer-upload";
 import { useQuestionRetryStatus } from "@/features/exam/use-question-retry-status";
+import { trackEvent } from "@/lib/analytics";
 
 export type ReanswerSubmissionStatus = "idle" | "submitting" | "grading" | "error";
 
@@ -54,6 +55,10 @@ export function useReanswerSubmission({
     async (blob: Blob, nextRetryCount: number) => {
       setStatus("submitting");
       setErrorMessage(null);
+      trackEvent("reanswer_submit", {
+        question_number: questionNumber,
+        retry_count: nextRetryCount,
+      });
       try {
         await uploadExamAnswer(examId, String(questionNumber), blob, nextRetryCount);
         setStatus("grading");

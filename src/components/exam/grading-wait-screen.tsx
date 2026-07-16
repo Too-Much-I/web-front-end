@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ErrorFallbackScreen } from "@/components/error-fallback-screen";
 import { useGradingProgress } from "@/features/exam/use-grading-progress";
 import { useTrialQuestionProgress } from "@/features/exam/use-trial-question-progress";
+import { trackEvent } from "@/lib/analytics";
 
 const STATUS_MESSAGES = [
   "답변을 서버에 안전하게 업로드하고 있어요",
@@ -63,7 +64,14 @@ export function GradingWaitScreen({
 
   const { progress, failed } = useGradingProgress(examId, handleComplete);
 
-  return <GradingWaitVisual progress={progress} failed={failed} estimatedWaitLabel={estimatedWaitLabel} />;
+  return (
+    <GradingWaitVisual
+      progress={progress}
+      failed={failed}
+      gradingType="full"
+      estimatedWaitLabel={estimatedWaitLabel}
+    />
+  );
 }
 
 /**
@@ -93,20 +101,33 @@ export function TrialGradingWaitScreen({
 
   const { progress, failed } = useTrialQuestionProgress(examId, questionNumber, handleComplete);
 
-  return <GradingWaitVisual progress={progress} failed={failed} estimatedWaitLabel={estimatedWaitLabel} />;
+  return (
+    <GradingWaitVisual
+      progress={progress}
+      failed={failed}
+      gradingType="trial_question"
+      estimatedWaitLabel={estimatedWaitLabel}
+    />
+  );
 }
 
 function GradingWaitVisual({
   progress,
   failed,
+  gradingType,
   estimatedWaitLabel,
 }: {
   progress: number;
   failed: boolean;
+  gradingType: "full" | "trial_question";
   estimatedWaitLabel: string;
 }) {
   const [messageIndex, setMessageIndex] = useState(0);
   const [tipIndex, setTipIndex] = useState(0);
+
+  useEffect(() => {
+    if (failed) trackEvent("grading_fail", { grading_type: gradingType });
+  }, [failed, gradingType]);
 
   useEffect(() => {
     const id = setInterval(() => {

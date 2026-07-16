@@ -9,6 +9,7 @@ import { SatisfactionStars } from "@/components/exam/satisfaction-stars";
 import { getOrCreateAnonymousId } from "@/features/consent/anonymous-id";
 import { TARGET_GRADE_OPTIONS } from "@/features/exam/target-grade";
 import { submitExamSurvey } from "@/features/survey/api/submit-exam-survey";
+import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 const PRICE_OPTIONS = [
@@ -91,6 +92,7 @@ export function ExamFeedbackSurvey({
         source: mode,
       });
       setSubmitted(true);
+      trackEvent("survey_submit", { exam_mode: mode, satisfaction });
       toast.success("설문 제출 완료!", {
         description: `프리미엄형 모의고사 ${rewardCount}회 응시권을 곧 보내드릴게요.`,
         className: "toast-face-icon",

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Jua } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { ClarityAnalytics } from "@/components/clarity-analytics";
+import { GoogleAnalyticsTag } from "@/components/google-analytics";
 import { SITE_URL } from "@/lib/site-config";
 
 const geistSans = Geist({
@@ -58,6 +59,7 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col">
         <ClarityAnalytics />
+        <GoogleAnalyticsTag />
         <Providers>{children}</Providers>
       </body>
     </html>

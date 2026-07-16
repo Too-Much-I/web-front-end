@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { trackEvent } from "@/lib/analytics";
 
 type PrepareDialogStep = "consent" | "mic" | "sound" | null;
 
@@ -26,6 +27,7 @@ export function ExamPrepareFlow() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isTrial = searchParams.get("mode") === "trial";
+  const examMode = isTrial ? "trial" : "full";
   const [dialogStep, setDialogStep] = useState<PrepareDialogStep>(null);
   const checklist = isTrial
     ? CHECKLIST_BASE
@@ -120,16 +122,27 @@ export function ExamPrepareFlow() {
       >
         <DialogContent className="max-w-none border-none bg-transparent p-0 ring-0 sm:max-w-xl">
           {dialogStep === "consent" && (
-            <VoiceConsentPanel onAgreed={() => setDialogStep("mic")} />
+            <VoiceConsentPanel
+              onAgreed={() => {
+                trackEvent("consent_complete", { exam_mode: examMode });
+                setDialogStep("mic");
+              }}
+            />
           )}
           {dialogStep === "mic" && (
-            <MicTestPanel onVerified={() => setDialogStep("sound")} />
+            <MicTestPanel
+              onVerified={() => {
+                trackEvent("mic_test_complete", { exam_mode: examMode });
+                setDialogStep("sound");
+              }}
+            />
           )}
           {dialogStep === "sound" && (
             <SoundCheckPanel
-              onCompleted={() =>
-                router.push(isTrial ? "/exam/session?mode=trial" : "/exam/session")
-              }
+              onCompleted={() => {
+                trackEvent("sound_check_complete", { exam_mode: examMode });
+                router.push(isTrial ? "/exam/session?mode=trial" : "/exam/session");
+              }}
             />
           )}
         </DialogContent>

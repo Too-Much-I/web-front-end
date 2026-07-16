@@ -17,10 +17,12 @@ import {
 import { terminateExam } from "@/features/exam/api/exam-terminate";
 import { AUDIO_CUES } from "@/features/exam/audio-cues";
 import { getExamPartMeta } from "@/features/exam/part-meta";
+import { getStoredTargetGradeId } from "@/features/exam/target-grade";
 import { useAnswerRecorder } from "@/features/exam/use-answer-recorder";
 import { useAudioCue } from "@/features/exam/use-audio-cue";
 import { useAudioSequence } from "@/features/exam/use-audio-sequence";
 import { formatSeconds, usePhaseCountdown } from "@/features/exam/use-phase-countdown";
+import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import type { ExamSession } from "@/types/exam";
 
@@ -58,8 +60,20 @@ export function ExamSessionScreen({
   const [isTerminating, setIsTerminating] = useState(false);
 
   const question = questions[index];
+  const examMode = isTrial ? "trial" : "full";
 
   const { startRecording, stopRecording, levelBarRefs } = useAnswerRecorder();
+
+  // React Strict Mode의 이펙트 이중 실행으로 시험 시작이 중복 집계되지 않도록 ref로 가드한다.
+  const hasTrackedExamStart = useRef(false);
+  useEffect(() => {
+    if (hasTrackedExamStart.current) return;
+    hasTrackedExamStart.current = true;
+    trackEvent("exam_start", {
+      exam_mode: examMode,
+      target_grade: getStoredTargetGradeId() ?? "none",
+    });
+  }, [examMode]);
 
   const handlePhaseComplete = useCallback(() => {
     if (phase === "directions") {
@@ -110,6 +124,16 @@ export function ExamSessionScreen({
       return;
     }
     // phase === "speaking"
+    if (question) {
+      trackEvent("question_complete", {
+        exam_mode: examMode,
+        part: question.partNumber,
+        question_number: question.questionNumber,
+      });
+      if (index + 1 >= total) {
+        trackEvent("exam_complete", { exam_mode: examMode });
+      }
+    }
     if (index + 1 < total) {
       const nextQuestion = questions[index + 1];
       const isNewPart = nextQuestion.partNumber !== questions[index].partNumber;
@@ -128,7 +152,7 @@ export function ExamSessionScreen({
     } else {
       router.replace(`/exam/grading?examId=${encodeURIComponent(session.examId)}`);
     }
-  }, [phase, index, total, questions, question, router, session.examId, isTrial]);
+  }, [phase, index, total, questions, question, router, session.examId, isTrial, examMode]);
 
   const isAnyDialogOpen = showExitConfirm || showTerminateConfirm;
 
@@ -271,8 +295,13 @@ export function ExamSessionScreen({
   }, []);
 
   const handleConfirmExit = useCallback(() => {
+    trackEvent("exam_exit", {
+      exam_mode: examMode,
+      part: question?.partNumber ?? 0,
+      question_number: question?.questionNumber ?? 0,
+    });
     router.replace("/exam/prepare");
-  }, [router]);
+  }, [router, examMode, question]);
 
   // 현재 index의 문제는 directions~speaking 전 구간에서 아직 "응시 완료"가 아니다.
   // (녹음/제출은 speaking이 끝나야 이루어지고, 그래야 index가 다음으로 넘어간다.)
@@ -306,13 +335,17 @@ export function ExamSessionScreen({
       // 현재 index의 문제는 아직 답변 제출 전이라(directions~speaking 어느 단계든) 카운트에서 제외하고,
       // 실제로 제출까지 끝난 마지막 문제 번호만 보낸다.
       await terminateExam(session.examId, lastAnsweredQuestion?.questionNumber ?? 0);
+      trackEvent("exam_terminate", {
+        exam_mode: examMode,
+        last_question_number: lastAnsweredQuestion?.questionNumber ?? 0,
+      });
       router.replace(`/exam/grading?examId=${encodeURIComponent(session.examId)}`);
     } catch (err) {
       console.error(err);
       toast.error("시험 중단에 실패했어요. 잠시 후 다시 시도해주세요.");
       setIsTerminating(false);
     }
-  }, [router, session.examId, lastAnsweredQuestion]);
+  }, [router, session.examId, lastAnsweredQuestion, examMode]);
 
   const terminateConfirmDialog = showTerminateConfirm && (
     <ExamTerminateConfirmPopup

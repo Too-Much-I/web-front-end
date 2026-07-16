@@ -7,6 +7,7 @@ import {
   getStoredTargetGradeId,
   setStoredTargetGradeId,
 } from "@/features/exam/target-grade";
+import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 export function TargetGradeSelect() {
@@ -21,6 +22,7 @@ export function TargetGradeSelect() {
   const handleSelect = (id: string) => {
     setSelectedId(id);
     setStoredTargetGradeId(id);
+    trackEvent("target_grade_select", { target_grade: id });
   };
 
   return (
