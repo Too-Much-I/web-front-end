@@ -1,9 +1,68 @@
 import Image from "next/image";
+import type { ReactNode } from "react";
 
 import { jua } from "@/lib/fonts";
 import type { ExamQuestionInfo } from "@/types/exam";
 
-/** 문제별 피드백 화면에서 문제 원문을 파트별 구성 요소(지문 소개/읽기 지문/사진/표/질문)에 맞춰 보여준다. */
+/**
+ * 파트 2 피드백에서 사진만 덩그러니 보이지 않도록 붙이는 안내문.
+ * EXAM_PART_DIRECTIONS(part-directions.ts) 파트 2 디렉션의 핵심 문장.
+ */
+const PART2_DIRECTION_TEXT =
+  "In this part of the test, you will describe the picture on your screen in as much detail as you can.";
+
+const GRID_TONES = {
+  /** 읽었던 지문 — 시험지에 인쇄된 읽기 지문 */
+  slate: {
+    label: "text-slate-600",
+    box: "bg-[#f4f7fb] ring-slate-200",
+    line: "rgba(71,85,105,0.12)",
+    text: "text-slate-700",
+  },
+  /** 디렉션/지문 소개 — 문제를 소개하는 안내문 */
+  sky: {
+    label: "text-sky-700",
+    box: "bg-sky-50 ring-sky-100",
+    line: "rgba(2,132,199,0.12)",
+    text: "text-sky-900",
+  },
+} as const;
+
+/** 디렉션/지문 소개/읽었던 지문처럼 "시험지에 인쇄된 안내문" 류에 공통으로 쓰는 모눈종이 박스. */
+function GridPaperNote({
+  tone,
+  label,
+  children,
+}: {
+  tone: keyof typeof GRID_TONES;
+  label?: string;
+  children: ReactNode;
+}) {
+  const t = GRID_TONES[tone];
+  return (
+    <div>
+      {label && (
+        <p className={`${jua.className} mb-2 text-sm lg:text-base ${t.label}`}>
+          {label}
+        </p>
+      )}
+      <div
+        className={`relative overflow-hidden rounded-2xl ring-1 ${t.box}`}
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage: `repeating-linear-gradient(to bottom, transparent, transparent 27px, ${t.line} 27px, ${t.line} 28px), repeating-linear-gradient(to right, transparent, transparent 27px, ${t.line} 27px, ${t.line} 28px)`,
+          }}
+        />
+        <div className={`relative p-4 lg:p-5 ${t.text}`}>{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/** 문제별 피드백 화면에서 문제 원문을 파트별 구성 요소(디렉션/지문 소개/읽기 지문/사진/표/질문)에 맞춰 보여준다. */
 export function ExamQuestionPrompt({
   questionInfo,
 }: {
@@ -15,36 +74,28 @@ export function ExamQuestionPrompt({
         문제
       </span>
 
-      {questionInfo.partNumber === 3 && questionInfo.partIntroText && (
-        <div className="rounded-2xl bg-sky-50 p-4 ring-1 ring-sky-100 lg:p-5">
-          <p className={`${jua.className} text-sm text-sky-700 lg:text-base`}>
-            지문 소개
+      {questionInfo.partNumber === 2 && (
+        <GridPaperNote tone="sky">
+          <p className="text-sm leading-relaxed lg:text-base">
+            {PART2_DIRECTION_TEXT}
           </p>
-          <p className="mt-1.5 text-sm leading-relaxed text-sky-900 lg:text-base">
+        </GridPaperNote>
+      )}
+
+      {questionInfo.partNumber === 3 && questionInfo.partIntroText && (
+        <GridPaperNote tone="sky">
+          <p className="text-sm leading-relaxed lg:text-base">
             {questionInfo.partIntroText}
           </p>
-        </div>
+        </GridPaperNote>
       )}
 
       {questionInfo.partNumber === 1 && questionInfo.referenceText && (
-        <div>
-          <p className={`${jua.className} text-sm text-slate-600 lg:text-base`}>
-            읽었던 지문
+        <GridPaperNote tone="slate" label="읽었던 지문">
+          <p className="text-base leading-7 whitespace-pre-line sm:text-lg lg:text-xl">
+            {questionInfo.referenceText}
           </p>
-          <div className="relative mt-2 overflow-hidden rounded-2xl bg-[#f4f7fb] ring-1 ring-slate-200">
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0"
-              style={{
-                backgroundImage:
-                  "repeating-linear-gradient(to bottom, transparent, transparent 27px, rgba(71,85,105,0.12) 27px, rgba(71,85,105,0.12) 28px), repeating-linear-gradient(to right, transparent, transparent 27px, rgba(71,85,105,0.12) 27px, rgba(71,85,105,0.12) 28px)",
-              }}
-            />
-            <p className="relative p-4 text-base leading-7 whitespace-pre-line text-slate-700 sm:text-lg lg:p-5 lg:text-xl">
-              {questionInfo.referenceText}
-            </p>
-          </div>
-        </div>
+        </GridPaperNote>
       )}
 
       {questionInfo.imageUrl && (
@@ -98,9 +149,16 @@ export function ExamQuestionPrompt({
       )}
 
       {questionInfo.text && (
-        <p className="text-sm leading-relaxed font-medium text-blue-950 lg:text-base">
-          {questionInfo.text}
-        </p>
+        <div className="border-l-4 border-orange-400 py-0.5 pl-3.5">
+          <p className="text-base leading-relaxed font-medium text-blue-950 lg:text-lg">
+            <span
+              className={`${jua.className} mr-1.5 text-lg text-orange-500 lg:text-xl`}
+            >
+              Q.
+            </span>
+            {questionInfo.text}
+          </p>
+        </div>
       )}
     </div>
   );

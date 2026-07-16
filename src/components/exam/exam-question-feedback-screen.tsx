@@ -255,17 +255,36 @@ function ExamModelAnswerTab({ feedback }: { feedback: ExamQuestionFeedback }) {
           </button>
         </div>
       )}
-      <p
-        key={active}
-        style={
-          {
-            "--exam-model-answer-slide-x": `${slideDir * 12}px`,
-          } as React.CSSProperties
-        }
-        className="animate-[exam-model-answer-slide_220ms_ease-out] rounded-2xl bg-zinc-50 p-4 text-sm leading-relaxed text-zinc-700 ring-1 ring-zinc-100 motion-reduce:animate-none lg:p-5 lg:text-base"
-      >
-        {shown}
-      </p>
+      <div className="flex items-end gap-3">
+        <div className="relative h-20 w-20 shrink-0 sm:h-24 sm:w-24">
+          <Image
+            src="/mascots/rabbit_teacher.png"
+            alt="토선생 캐릭터"
+            fill
+            sizes="96px"
+            className="object-contain drop-shadow-md"
+          />
+        </div>
+        <div
+          key={active}
+          style={
+            {
+              "--exam-model-answer-slide-x": `${slideDir * 12}px`,
+            } as React.CSSProperties
+          }
+          className="relative flex-1 animate-[exam-model-answer-slide_220ms_ease-out] rounded-2xl bg-orange-50 p-4 ring-1 ring-orange-100 motion-reduce:animate-none lg:p-5"
+        >
+          <div className="absolute bottom-3 -left-2.5 h-3 w-2.5 bg-orange-50 [clip-path:polygon(100%_0%,100%_100%,0%_100%)]" />
+          <span
+            className={`${jua.className} text-sm text-orange-600 lg:text-base`}
+          >
+            {active === "model" ? "토선생의 모범답안" : "토선생의 추천답안"}
+          </span>
+          <p className="mt-1 text-sm leading-relaxed text-zinc-700 lg:text-base">
+            {shown}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
