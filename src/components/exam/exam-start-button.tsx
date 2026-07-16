@@ -10,7 +10,7 @@ const EXAM_MODE_OPTIONS = [
   {
     mode: "full",
     title: "전체 모의고사",
-    description: "실전과 동일하게 5개 파트, 11문항을 모두 풀어봐요.",
+    description: "실전과 같은 구성으로 5개 파트, 11문항을 모두 풀어봐요.",
     meta: "약 20분",
     recommended: true,
   },

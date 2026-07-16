@@ -273,6 +273,28 @@ export function ExamSessionScreen({
     window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
   }, [question, phase]);
 
+  // 조기 제출 버튼: 리렌더 전에 두 번 클릭되면 setIndex((i) => i + 1)이 두 번 실행돼
+  // 문제를 건너뛸 수 있으므로 ref로 가드한다. 답변 시작 직후 오클릭을 막기 위해
+  // speaking 진입 후 3초가 지나야 활성화한다.
+  const hasSubmittedEarlyRef = useRef(false);
+  const [isEarlySubmitEnabled, setIsEarlySubmitEnabled] = useState(false);
+
+  useEffect(() => {
+    if (phase !== "speaking") return;
+    hasSubmittedEarlyRef.current = false;
+    const timer = setTimeout(() => setIsEarlySubmitEnabled(true), 3000);
+    return () => {
+      clearTimeout(timer);
+      setIsEarlySubmitEnabled(false);
+    };
+  }, [phase, question]);
+
+  const handleEarlySubmit = useCallback(() => {
+    if (hasSubmittedEarlyRef.current) return;
+    hasSubmittedEarlyRef.current = true;
+    handlePhaseComplete();
+  }, [handlePhaseComplete]);
+
   const showTerminateConfirmRef = useRef(showTerminateConfirm);
   useEffect(() => {
     showTerminateConfirmRef.current = showTerminateConfirm;
@@ -570,6 +592,17 @@ export function ExamSessionScreen({
                   />
                 ))}
               </div>
+            )}
+
+            {phase === "speaking" && (
+              <button
+                type="button"
+                onClick={handleEarlySubmit}
+                disabled={!isEarlySubmitEnabled}
+                className="rounded-full border border-orange-300 px-4 py-1.5 text-sm font-semibold text-orange-600 transition-colors hover:bg-orange-50 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:text-zinc-400 disabled:hover:bg-transparent lg:px-5 lg:py-2 lg:text-base"
+              >
+                답변 완료, 제출하고 넘어가기
+              </button>
             )}
           </>
         )}
