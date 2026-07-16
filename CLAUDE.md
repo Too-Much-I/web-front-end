@@ -39,7 +39,7 @@ Note: `src/types/report.ts` and `src/features/report/api/use-report.ts` define a
 
 ### Exam flow (page-by-page)
 
-`/` (marketing landing, `src/app/page.tsx`) → `/exam/prepare` (`ExamPrepareFlow`: target grade select, then a dialog stepping through `consent` → `mic` → `sound`) → `/exam/session` (`ExamSessionScreen`) → `/exam/grading` (`GradingWaitScreen`, polls status) → `/exam/result` (+ `/exam/result/question` for per-question detail) → `/exam/survey`.
+`/` (marketing landing, `src/app/page.tsx`) → `/exam/prepare` (`ExamPrepareFlow`: target grade select, then a dialog stepping through `consent` → `mic` → `sound` → `tutorial`; the tutorial step auto-shows only until dismissed once — `localStorage("exam-tutorial-seen")` — and is re-openable via the "시험 진행 방식 미리 보기" link in review mode, which closes instead of navigating and skips GA events) → `/exam/session` (`ExamSessionScreen`) → `/exam/grading` (`GradingWaitScreen`, polls status) → `/exam/result` (+ `/exam/result/question` for per-question detail) → `/exam/survey`.
 
 `ExamSessionScreen` (`src/components/exam/exam-session-screen.tsx`) drives one big phase state machine per question: `directions → question-audio → (repeat-cue → question-audio-repeat, Part 4's last question only) → prep-cue → prep → speak-cue → speaking`, advancing via `handlePhaseComplete`, which is invoked either by an audio cue/sequence finishing (`useAudioCue`/`useAudioSequence`) or by `usePhaseCountdown` timing out. Recording starts on entering `"speaking"` and is uploaded from that effect's cleanup (`use-answer-recorder.ts` + `uploadExamAnswer`, a 3-step presigned-S3-URL → PUT → submit-for-grading flow in `exam-answer-upload.ts`).
 

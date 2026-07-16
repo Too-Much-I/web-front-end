@@ -4,6 +4,7 @@ import { HelpCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { ExamTutorialPanel } from "@/components/exam/exam-tutorial-panel";
 import { TargetGradeSelect } from "@/components/exam/target-grade-select";
 import { VoiceConsentPanel } from "@/components/exam/voice-consent-panel";
 import { MicTestPanel } from "@/components/mic-test-panel";
@@ -14,7 +15,10 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { trackEvent } from "@/lib/analytics";
 
-type PrepareDialogStep = "consent" | "mic" | "sound" | null;
+type PrepareDialogStep = "consent" | "mic" | "sound" | "tutorial" | null;
+
+// 튜토리얼을 한 번이라도 보거나 건너뛴 브라우저에서는 다시 자동 노출하지 않는다.
+const TUTORIAL_SEEN_KEY = "exam-tutorial-seen";
 
 const CHECKLIST_BASE = [
   "주변 소음이 차단된 조용한 환경에서 응시해 주세요.",
@@ -29,6 +33,8 @@ export function ExamPrepareFlow() {
   const isTrial = searchParams.get("mode") === "trial";
   const examMode = isTrial ? "trial" : "full";
   const [dialogStep, setDialogStep] = useState<PrepareDialogStep>(null);
+  // "시험 진행 방식 미리 보기"로 열린 튜토리얼은 끝나도 세션으로 이동하지 않고 닫히기만 한다.
+  const [isTutorialReview, setIsTutorialReview] = useState(false);
   const checklist = isTrial
     ? CHECKLIST_BASE
     : [...CHECKLIST_BASE, CHECKLIST_FULL_EXAM_EXTRA];
@@ -113,6 +119,17 @@ export function ExamPrepareFlow() {
           >
             다음 (마이크 테스트)
           </Button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setIsTutorialReview(true);
+              setDialogStep("tutorial");
+            }}
+            className="mx-auto -mt-2 text-sm text-zinc-400 underline underline-offset-2 hover:text-orange-600"
+          >
+            시험 진행 방식 미리 보기
+          </button>
         </section>
       </div>
 
@@ -141,6 +158,26 @@ export function ExamPrepareFlow() {
             <SoundCheckPanel
               onCompleted={() => {
                 trackEvent("sound_check_complete", { exam_mode: examMode });
+                if (localStorage.getItem(TUTORIAL_SEEN_KEY)) {
+                  router.push(isTrial ? "/exam/session?mode=trial" : "/exam/session");
+                  return;
+                }
+                setIsTutorialReview(false);
+                setDialogStep("tutorial");
+              }}
+            />
+          )}
+          {dialogStep === "tutorial" && (
+            <ExamTutorialPanel
+              examMode={examMode}
+              isReview={isTutorialReview}
+              finishLabel={isTutorialReview ? "확인했어요" : "모의고사 시작하기"}
+              onFinish={() => {
+                localStorage.setItem(TUTORIAL_SEEN_KEY, "true");
+                if (isTutorialReview) {
+                  setDialogStep(null);
+                  return;
+                }
                 router.push(isTrial ? "/exam/session?mode=trial" : "/exam/session");
               }}
             />
