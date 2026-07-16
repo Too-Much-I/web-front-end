@@ -26,15 +26,23 @@ function ExamQuestionFeedbackLoader({
   retryCount,
   isTrial,
   onNavigateRetry,
+  showCompareHint,
 }: {
   examId: string;
   questionNumber: number;
   retryCount: number;
   isTrial: boolean;
-  onNavigateRetry: (nextRetryCount: number) => void;
+  onNavigateRetry: (
+    nextRetryCount: number,
+    options?: { fromReanswer?: boolean },
+  ) => void;
+  showCompareHint: boolean;
 }) {
-  const [shownDetail, setShownDetail] = useState<ExamQuestionDetail | null>(null);
-  const [outgoingDetail, setOutgoingDetail] = useState<ExamQuestionDetail | null>(null);
+  const [shownDetail, setShownDetail] = useState<ExamQuestionDetail | null>(
+    null,
+  );
+  const [outgoingDetail, setOutgoingDetail] =
+    useState<ExamQuestionDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   /** 지금 shownDetail로 표시 중인 데이터. 최신 값을 동기적으로 읽기 위한 ref (state는 다음 렌더까지 갱신되지 않음). */
   const shownDetailRef = useRef<ExamQuestionDetail | null>(null);
@@ -105,6 +113,9 @@ function ExamQuestionFeedbackLoader({
           detail={shownDetail}
           isTrial={isTrial}
           onNavigateRetry={onNavigateRetry}
+          showCompareHint={
+            showCompareHint && shownDetail.retryCount === retryCount
+          }
         />
       </div>
     </div>
@@ -115,12 +126,16 @@ function ExamQuestionFeedbackContent() {
   const searchParams = useSearchParams();
   const examId = searchParams.get("examId") ?? "";
   const questionNumber = Number(searchParams.get("questionNumber"));
-  const hasValidParams = Boolean(examId) && Number.isInteger(questionNumber) && questionNumber > 0;
+  const hasValidParams =
+    Boolean(examId) && Number.isInteger(questionNumber) && questionNumber > 0;
   const isTrial = searchParams.get("mode") === "trial";
 
   const [retryCount, setRetryCount] = useState(() =>
     parseRetryCount(searchParams.get("retryCount")),
   );
+  // "다시 답변하기" 채점 완료로 새 회차에 도착했는지 여부 — 도착 직후 날개 버튼 비교 힌트를
+  // 한 번 보여주기 위한 신호. 날개 버튼 등 다른 경로로 이동하면 다시 꺼진다.
+  const [showCompareHint, setShowCompareHint] = useState(false);
 
   // useSearchParams()는 실제 Next.js 라우터 내비게이션(예: ExamReanswerPanel의 router.replace)에만
   // 반응한다 — 날개 버튼이 쓰는 raw history.replaceState는 이 훅을 갱신하지 않으므로, 이 effect는
@@ -134,8 +149,12 @@ function ExamQuestionFeedbackContent() {
   // 날개 화살표로 회차를 넘기면 state를 바꾸는 동시에, 새로고침/공유 시에도 같은 회차를
   // 보게끔 URL도 맞춰준다. App Router의 router.push/replace는 항상 서버 왕복(재로드)이
   // 생기므로, 여기서는 history.replaceState로 URL만 조용히 바꾼다.
-  function handleNavigateRetry(nextRetryCount: number) {
+  function handleNavigateRetry(
+    nextRetryCount: number,
+    options?: { fromReanswer?: boolean },
+  ) {
     setRetryCount(nextRetryCount);
+    setShowCompareHint(Boolean(options?.fromReanswer));
     const url = new URL(window.location.href);
     url.searchParams.set("retryCount", String(nextRetryCount));
     window.history.replaceState(null, "", url);
@@ -157,6 +176,7 @@ function ExamQuestionFeedbackContent() {
           retryCount={retryCount}
           isTrial={isTrial}
           onNavigateRetry={handleNavigateRetry}
+          showCompareHint={showCompareHint}
         />
       )}
     </div>
