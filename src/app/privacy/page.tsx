@@ -68,6 +68,11 @@ export default function PrivacyPolicyPage() {
             최대 30일, 클릭·이동 경로 등 집계 데이터는 최대 9개월간 보관(제10조
             참조)
           </li>
+          <li>
+            쿠키 등 자동 수집된 행태정보(Google Analytics): 이용자 단위 이벤트
+            데이터는 최대 14개월간 보관하며, 이후 개인을 식별할 수 없는 집계
+            형태로만 유지(제10조 참조)
+          </li>
         </ul>
       </LegalSection>
 
@@ -115,7 +120,9 @@ export default function PrivacyPolicyPage() {
               <tr>
                 <td className="px-3 py-2 align-top">Google LLC</td>
                 <td className="px-3 py-2 align-top">
-                  동의 이력 및 만족도 조사 응답의 저장·관리(Google 스프레드시트)
+                  동의 이력 및 만족도 조사 응답의 저장·관리(Google
+                  스프레드시트), 웹사이트 방문 및 이용 통계 분석(Google
+                  Analytics)
                 </td>
               </tr>
               <tr>
@@ -180,6 +187,21 @@ export default function PrivacyPolicyPage() {
                   전송
                 </td>
               </tr>
+              <tr>
+                <td className="px-3 py-2 align-top">
+                  Google LLC
+                  <br />
+                  (미국 등 Google이 데이터를 처리하는 국가)
+                </td>
+                <td className="px-3 py-2 align-top">
+                  쿠키 식별자, 페이지 이동 경로, 서비스 이용 단계·이용 기록 등
+                  행태정보
+                </td>
+                <td className="px-3 py-2 align-top">
+                  웹사이트 이용 통계 분석(Google Analytics) 목적으로 서비스
+                  이용 시점에 네트워크를 통해 실시간 전송
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -193,9 +215,9 @@ export default function PrivacyPolicyPage() {
         </p>
         <ul className="list-disc space-y-1 pl-5">
           <li>
-            Microsoft Clarity(행태정보): 제10조의 쿠키 거부 방법을 통해 수집을
-            차단할 수 있으며, 차단하더라도 모의고사 응시 등 핵심 기능 이용에는
-            제한이 없습니다.
+            Microsoft Clarity·Google Analytics(행태정보): 제10조의 쿠키 거부
+            방법을 통해 수집을 차단할 수 있으며, 차단하더라도 모의고사 응시 등
+            핵심 기능 이용에는 제한이 없습니다.
           </li>
           <li>
             Google 스프레드시트(만족도 조사 응답): 만족도 조사는 선택적으로
@@ -263,17 +285,29 @@ export default function PrivacyPolicyPage() {
 
       <LegalSection title="제10조 (쿠키 등 자동 수집 장치의 설치·운영 및 거부)">
         <p>
-          서비스는 이용 행태 분석 도구인 Microsoft Clarity를 통해 쿠키를
-          설치·운영합니다. 쿠키는 웹사이트 이용 편의를 위해 이용 정보를
-          저장하고 수시로 불러오는 기능을 하며, 서비스 개선을 위한 사용성
-          분석 목적으로만 사용됩니다.
+          서비스는 이용 행태 분석 도구인 Microsoft Clarity와 Google
+          Analytics를 통해 쿠키를 설치·운영합니다. 쿠키는 웹사이트 이용
+          편의를 위해 이용 정보를 저장하고 수시로 불러오는 기능을 하며,
+          서비스 개선을 위한 사용성 분석 및 이용 통계 분석 목적으로만
+          사용됩니다.
         </p>
         <p>
           이용자는 브라우저 설정을 통해 쿠키 저장을 거부하거나 삭제할 수
-          있습니다. 다만 쿠키 저장을 거부하더라도 모의고사 응시 등 서비스의
-          핵심 기능 이용에는 제한이 없습니다. Microsoft Clarity의 데이터
-          처리에 관한 자세한 사항은 Microsoft의 개인정보처리방침을 통해
-          확인할 수 있습니다.
+          있으며, Google Analytics의 경우 Google이 제공하는 차단 브라우저
+          부가기능(
+          <a
+            href="https://tools.google.com/dlpage/gaoptout"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-orange-500 hover:underline"
+          >
+            tools.google.com/dlpage/gaoptout
+          </a>
+          )을 통해서도 수집을 거부할 수 있습니다. 다만 쿠키 저장을
+          거부하더라도 모의고사 응시 등 서비스의 핵심 기능 이용에는 제한이
+          없습니다. Microsoft Clarity 및 Google Analytics의 데이터 처리에
+          관한 자세한 사항은 각각 Microsoft와 Google의 개인정보처리방침을
+          통해 확인할 수 있습니다.
         </p>
       </LegalSection>
 
