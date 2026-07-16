@@ -1,14 +1,25 @@
 "use client";
 
-import { Star } from "lucide-react";
+import { Check, Star } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { SatisfactionStars } from "@/components/exam/satisfaction-stars";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { getOrCreateAnonymousId } from "@/features/consent/anonymous-id";
 import { TARGET_GRADE_OPTIONS } from "@/features/exam/target-grade";
 import { submitExamSurvey } from "@/features/survey/api/submit-exam-survey";
+import {
+  SURVEY_CONTACT_CONSENT_DETAILS,
+  SURVEY_CONTACT_CONSENT_ITEM,
+  SURVEY_CONTACT_CONSENT_VERSION,
+} from "@/features/survey/survey-contact-consent";
 import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +61,7 @@ export function ExamFeedbackSurvey({
   const isTrial = mode === "trial";
   const rewardCount = isTrial ? 1 : 3;
   const [contact, setContact] = useState("");
+  const [contactConsent, setContactConsent] = useState(false);
   const [satisfaction, setSatisfaction] = useState<number | null>(
     initialSatisfaction,
   );
@@ -75,9 +87,16 @@ export function ExamFeedbackSurvey({
     setTimeout(() => setIsPopping(false), 600);
   };
 
+  const trimmedContact = contact.trim();
+  // 연락처(개인정보)를 입력한 경우에만 수집·이용 동의가 필수가 된다. 미입력이면 수집 자체가 없다.
+  const needsContactConsent = trimmedContact !== "" && !contactConsent;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (satisfaction === null || submitting) return;
+    if (satisfaction === null || submitting || needsContactConsent) return;
+
+    // 연락처가 비어 있으면 체크 상태와 무관하게 "동의 없음"으로 기록한다 — 수집된 개인정보가 없으므로.
+    const consented = trimmedContact !== "" && contactConsent;
 
     setSubmitting(true);
     try {
@@ -87,7 +106,9 @@ export function ExamFeedbackSurvey({
         previousGrade: isTrial ? null : previousGradeId,
         priceWillingness: isTrial ? null : priceId,
         opinion,
-        contact,
+        contact: trimmedContact,
+        contactConsent: consented,
+        contactConsentVersion: consented ? SURVEY_CONTACT_CONSENT_VERSION : null,
         submittedAt: new Date().toISOString(),
         source: mode,
       });
@@ -342,9 +363,73 @@ export function ExamFeedbackSurvey({
               </p>
             </div>
 
+            <div className="flex flex-col gap-1.5">
+              <label
+                className={cn(
+                  "flex cursor-pointer items-start gap-2.5 rounded-xl border border-orange-200 bg-orange-50/60 p-3.5 text-sm text-zinc-700 lg:p-4 lg:text-base",
+                  submitting && "pointer-events-none opacity-60",
+                )}
+              >
+                <input
+                  type="checkbox"
+                  checked={contactConsent}
+                  onChange={(e) => setContactConsent(e.target.checked)}
+                  className="peer sr-only"
+                />
+                <span
+                  className={cn(
+                    "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded border transition-colors",
+                    contactConsent
+                      ? "border-orange-500 bg-orange-500"
+                      : "border-zinc-300 bg-white",
+                  )}
+                >
+                  {contactConsent && (
+                    <Check className="size-3 text-white" strokeWidth={3} />
+                  )}
+                </span>
+                <span>
+                  <span className="font-semibold text-orange-600">
+                    [연락처 입력 시 필수]
+                  </span>{" "}
+                  {SURVEY_CONTACT_CONSENT_ITEM}에 동의합니다.
+                </span>
+              </label>
+
+              <Accordion>
+                <AccordionItem className="border-none">
+                  <AccordionTrigger className="py-1 text-xs font-semibold text-zinc-500 hover:text-zinc-700 lg:text-sm">
+                    수집·이용 동의 내용 자세히 보기
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-0">
+                    <div className="flex flex-col gap-2 rounded-xl bg-zinc-50 p-3.5 text-xs text-zinc-600 lg:p-4 lg:text-sm">
+                      {SURVEY_CONTACT_CONSENT_DETAILS.map((detail) => (
+                        <div
+                          key={detail.title}
+                          className="flex flex-col gap-0.5"
+                        >
+                          <span className="font-semibold text-zinc-500">
+                            {detail.title}
+                          </span>
+                          <p className="leading-relaxed">{detail.body}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+
+              {needsContactConsent && (
+                <p className="text-xs font-semibold text-orange-500 lg:text-sm">
+                  연락처를 남기신 경우 수집·이용 동의가 필요해요. 동의하지
+                  않으시려면 연락처를 비워주세요.
+                </p>
+              )}
+            </div>
+
             <button
               type="submit"
-              disabled={satisfaction === null || submitting}
+              disabled={satisfaction === null || submitting || needsContactConsent}
               className="mt-1 rounded-full bg-orange-400 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-orange-500 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400 disabled:hover:bg-zinc-200 lg:py-3 lg:text-base"
             >
               {submitting ? "제출 중..." : "설문 제출하고 응시권 받기"}

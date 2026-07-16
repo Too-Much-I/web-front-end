@@ -15,6 +15,13 @@ export interface ExamSurveyRecord {
   opinion: string;
   /** 응시권 발송용 연락처 (전화번호 또는 이메일). 미입력 시 빈 문자열. */
   contact: string;
+  /**
+   * 연락처 수집·이용 동의 여부. 연락처가 비어 있지 않으면 반드시 true여야 한다
+   * (서버에서도 교차 검증). 연락처 미입력 시에는 항상 false.
+   */
+  contactConsent: boolean;
+  /** 동의한 연락처 수집·이용 동의 문구의 버전 (SURVEY_CONTACT_CONSENT_VERSION). 미동의 시 null. */
+  contactConsentVersion: string | null;
   /** 제출한 정확한 시각 (ISO 8601, UTC). */
   submittedAt: string;
   /** 전체 모의고사(응시권 3회) vs 맛보기(응시권 1회) — 운영팀이 보상 수량을 구분해서 발송하기 위한 필드. */
