@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ThumbsUp, TriangleAlert } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -24,6 +25,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getExamQuestionFeedback } from "@/features/exam/api/exam-question-feedback";
 import {
   getExamPartMeta,
   getExamPartTimingByQuestionNumber,
@@ -47,6 +49,25 @@ const CONTENT_RELEVANCE_MAX: Record<number, number> = {
   4: 2.5,
   5: 4,
 };
+
+/**
+ * 재시도 회차의 점수가 첫 답변 대비 얼마나 변했는지, 칠판에 분필로 쓴 듯한 문구/색을 정한다.
+ * (색은 emerald-950 칠판 배경 위 기준.) 점수가 소수일 수 있어(예: 내용 적합성 만점 2.5)
+ * 정수가 아니면 소수 한 자리로 표기한다.
+ */
+function getScoreDeltaNote(delta: number): {
+  text: string;
+  className: string;
+} {
+  if (delta === 0) {
+    return { text: "첫 답변과 같은 점수", className: "text-white/60" };
+  }
+  const abs = Math.abs(delta);
+  const absText = Number.isInteger(abs) ? String(abs) : abs.toFixed(1);
+  return delta > 0
+    ? { text: `첫 답변보다 +${absText}점`, className: "text-amber-300" }
+    : { text: `첫 답변보다 -${absText}점`, className: "text-rose-300" };
+}
 
 /** 탭 전환 슬라이드 방향을 정하기 위한 좌→우 순서. */
 const TAB_VALUES = ["my-answer", "model-answer", "reanswer"] as const;
@@ -254,11 +275,17 @@ export function ExamQuestionFeedbackScreen({
   detail,
   isTrial,
   onNavigateRetry,
+  showCompareHint = false,
 }: {
   examId: string;
   detail: ExamQuestionDetail;
   isTrial: boolean;
-  onNavigateRetry: (nextRetryCount: number) => void;
+  onNavigateRetry: (
+    nextRetryCount: number,
+    options?: { fromReanswer?: boolean },
+  ) => void;
+  /** "다시 답변하기" 채점 완료로 이 회차에 도착했을 때만 true — 날개 버튼 비교 힌트를 켠다. */
+  showCompareHint?: boolean;
 }) {
   const partMeta = getExamPartMeta(detail.partNumber);
   const scorePercent = clampPercent(
@@ -321,17 +348,35 @@ export function ExamQuestionFeedbackScreen({
     setActiveTab(next);
   }
 
-  function handleNavigateRetry(nextRetryCount: number) {
+  function handleNavigateRetry(
+    nextRetryCount: number,
+    options?: { fromReanswer?: boolean },
+  ) {
     if (!confirmDiscardUnsavedRecording()) return;
-    onNavigateRetry(nextRetryCount);
+    onNavigateRetry(nextRetryCount, options);
   }
+
+  // 재시도 회차를 보고 있을 때 첫 답변 대비 점수 변화 배지를 달기 위해 첫 답변(retryCount=0)
+  // 점수를 가져온다. 회차 점수는 불변이므로 캐시를 무기한 신선하게 둬서 회차를 오가도 재요청하지 않는다.
+  const { data: firstAttempt } = useQuery({
+    queryKey: ["exam-question-feedback", examId, detail.questionNumber, 0],
+    queryFn: () => getExamQuestionFeedback(examId, detail.questionNumber, 0),
+    enabled: detail.retryCount > 0,
+    staleTime: Infinity,
+  });
+  const scoreDeltaNote =
+    detail.retryCount > 0 && firstAttempt
+      ? getScoreDeltaNote(detail.score - firstAttempt.score)
+      : null;
 
   // 탭 상위(여기)에서 들고 있어야, "다시 답변하기" 탭을 벗어나 ExamReanswerPanel이 언마운트돼도
   // 제출~채점 진행 상태가 사라지지 않는다 (자세한 이유는 useReanswerSubmission 참고).
   const reanswerSubmission = useReanswerSubmission({
     examId,
     questionNumber: detail.questionNumber,
-    onNavigateRetry: handleNavigateRetry,
+    // fromReanswer 표시를 달아, 새 회차 도착 직후 날개 버튼 비교 힌트가 한 번 뜨게 한다.
+    onNavigateRetry: (nextRetryCount) =>
+      handleNavigateRetry(nextRetryCount, { fromReanswer: true }),
   });
 
   return (
@@ -340,6 +385,7 @@ export function ExamQuestionFeedbackScreen({
         retryCount={detail.retryCount}
         totalRetryCount={detail.totalRetryCount}
         onNavigate={handleNavigateRetry}
+        showCompareHint={showCompareHint}
       />
 
       {!isTrial && (
@@ -517,15 +563,26 @@ export function ExamQuestionFeedbackScreen({
               </button>
             </div>
 
-            <div
-              className={`flex items-center gap-1.5 ${showSubScores ? "invisible" : ""}`}
-            >
-              <HintArrow className="h-8 w-10 shrink-0 text-amber-300" />
-              <span
-                className={`${jua.className} max-w-32 text-sm leading-tight text-amber-200`}
+            <div className="flex flex-col gap-2">
+              {/* 첫 답변 대비 점수 변화 — 칠판에 분필로 덧쓴 메모처럼 그래프 옆에 붙는다.
+                  세부 지표 토글과 무관하게 항상 보인다. */}
+              {scoreDeltaNote && (
+                <span
+                  className={`${jua.className} text-sm lg:text-base ${scoreDeltaNote.className}`}
+                >
+                  ★ {scoreDeltaNote.text}
+                </span>
+              )}
+              <div
+                className={`flex items-center gap-1.5 ${showSubScores ? "invisible" : ""}`}
               >
-                그래프를 클릭하면 세부 평가 지표가 보여요
-              </span>
+                <HintArrow className="h-8 w-10 shrink-0 text-amber-300" />
+                <span
+                  className={`${jua.className} max-w-32 text-sm leading-tight text-amber-200`}
+                >
+                  그래프를 클릭하면 세부 평가 지표가 보여요
+                </span>
+              </div>
             </div>
           </div>
 
