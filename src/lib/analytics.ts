@@ -10,13 +10,17 @@ import { sendGAEvent } from "@next/third-parties/google";
  * 이벤트 파라미터는 GA4 표준 보고서에 노출되려면 GA4 관리 콘솔의 "맞춤 정의(Custom
  * definitions)"에 같은 이름으로 등록되어야 한다. 현재 사용 중인 파라미터:
  * exam_mode("trial"|"full"), target_grade(등급 id), part, question_number,
- * last_question_number, satisfaction, retry_count, grading_type
+ * last_question_number, satisfaction, retry_count, grading_type,
+ * step(튜토리얼 단계 번호, 0=인트로)
  */
 export type AnalyticsEventName =
   | "target_grade_select"
   | "consent_complete"
   | "mic_test_complete"
   | "sound_check_complete"
+  | "tutorial_start"
+  | "tutorial_skip"
+  | "tutorial_complete"
   | "exam_start"
   | "question_complete"
   | "exam_complete"

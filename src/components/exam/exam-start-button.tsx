@@ -10,7 +10,7 @@ const EXAM_MODE_OPTIONS = [
   {
     mode: "full",
     title: "전체 모의고사",
-    description: "실전과 동일하게 5개 파트, 11문항을 모두 풀어봐요.",
+    description: "실전과 같은 구성으로 5개 파트, 11문항을 모두 풀어봐요.",
     meta: "약 20분",
     recommended: true,
   },
@@ -40,7 +40,7 @@ export function ExamStartButton({
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-none border-none bg-transparent p-0 ring-0 sm:max-w-md">
+        <DialogContent className="border-none bg-transparent p-0 ring-0 sm:max-w-md">
           <section className="flex w-full flex-col gap-5 rounded-xl bg-white p-6 shadow-sm ring-1 ring-zinc-100">
             <div className="flex flex-col items-center gap-1 text-center">
               <h2 className="text-base font-bold text-blue-950 lg:text-lg">

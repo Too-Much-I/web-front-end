@@ -49,7 +49,7 @@ export default function Home() {
             <span className="text-orange-500">내 점수</span>부터 확인하세요
           </h1>
           <p className="max-w-lg text-base leading-relaxed text-zinc-500 sm:text-lg lg:max-w-xl lg:text-xl">
-            실전과 똑같은 모의고사를 보고 나면, 토선생 AI가 공식 채점 기준으로
+            실제 시험처럼 모의고사를 보고 나면, 토선생 AI가 공식 채점 기준으로
             점수와 감점 이유를 바로 알려드려요.
           </p>
           <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-zinc-600 lg:justify-start lg:text-base">
