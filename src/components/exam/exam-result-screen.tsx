@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { BetaNoticePopup } from "@/components/exam/beta-notice-popup";
 import { ExamPartScoreRadar } from "@/components/exam/exam-part-score-radar";
 import { ScrollSatisfactionPopup } from "@/components/exam/scroll-satisfaction-popup";
 import { SketchyDashBorder } from "@/components/exam/sketchy-dash-border";
@@ -39,8 +40,14 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
     Math.max(0, (result.totalScore / result.maxScore) * 100),
   );
 
+  // 베타 안내 팝업이 칠판을 가리고 있는 동안엔 카운트업/타이핑을 붙잡아 두고,
+  // 팝업이 닫히기 시작할 때부터 재생한다. (팝업을 건너뛰는 재진입 시엔 즉시 시작)
+  const [isBetaNoticeClosed, setIsBetaNoticeClosed] = useState(false);
+
   // 총점 숫자와 프로그레스 바가 0부터 실제 점수까지 차오르는 카운트업.
-  const displayScore = useCountUp(result.totalScore);
+  const displayScore = useCountUp(result.totalScore, {
+    enabled: isBetaNoticeClosed,
+  });
   const displayPercent = Math.min(
     100,
     Math.max(0, (displayScore / result.maxScore) * 100),
@@ -117,10 +124,10 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
           )}
         </div>
 
-           {/* 모바일에서는 토끼가 칠판 왼쪽 아래 모서리 바깥에 서서 살짝만 겹치고(콘텐츠는 전체 폭 사용),
+        {/* 모바일에서는 토끼가 칠판 왼쪽 아래 모서리 바깥에 서서 살짝만 겹치고(콘텐츠는 전체 폭 사용),
           sm부터는 칠판 왼쪽에 크게 서 있는 원래 배치로 돌아간다. 아래로 튀어나온 만큼 mb로 다음 섹션과 간격 확보. */}
-      <div className="relative mt-8 mb-14 sm:mb-0">
-        <div className="absolute -bottom-20 -left-1 z-10 h-32 w-32 -scale-x-100 sm:bottom-0 sm:-left-4 sm:h-48 sm:w-48">l
+        <div className="relative mt-8 mb-14 sm:mb-0">
+          <div className="absolute -bottom-20 -left-1 z-10 h-32 w-32 -scale-x-100 sm:bottom-0 sm:-left-4 sm:h-48 sm:w-48">
             <Image
               src={mascot.src}
               alt={mascot.alt}
@@ -166,6 +173,7 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
 
                 <TypedText
                   text={result.summary}
+                  enabled={isBetaNoticeClosed}
                   className={`${jua.className} mt-6 text-base leading-relaxed text-white/90 lg:text-lg`}
                 />
               </div>
@@ -316,6 +324,11 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
           ))}
         </ol>
       </section>
+
+      <BetaNoticePopup
+        examId={result.examId}
+        onClose={() => setIsBetaNoticeClosed(true)}
+      />
 
       <ScrollSatisfactionPopup examId={result.examId} mode="full" />
     </>

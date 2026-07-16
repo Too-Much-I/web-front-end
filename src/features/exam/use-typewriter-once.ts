@@ -6,12 +6,16 @@ import { useEffect, useState } from "react";
 const TYPEWRITER_SPEED_MS = 40;
 
 /**
- * 최초 마운트 시 한 번만 타이핑 애니메이션을 재생하고, 이후엔 항상 전체 텍스트를 보여준다.
+ * 타이핑 애니메이션을 한 번만 재생하고, 이후엔 항상 전체 텍스트를 보여준다.
+ * enabled가 false인 동안엔 아무 글자도 드러내지 않고 대기하다가 true가 되면 시작한다.
  * 전체 글자를 처음부터 모두 렌더링해두고 opacity만 토글하는 방식이라, 문자가 하나씩
  * "추가"되면서 text-center 정렬이 매번 다시 계산되어 이미 나타난 글자의 위치가
  * 밀리는 문제가 없다 — 레이아웃은 최초 페인트부터 최종 형태로 고정된다.
  */
-export function useTypewriterOnce(text: string): {
+export function useTypewriterOnce(
+  text: string,
+  { enabled = true }: { enabled?: boolean } = {},
+): {
   chars: string[];
   revealedCount: number;
 } {
@@ -26,7 +30,7 @@ export function useTypewriterOnce(text: string): {
   );
 
   useEffect(() => {
-    if (prefersReducedMotion) return;
+    if (!enabled || prefersReducedMotion) return;
 
     let i = 0;
     const id = setInterval(() => {
@@ -36,7 +40,7 @@ export function useTypewriterOnce(text: string): {
     }, TYPEWRITER_SPEED_MS);
 
     return () => clearInterval(id);
-  }, [chars, prefersReducedMotion]);
+  }, [chars, prefersReducedMotion, enabled]);
 
   return { chars, revealedCount };
 }
