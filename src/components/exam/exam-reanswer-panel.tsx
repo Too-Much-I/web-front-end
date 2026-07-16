@@ -70,13 +70,26 @@ export function ExamReanswerPanel({
   if (status === "submitting" || status === "grading") {
     return (
       <div className="flex flex-col gap-4 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
-        <div className="flex flex-col items-center gap-1 rounded-2xl bg-orange-50 p-6 text-center ring-1 ring-orange-100">
-          <span className="size-5 animate-spin rounded-full border-2 border-orange-200 border-t-orange-500" />
-          <span className="mt-1 text-sm font-semibold text-orange-600 lg:text-base">
+        <div className="flex flex-col items-center gap-1 p-4 text-center sm:p-6">
+          {/* 영상 배경이 순수 흰색이라 카드 흰 배경과 경계 없이 이어진다. poster는 영상
+              첫 프레임과 동일한 스냅샷 — 영상 로딩이 끝날 때까지 빈 사각형 대신 보여준다. */}
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            poster="/video/running_rabbit_poster.jpg"
+            aria-hidden
+            className="w-full max-w-[180px] sm:max-w-[210px] md:max-w-[240px] lg:max-w-[270px] xl:max-w-[300px]"
+          >
+            <source src="/video/running_rabbit.webm" type="video/webm" />
+            <source src="/video/running_rabbit.mp4" type="video/mp4" />
+          </video>
+          <span className="font-jua mt-1 text-base text-orange-600 lg:text-lg">
             {status === "submitting" ? "제출하는 중이에요..." : "제출했어요! 채점 중이에요..."}
           </span>
           {status === "grading" && (
-            <span className="text-xs text-orange-500">
+            <span className="font-jua text-sm text-orange-500">
               채점이 끝나면 자동으로 결과를 보여드릴게요.
             </span>
           )}
