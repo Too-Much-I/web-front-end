@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+import { ErrorFallbackScreen } from "@/components/error-fallback-screen";
 import { useGradingProgress } from "@/features/exam/use-grading-progress";
 import { useTrialQuestionProgress } from "@/features/exam/use-trial-question-progress";
 
@@ -124,6 +125,16 @@ function GradingWaitVisual({
   const clampedProgress = Math.min(100, Math.max(0, progress));
   const speakerIndex = tipIndex % MASCOTS.length;
 
+  if (failed) {
+    return (
+      <ErrorFallbackScreen
+        title="채점 중 문제가 생겼어요"
+        description="서버에서 응답을 받지 못했어요. 잠시 후 다시 시도해 주세요."
+        onRetry={() => window.location.reload()}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-[#ffe0b2] px-6 py-10 text-center">
       <div className="relative w-full max-w-4xl rounded-3xl bg-white p-6 shadow-md sm:p-8 lg:max-w-5xl lg:p-10">
@@ -175,22 +186,14 @@ function GradingWaitVisual({
         </div>
       </div>
 
-      {failed ? (
-        <p className="mt-4 text-sm font-semibold text-red-500 lg:text-base" aria-live="assertive">
-          채점 중 문제가 발생했어요. 잠시 후 다시 시도해 주세요.
-        </p>
-      ) : (
-        <>
-          <p className="mt-4 text-sm text-zinc-500 lg:text-base">
-            예상 대기 시간:{" "}
-            <span className="font-semibold text-orange-600">{estimatedWaitLabel}</span>
-          </p>
+      <p className="mt-4 text-sm text-zinc-500 lg:text-base">
+        예상 대기 시간:{" "}
+        <span className="font-semibold text-orange-600">{estimatedWaitLabel}</span>
+      </p>
 
-          <p className="mt-6 text-xs text-zinc-400 lg:text-sm" aria-live="polite">
-            {STATUS_MESSAGES[messageIndex]}
-          </p>
-        </>
-      )}
+      <p className="mt-6 text-xs text-zinc-400 lg:text-sm" aria-live="polite">
+        {STATUS_MESSAGES[messageIndex]}
+      </p>
     </div>
   );
 }

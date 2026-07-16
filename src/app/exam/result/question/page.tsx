@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 
+import { ErrorFallbackScreen } from "@/components/error-fallback-screen";
 import { ExamHeader } from "@/components/exam/exam-header";
 import { ExamQuestionFeedbackScreen } from "@/components/exam/exam-question-feedback-screen";
 import { getExamQuestionFeedback } from "@/features/exam/api/exam-question-feedback";
@@ -72,9 +73,10 @@ function ExamQuestionFeedbackLoader({
 
   if (error) {
     return (
-      <p className="flex flex-1 items-center justify-center text-sm text-red-500 lg:text-base">
-        {error}
-      </p>
+      <ErrorFallbackScreen
+        description={`${error} 잠시 후 다시 시도해 주세요.`}
+        onRetry={() => window.location.reload()}
+      />
     );
   }
 

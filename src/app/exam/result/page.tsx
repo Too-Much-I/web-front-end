@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
+import { ErrorFallbackScreen } from "@/components/error-fallback-screen";
 import { ExamHeader } from "@/components/exam/exam-header";
 import { ExamResultScreen } from "@/components/exam/exam-result-screen";
 import { getExamGradingResult } from "@/features/exam/api/exam-grading-result";
@@ -47,9 +48,10 @@ function ExamResultContent() {
         </p>
       )}
       {error && (
-        <p className="flex flex-1 items-center justify-center text-sm text-red-500 lg:text-base">
-          {error}
-        </p>
+        <ErrorFallbackScreen
+          description={`${error} 잠시 후 다시 시도해 주세요.`}
+          onRetry={() => window.location.reload()}
+        />
       )}
       {result && <ExamResultScreen result={result} />}
     </div>
