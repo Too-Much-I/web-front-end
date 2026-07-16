@@ -442,8 +442,10 @@ export function ExamQuestionFeedbackScreen({
         </span>
       </div>
 
-      <div className="relative mt-8">
-        <div className="absolute bottom-0 left-0 z-10 h-40 w-40 -scale-x-100 sm:-left-4 sm:h-48 sm:w-48">
+      {/* 모바일에서는 토끼가 칠판 왼쪽 아래 모서리 바깥에 서서 살짝만 겹치고(콘텐츠는 전체 폭 사용),
+          sm부터는 칠판 왼쪽에 크게 서 있는 원래 배치로 돌아간다. 아래로 튀어나온 만큼 mb로 다음 섹션과 간격 확보. */}
+      <div className="relative mt-8 mb-14 sm:mb-0">
+        <div className="absolute -bottom-20 -left-1 z-10 h-32 w-32 -scale-x-100 sm:bottom-0 sm:-left-4 sm:h-48 sm:w-48">
           <Image
             src={mascot.src}
             alt={mascot.alt}
@@ -453,7 +455,7 @@ export function ExamQuestionFeedbackScreen({
           />
         </div>
 
-        <div className="relative rounded-3xl border-[10px] border-amber-900 bg-emerald-950 py-6 pr-6 pl-32 shadow-xl sm:pl-36 lg:p-10 lg:pl-40">
+        <div className="relative rounded-3xl border-[10px] border-amber-900 bg-emerald-950 px-5 py-6 pb-14 shadow-xl sm:pr-6 sm:pb-6 sm:pl-36 lg:p-10 lg:pl-40">
           <div className="absolute -top-5 left-4 z-20 -rotate-3 rounded-lg bg-amber-400 px-4 py-2 shadow-md">
             <span
               className={`${jua.className} text-lg text-emerald-950 lg:text-xl`}
