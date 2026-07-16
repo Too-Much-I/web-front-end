@@ -137,7 +137,7 @@ export function ExamPrepareFlow() {
         open={dialogStep !== null}
         onOpenChange={(open) => setDialogStep(open ? "consent" : null)}
       >
-        <DialogContent className="max-w-none border-none bg-transparent p-0 ring-0 sm:max-w-xl">
+        <DialogContent className="border-none bg-transparent p-0 ring-0 sm:max-w-xl">
           {dialogStep === "consent" && (
             <VoiceConsentPanel
               onAgreed={() => {

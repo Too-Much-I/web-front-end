@@ -227,12 +227,6 @@ const TUTORIAL_STEPS: {
   },
 ];
 
-const DONE_CHECKLIST = [
-  "질문 듣기 → 준비 → 답변 순서로 진행돼요",
-  "준비·답변이 일찍 끝나면 버튼으로 건너뛸 수 있어요",
-  "중단해도 푼 만큼 채점 결과를 받아요",
-];
-
 type Stage = "intro" | "done" | number; // number = TUTORIAL_STEPS 인덱스
 
 export function ExamTutorialPanel({
@@ -389,14 +383,6 @@ export function ExamTutorialPanel({
             <h2 className="text-base font-bold text-orange-500">준비 끝!</h2>
             <p className="text-lg font-bold text-blue-950">이제 시작해 볼까요?</p>
           </div>
-          <ul className="flex flex-col items-start gap-1.5 text-sm text-zinc-600">
-            {DONE_CHECKLIST.map((item) => (
-              <li key={item} className="flex items-start gap-1.5 text-left">
-                <span className="text-orange-500">✓</span>
-                {item}
-              </li>
-            ))}
-          </ul>
           <Button
             size="lg"
             onClick={onFinish}
