@@ -14,8 +14,34 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { trackEvent } from "@/lib/analytics";
+import { cn } from "@/lib/utils";
 
 type PrepareDialogStep = "consent" | "mic" | "sound" | "tutorial" | null;
+
+/** 다이얼로그가 실제로 진행하는 순서. 상단 진행 표시와 "몇 걸음 남았는지" 계산에 쓴다. */
+const PREPARE_FLOW_STEPS = ["consent", "mic", "sound", "tutorial"] as const;
+
+/** 동의 → 마이크 → 사운드 → 튜토리얼로 이어지는 흐름의 현재 위치를 점으로 보여준다. */
+function PrepareStepProgress({
+  current,
+}: {
+  current: (typeof PREPARE_FLOW_STEPS)[number];
+}) {
+  const currentIndex = PREPARE_FLOW_STEPS.indexOf(current);
+  return (
+    <div className="mx-auto mb-1 flex w-fit items-center gap-1.5 rounded-full bg-white/90 px-3 py-2 shadow-sm ring-1 ring-zinc-100 backdrop-blur-sm">
+      {PREPARE_FLOW_STEPS.map((step, i) => (
+        <span
+          key={step}
+          className={cn(
+            "h-1.5 w-6 rounded-full transition-colors duration-300",
+            i <= currentIndex ? "bg-orange-500" : "bg-zinc-200",
+          )}
+        />
+      ))}
+    </div>
+  );
+}
 
 // 튜토리얼을 한 번이라도 보거나 건너뛴 브라우저에서는 다시 자동 노출하지 않는다.
 const TUTORIAL_SEEN_KEY = "exam-tutorial-seen";
@@ -46,7 +72,11 @@ export function ExamPrepareFlow() {
     // "마이크 테스트" vs "사운드 체크" drop-offs apart without remounting anything.
     const params = new URLSearchParams(window.location.search);
     params.set("step", dialogStep ?? "grade");
-    window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}?${params.toString()}`,
+    );
   }, [dialogStep]);
 
   return (
@@ -138,50 +168,65 @@ export function ExamPrepareFlow() {
         onOpenChange={(open) => setDialogStep(open ? "consent" : null)}
       >
         <DialogContent className="border-none bg-transparent p-0 ring-0 sm:max-w-xl">
-          {dialogStep === "consent" && (
-            <VoiceConsentPanel
-              onAgreed={() => {
-                trackEvent("consent_complete", { exam_mode: examMode });
-                setDialogStep("mic");
-              }}
-            />
-          )}
-          {dialogStep === "mic" && (
-            <MicTestPanel
-              onVerified={() => {
-                trackEvent("mic_test_complete", { exam_mode: examMode });
-                setDialogStep("sound");
-              }}
-            />
-          )}
-          {dialogStep === "sound" && (
-            <SoundCheckPanel
-              onCompleted={() => {
-                trackEvent("sound_check_complete", { exam_mode: examMode });
-                if (localStorage.getItem(TUTORIAL_SEEN_KEY)) {
-                  router.push(isTrial ? "/exam/session?mode=trial" : "/exam/session");
-                  return;
+          {dialogStep !== null &&
+            !(dialogStep === "tutorial" && isTutorialReview) && (
+              <PrepareStepProgress current={dialogStep} />
+            )}
+          <div
+            key={dialogStep}
+            className="animate-[prepare-step-slide-in_260ms_ease-out] motion-reduce:animate-none"
+          >
+            {dialogStep === "consent" && (
+              <VoiceConsentPanel
+                onAgreed={() => {
+                  trackEvent("consent_complete", { exam_mode: examMode });
+                  setDialogStep("mic");
+                }}
+              />
+            )}
+            {dialogStep === "mic" && (
+              <MicTestPanel
+                onVerified={() => {
+                  trackEvent("mic_test_complete", { exam_mode: examMode });
+                  setDialogStep("sound");
+                }}
+              />
+            )}
+            {dialogStep === "sound" && (
+              <SoundCheckPanel
+                onCompleted={() => {
+                  trackEvent("sound_check_complete", { exam_mode: examMode });
+                  if (localStorage.getItem(TUTORIAL_SEEN_KEY)) {
+                    router.push(
+                      isTrial ? "/exam/session?mode=trial" : "/exam/session",
+                    );
+                    return;
+                  }
+                  setIsTutorialReview(false);
+                  setDialogStep("tutorial");
+                }}
+              />
+            )}
+            {dialogStep === "tutorial" && (
+              <ExamTutorialPanel
+                examMode={examMode}
+                isReview={isTutorialReview}
+                finishLabel={
+                  isTutorialReview ? "확인했어요" : "모의고사 시작하기"
                 }
-                setIsTutorialReview(false);
-                setDialogStep("tutorial");
-              }}
-            />
-          )}
-          {dialogStep === "tutorial" && (
-            <ExamTutorialPanel
-              examMode={examMode}
-              isReview={isTutorialReview}
-              finishLabel={isTutorialReview ? "확인했어요" : "모의고사 시작하기"}
-              onFinish={() => {
-                localStorage.setItem(TUTORIAL_SEEN_KEY, "true");
-                if (isTutorialReview) {
-                  setDialogStep(null);
-                  return;
-                }
-                router.push(isTrial ? "/exam/session?mode=trial" : "/exam/session");
-              }}
-            />
-          )}
+                onFinish={() => {
+                  localStorage.setItem(TUTORIAL_SEEN_KEY, "true");
+                  if (isTutorialReview) {
+                    setDialogStep(null);
+                    return;
+                  }
+                  router.push(
+                    isTrial ? "/exam/session?mode=trial" : "/exam/session",
+                  );
+                }}
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </>
