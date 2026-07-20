@@ -101,6 +101,8 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
   const everExceededThresholdRef = useRef(false);
   /** 임계 음량을 넘긴 순간 중 스펙트럼상 실제 목소리로 판단된 적이 있는지 여부. 이게 한 번이라도 있었으면 통과 처리한다. */
   const everVoiceLikeRef = useRef(false);
+  /** finishRecording이 recorder.onstop을 기다리는 동안 CTA가 다시 눌려 재진입하는 것을 막는다. */
+  const isFinishingRef = useRef(false);
   /** 마지막으로 화면에 표시한 안내 문구. 매 프레임 동일한 값으로 setState하는 것을 방지한다. */
   const shownHintRef = useRef<string | null>(null);
 
@@ -256,6 +258,14 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
    * 실패했다면 이유에 맞는 안내 문구를 보여주고 처음으로 되돌린다.
    */
   const finishRecording = useCallback(() => {
+    // recorder.stop()은 state를 동기적으로 "inactive"로 바꾸지만, 실제 onstop(blob 생성)은
+    // 비동기로 뒤늦게 발생한다. 그 사이 CTA가 다시 눌려 finishRecording이 재진입하면 두 번째
+    // 호출은 이미 "inactive"라 finalize(null)로 즉시 idle로 되돌리고, 뒤이어 첫 번째 호출의
+    // onstop이 뒤늦게 finalize(blob)을 실행해 reviewing으로 다시 튀는 상태 꼬임이 생길 수
+    // 있다. isFinishingRef로 이미 종료 처리 중이면 재진입 자체를 막는다.
+    if (isFinishingRef.current) return;
+    isFinishingRef.current = true;
+
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     rafRef.current = null;
 
@@ -286,6 +296,7 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
         setHint(nextHint);
         setPhase("idle");
       }
+      isFinishingRef.current = false;
     };
 
     if (recorder && recorder.state !== "inactive") {
@@ -374,6 +385,7 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
               type="button"
               onClick={handleTogglePlayback}
               aria-pressed={isPlaying}
+              aria-label={isPlaying ? "재생 일시정지" : "내 목소리 재생"}
               className={cn(
                 "flex size-16 items-center justify-center rounded-full shadow-md transition-transform duration-100",
                 isPlaying ? "bg-red-500" : "bg-orange-600",
