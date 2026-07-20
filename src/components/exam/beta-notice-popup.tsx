@@ -114,7 +114,7 @@ export function BetaNoticePopup({
           <p className="text-sm leading-relaxed text-zinc-500">
             정식 출시 전까지 채점 엔진을 계속 고도화할 예정이에요.
             <br />
-            채점 결과에 일부 불완전할 수 있어요.
+            채점 결과가 일부 부정확할 수 있어요.
           </p>
         </div>
       </div>
