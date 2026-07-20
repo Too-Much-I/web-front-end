@@ -33,6 +33,18 @@ export function getExamPartQuestionNumbers(part: number): number[] {
   return EXAM_PART_QUESTION_NUMBERS[part] ?? [];
 }
 
+/** questionNumber가 속한 파트 번호를 찾는다. 정규 구성에 없는 번호면 null. */
+export function getExamPartNumberByQuestionNumber(
+  questionNumber: number,
+): number | null {
+  for (const [partNumber, questionNumbers] of Object.entries(
+    EXAM_PART_QUESTION_NUMBERS,
+  )) {
+    if (questionNumbers.includes(questionNumber)) return Number(partNumber);
+  }
+  return null;
+}
+
 export interface ExamPartTiming {
   prepTimeSec: number;
   speakTimeSec: number;

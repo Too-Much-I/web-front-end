@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ThumbsUp, TriangleAlert } from "lucide-react";
+import { ArrowLeft, ArrowRight, ThumbsUp, TriangleAlert } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
@@ -25,9 +25,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getExamGradingResult } from "@/features/exam/api/exam-grading-result";
 import { getExamQuestionFeedback } from "@/features/exam/api/exam-question-feedback";
 import {
   getExamPartMeta,
+  getExamPartNumberByQuestionNumber,
+  getExamPartQuestionNumbers,
   getExamPartTimingByQuestionNumber,
 } from "@/features/exam/part-meta";
 import { useReanswerSubmission } from "@/features/exam/use-reanswer-submission";
@@ -72,6 +75,18 @@ function getScoreDeltaNote(delta: number): {
 /** 탭 전환 슬라이드 방향을 정하기 위한 좌→우 순서. */
 const TAB_VALUES = ["my-answer", "model-answer", "reanswer"] as const;
 type TabValue = (typeof TAB_VALUES)[number];
+
+/** 정규 구성의 전체 문제 번호(1~11)를 파트 순서대로 펼친 목록. */
+const ALL_QUESTION_NUMBERS = [1, 2, 3, 4, 5].flatMap(
+  getExamPartQuestionNumbers,
+);
+
+function questionNavLabel(questionNumber: number): string {
+  const partNumber = getExamPartNumberByQuestionNumber(questionNumber);
+  return partNumber === null
+    ? `Q${questionNumber}`
+    : `Q${questionNumber} · ${getExamPartMeta(partNumber).titleKo}`;
+}
 
 function ScoreRing({
   percent,
@@ -388,6 +403,38 @@ export function ExamQuestionFeedbackScreen({
       ? getScoreDeltaNote(detail.score - firstAttempt.score)
       : null;
 
+  // 이전/다음 문제 이동은 실제로 풀린 문제(totalSolvedQuestions) 안에서만 허용해야 해서
+  // 요약 결과를 가져온다. 채점 완료된 결과는 불변이므로 무기한 캐시 — 문제를 오가도 재요청하지 않는다.
+  // 맛보기 플로우에는 요약 결과가 없으므로 조회하지 않는다(내비게이션도 없음).
+  const { data: gradingSummary } = useQuery({
+    queryKey: ["exam-grading-result", examId],
+    queryFn: () => getExamGradingResult(examId),
+    enabled: !isTrial,
+    staleTime: Infinity,
+  });
+
+  const questionIndex = ALL_QUESTION_NUMBERS.indexOf(detail.questionNumber);
+  const prevQuestionNumber =
+    gradingSummary && questionIndex > 0
+      ? ALL_QUESTION_NUMBERS[questionIndex - 1]
+      : null;
+  const nextQuestionNumberCandidate =
+    gradingSummary && questionIndex >= 0
+      ? (ALL_QUESTION_NUMBERS[questionIndex + 1] ?? null)
+      : null;
+  const nextQuestionNumber =
+    nextQuestionNumberCandidate !== null &&
+    gradingSummary &&
+    nextQuestionNumberCandidate <= gradingSummary.totalSolvedQuestions
+      ? nextQuestionNumberCandidate
+      : null;
+
+  // Link 내비게이션은 handleTabChange/handleNavigateRetry를 거치지 않으므로,
+  // "다시 답변하기" 탭의 미저장 녹음 확인을 클릭 시점에 직접 태운다.
+  function handleLeaveByLink(event: React.MouseEvent) {
+    if (!confirmDiscardUnsavedRecording()) event.preventDefault();
+  }
+
   // 탭 상위(여기)에서 들고 있어야, "다시 답변하기" 탭을 벗어나 ExamReanswerPanel이 언마운트돼도
   // 제출~채점 진행 상태가 사라지지 않는다 (자세한 이유는 useReanswerSubmission 참고).
   const reanswerSubmission = useReanswerSubmission({
@@ -410,6 +457,7 @@ export function ExamQuestionFeedbackScreen({
       {!isTrial && (
         <Link
           href={`/exam/result?examId=${examId}`}
+          onClick={handleLeaveByLink}
           className="group inline-flex items-center gap-1.5 text-sm font-semibold text-zinc-500 hover:text-zinc-700 lg:text-base"
         >
           <span className="flex size-6 items-center justify-center rounded-full bg-zinc-100 transition-transform duration-200 group-hover:-translate-x-0.5">
@@ -818,6 +866,57 @@ export function ExamQuestionFeedbackScreen({
           ))}
         </ol>
       </div>
+
+      {(prevQuestionNumber !== null || nextQuestionNumber !== null) && (
+        <nav
+          aria-label="다른 문제 피드백으로 이동"
+          className="mt-10 flex items-stretch gap-3 lg:gap-4"
+        >
+          {prevQuestionNumber !== null ? (
+            <Link
+              href={`/exam/result/question?examId=${examId}&questionNumber=${prevQuestionNumber}`}
+              onClick={handleLeaveByLink}
+              className="group flex flex-1 items-center gap-2.5 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-zinc-100 transition-colors hover:ring-orange-200 lg:p-5"
+            >
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 transition-transform duration-200 group-hover:-translate-x-0.5">
+                <ArrowLeft className="size-3.5 text-zinc-500" aria-hidden />
+              </span>
+              <span className="flex min-w-0 flex-col text-left">
+                <span className="text-xs text-zinc-400 lg:text-sm">
+                  이전 문제
+                </span>
+                <span className="truncate text-sm font-semibold text-blue-950 lg:text-base">
+                  {questionNavLabel(prevQuestionNumber)}
+                </span>
+              </span>
+            </Link>
+          ) : (
+            <div className="flex-1" aria-hidden />
+          )}
+
+          {nextQuestionNumber !== null ? (
+            <Link
+              href={`/exam/result/question?examId=${examId}&questionNumber=${nextQuestionNumber}`}
+              onClick={handleLeaveByLink}
+              className="group flex flex-1 items-center justify-end gap-2.5 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-zinc-100 transition-colors hover:ring-orange-200 lg:p-5"
+            >
+              <span className="flex min-w-0 flex-col text-right">
+                <span className="text-xs text-zinc-400 lg:text-sm">
+                  다음 문제
+                </span>
+                <span className="truncate text-sm font-semibold text-blue-950 lg:text-base">
+                  {questionNavLabel(nextQuestionNumber)}
+                </span>
+              </span>
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 transition-transform duration-200 group-hover:translate-x-0.5">
+                <ArrowRight className="size-3.5 text-zinc-500" aria-hidden />
+              </span>
+            </Link>
+          ) : (
+            <div className="flex-1" aria-hidden />
+          )}
+        </nav>
+      )}
 
       {/* 전체 모의고사 사용자는 요약 결과 화면(/exam/result)에서 이미 이 팝업을 봤으므로,
           여기서는 종합 결과 화면을 거치지 않는 맛보기 플로우에서만 보여준다. */}
