@@ -1,9 +1,16 @@
 "use client";
 
-import { ChevronRight, ThumbsUp, TriangleAlert } from "lucide-react";
+import {
+  ChevronRight,
+  Share2,
+  Star,
+  ThumbsUp,
+  TriangleAlert,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { BetaNoticePopup } from "@/components/exam/beta-notice-popup";
 import { ExamPartScoreRadar } from "@/components/exam/exam-part-score-radar";
@@ -16,6 +23,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { isMyExamId } from "@/features/exam/my-exam-ids";
 import { getExamPartQuestionNumbers } from "@/features/exam/part-meta";
 import {
   getStoredTargetGradeId,
@@ -25,6 +33,11 @@ import {
 import { jua } from "@/lib/fonts";
 import { useCountUp } from "@/lib/use-count-up";
 import type { ExamGradingResult } from "@/types/exam";
+
+/** 정규 구성의 전체 문제 수(11). 이보다 적게 풀었으면 중도 종료한 응시다. */
+const TOTAL_QUESTION_COUNT = [1, 2, 3, 4, 5].flatMap(
+  getExamPartQuestionNumbers,
+).length;
 
 const PART_MASCOTS = [
   { src: "/mascots/rabbit.png", alt: "토끼 캐릭터" },
@@ -58,13 +71,22 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
   );
   const [isBetaTooltipOpen, setIsBetaTooltipOpen] = useState(false);
 
+  // 리포트 링크는 examId만 알면 누구나 열 수 있으므로, 설문 CTA와 목표 등급 비교처럼
+  // 응시자 본인에게만 의미 있는 UI는 이 브라우저에서 응시한 시험일 때만 보여준다.
+  const [isMyExam, setIsMyExam] = useState(false);
+
   useEffect(() => {
     // localStorage는 서버에 없으므로, SSR/하이드레이션 불일치를 피하기 위해 마운트 후에만 읽는다.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setTargetGrade(getTargetGradeOption(getStoredTargetGradeId()));
-  }, []);
+    setIsMyExam(isMyExamId(result.examId));
+  }, [result.examId]);
 
   const scoreGap = targetGrade ? targetGrade.score - result.totalScore : null;
+
+  // 중도 종료한 응시는 푼 문제까지만 채점되어 총점이 구조적으로 낮다 — 그 점수로
+  // "목표까지 N점 남았어요"라고 말하면 실력 평가처럼 오해되므로, 완주한 응시에만 보여준다.
+  const isCompleteExam = result.totalSolvedQuestions >= TOTAL_QUESTION_COUNT;
 
   // 중단(terminate)한 응시는 앞/뒤 이동 없이 순서대로 풀기 때문에, totalSolvedQuestions까지의
   // 전체 문제 번호만 실제로 풀린 문제다 — 파트에 풀린 문제가 하나도 없으면 그 파트 카드 자체를 숨긴다.
@@ -80,6 +102,33 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
     scorePercent > 50
       ? { src: "/mascots/good_rabbit.png", alt: "만족스러워하는 토끼 캐릭터" }
       : { src: "/mascots/hmm_rabbit.png", alt: "고민하는 토끼 캐릭터" };
+
+  // 모바일 등 지원 환경에서는 OS 공유 시트를 띄우고, 미지원 환경에서는 링크를 복사한다.
+  // 링크에 examId가 담기므로 받은 사람은 이 리포트를 그대로 볼 수 있다.
+  async function handleShare() {
+    const shareText = `토선생 AI 토익스피킹 모의고사에서 예상 ${result.totalScore}점(${result.levelEstimate})을 받았어요. 내 점수도 확인해보세요!`;
+    const shareUrl = window.location.href;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "토선생 채점 결과",
+          text: shareText,
+          url: shareUrl,
+        });
+      } catch {
+        // 사용자가 공유 시트를 그냥 닫은 경우 — 아무것도 하지 않는다.
+      }
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+      toast.success("결과 링크를 복사했어요. 원하는 곳에 붙여넣어 공유하세요!");
+    } catch {
+      toast.error("링크 복사에 실패했어요.");
+    }
+  }
 
   return (
     <>
@@ -119,7 +168,9 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
             </div>
           </div>
 
-          {targetGrade && scoreGap !== null && (
+          {/* 목표 등급은 보는 사람의 localStorage에서 읽으므로, 공유받은 리포트에서는
+              남의 점수와 내 목표가 뒤섞인 계산이 된다 — 본인 응시에만 보여준다. */}
+          {targetGrade && scoreGap !== null && isCompleteExam && isMyExam && (
             <TargetGradeMascot targetGrade={targetGrade} scoreGap={scoreGap} />
           )}
         </div>
@@ -196,7 +247,18 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
+        <div className="mt-3 flex justify-end">
+          <button
+            type="button"
+            onClick={handleShare}
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 lg:text-base"
+          >
+            <Share2 className="size-4" aria-hidden />
+            결과 공유하기
+          </button>
+        </div>
+
+        <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
           <div className="relative rounded-3xl bg-white p-6 lg:p-8">
             <SketchyDashBorder />
             <span className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-950 lg:text-base">
@@ -325,12 +387,66 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
         </ol>
       </section>
 
+      {/* 리포트를 끝까지 읽은 사용자에게 주는 설문 두 번째 기회 — 스크롤 팝업
+          (ScrollSatisfactionPopup)을 닫았거나 놓친 경우를 위한 정적 진입점. 보상 문구는 팝업의
+          full 모드(3회)와, 톤은 설문 화면(exam-feedback-survey)의 하늘색 파스텔과 맞춘다.
+          공유받은 리포트에서는 설문 CTA를 숨긴다. */}
+      {isMyExam && (
+        <section className="mx-auto w-full max-w-5xl px-6 pb-10 xl:max-w-6xl">
+          <div className="relative flex flex-col items-center gap-5 overflow-hidden rounded-[2rem] bg-gradient-to-br from-sky-200 via-sky-100 to-blue-50 p-8 text-center shadow-md sm:p-10">
+            {/* 설문 화면(exam-feedback-survey)과 같은 별 장식 — 장식일 뿐이므로 포인터/스크린리더에서 제외. */}
+            <Star
+              aria-hidden
+              className="pointer-events-none absolute top-5 left-[14%] size-4 rotate-12 fill-amber-300 text-amber-300 sm:size-5"
+            />
+            <Star
+              aria-hidden
+              className="pointer-events-none absolute top-10 right-[18%] size-3 -rotate-12 fill-white text-white sm:size-4"
+            />
+            <Star
+              aria-hidden
+              className="pointer-events-none absolute bottom-8 left-[8%] size-3 rotate-6 fill-pink-300 text-pink-300 sm:size-4"
+            />
+            <Star
+              aria-hidden
+              className="pointer-events-none absolute right-[10%] bottom-6 size-4 -rotate-6 fill-sky-300 text-sky-300"
+            />
+
+            <div className="relative h-16 w-16 animate-[gift-wiggle_2.4s_ease-in-out_infinite] motion-reduce:animate-none sm:h-20 sm:w-20">
+              <Image
+                src="/mascots/gift.png"
+                alt="선물 상자"
+                fill
+                sizes="80px"
+                className="object-contain drop-shadow-md"
+              />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-blue-950 sm:text-2xl lg:text-3xl">
+                채점 리포트, 도움이 됐나요?
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-blue-800 sm:text-base lg:text-lg">
+                1분 설문을 남겨주시면 프리미엄형 모의고사 3회를 무료로 드려요.
+              </p>
+            </div>
+            <Link
+              href={`/exam/survey?examId=${result.examId}&mode=full`}
+              className="relative rounded-full bg-blue-950 px-7 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-blue-900 sm:text-base lg:px-8 lg:text-lg"
+            >
+              설문 남기고 선물 받기
+            </Link>
+          </div>
+        </section>
+      )}
+
       <BetaNoticePopup
         examId={result.examId}
         onClose={() => setIsBetaNoticeClosed(true)}
       />
 
-      <ScrollSatisfactionPopup examId={result.examId} mode="full" />
+      {isMyExam && (
+        <ScrollSatisfactionPopup examId={result.examId} mode="full" />
+      )}
     </>
   );
 }

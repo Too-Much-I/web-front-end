@@ -5,6 +5,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { ExamSessionScreen } from "@/components/exam/exam-session-screen";
 import { createExamSession } from "@/features/exam/api/exam-session-create";
 import { createTrialExamSession } from "@/features/exam/api/exam-trial-session-create";
+import { addStoredMyExamId } from "@/features/exam/my-exam-ids";
 import type { ExamSession } from "@/types/exam";
 
 function ExamSessionContent() {
@@ -23,6 +24,9 @@ function ExamSessionContent() {
 
     (isTrial ? createTrialExamSession() : createExamSession())
       .then((realSession) => {
+        // 결과 리포트에서 "내가 응시한 시험"인지 판별할 수 있도록 기록해 둔다.
+        // (리포트 링크를 공유받은 사람에게 설문 CTA 등을 숨기는 용도)
+        addStoredMyExamId(realSession.examId);
         setSession(realSession);
       })
       .catch((err) => {
@@ -32,8 +36,18 @@ function ExamSessionContent() {
   }, [isTrial]);
 
   // API 응답을 기다리는 동안 보여줄 화면
-  if (error) return <div className="flex h-screen items-center justify-center text-red-500">{error}</div>;
-  if (!session) return <div className="flex h-screen items-center justify-center text-zinc-500">백엔드 서버와 연결 중입니다...</div>;
+  if (error)
+    return (
+      <div className="flex h-screen items-center justify-center text-red-500">
+        {error}
+      </div>
+    );
+  if (!session)
+    return (
+      <div className="flex h-screen items-center justify-center text-zinc-500">
+        백엔드 서버와 연결 중입니다...
+      </div>
+    );
 
   // 실제 데이터가 도착하면 시험 화면 렌더링
   return <ExamSessionScreen session={session} isTrial={isTrial} />;
