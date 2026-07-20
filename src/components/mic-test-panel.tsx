@@ -1,6 +1,6 @@
 "use client";
 
-import { Mic } from "lucide-react";
+import { Mic, Pause, Play, RotateCcw } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -23,17 +23,14 @@ const SPEECH_BAND_HZ: [number, number] = [300, 3400];
  */
 const SPECTRAL_FLATNESS_THRESHOLD = 0.5;
 /**
- * 목소리로 판정된 시간을 누적한 합이 이 값을 넘으면 통과 처리한다. 자음·숨쉬기·문장 사이 pause처럼
- * 자연스러운 발화에 포함된 끊김은 매번 초기화하지 않고 그대로 건너뛴 채 누적만 이어간다
- *  짧은 문장을 읽어도 대부분 이 정도는 금방 채워진다.
+ * 녹음을 끝내는 시점(사용자가 "다 읽었어요"를 누른 순간)은 사용자 스스로 판단하므로, 통과 여부는
+ * 녹음 중 한 번이라도 목소리로 판정된 순간이 있었는지만 본다 — 얼마나 길게 말했는지는 체크하지 않는다.
  */
-const VOICE_SUSTAIN_MS = 400;
 /** 녹음을 시작하고 이 시간이 지나도 통과하지 못하면 안내 문구를 보여준다. */
 const HINT_DELAY_MS = 3000;
 const HINT_VOLUME_TOO_LOW = "목소리를 조금 더 크게 내주세요.";
 const HINT_NOISE_DETECTED =
   "주변 소음이 감지돼요. 조용한 곳에서 다시 시도해주세요.";
-const HINT_TOO_SHORT = "조금 더 길게 이야기해주세요.";
 /**
  * 마이크 테스트 중 사용자가 읽을 문장. 토익 스피킹 실제 문제와 비슷한 톤을 유지하되, 숫자·약어·쉼표를
  * 줄여 막힘 없이 술술 읽히도록 쉬운 단어 위주로 구성했다.
@@ -77,11 +74,16 @@ function spectralFlatness(
   return geometricMean / arithmeticMean;
 }
 
+/** 마이크 테스트의 진행 단계. idle=시작 전/재시도 대기, recording=문장을 읽는 중, reviewing=녹음을 마치고 다시 들어보는 중. */
+type Phase = "idle" | "recording" | "reviewing";
+
 export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
-  const [isRecording, setIsRecording] = useState(false);
-  const [voiceVerified, setVoiceVerified] = useState(false);
+  const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
   const [hint, setHint] = useState<string | null>(null);
+  /** 녹음을 마친 뒤 다시 들어볼 수 있도록 만든 blob URL. */
+  const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const streamRef = useRef<MediaStream | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -90,15 +92,14 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
   const rafRef = useRef<number | null>(null);
   const barRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const micButtonRef = useRef<HTMLButtonElement | null>(null);
-  /** 목소리로 판정된(isVoiceLike) 시간의 누적 합(ms). 끊김이 있어도 리셋되지 않고 계속 쌓인다. */
-  const voiceAccumulatedMsRef = useRef(0);
-  /** 직전 프레임 시각. 프레임 간 실제 경과 시간(delta)을 구해 누적치에 더하는 데 쓴다. */
-  const lastTickAtRef = useRef<number | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const audioElRef = useRef<HTMLAudioElement | null>(null);
   /** 녹음을 시작한 시각. 안내 문구를 보여줄 시점을 계산하는 데 사용한다. */
   const recordingStartRef = useRef(0);
-  /** 녹음 중 한 번이라도 임계 음량을 넘겼는지 여부. 음량 문제와 지속시간/잡음 문제를 구분하는 데 사용한다. */
+  /** 녹음 중 한 번이라도 임계 음량을 넘겼는지 여부. 음량 문제와 잡음 문제를 구분하는 데 사용한다. */
   const everExceededThresholdRef = useRef(false);
-  /** 임계 음량을 넘긴 순간 중 스펙트럼상 실제 목소리로 판단된 적이 있는지 여부. 잡음 문제와 지속시간 문제를 구분하는 데 사용한다. */
+  /** 임계 음량을 넘긴 순간 중 스펙트럼상 실제 목소리로 판단된 적이 있는지 여부. 이게 한 번이라도 있었으면 통과 처리한다. */
   const everVoiceLikeRef = useRef(false);
   /** 마지막으로 화면에 표시한 안내 문구. 매 프레임 동일한 값으로 setState하는 것을 방지한다. */
   const shownHintRef = useRef<string | null>(null);
@@ -110,29 +111,34 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
     if (micButtonRef.current) micButtonRef.current.style.transform = "";
   };
 
-  const stopRecording = useCallback(() => {
-    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-    rafRef.current = null;
-    streamRef.current?.getTracks().forEach((track) => track.stop());
-    streamRef.current = null;
-    audioCtxRef.current?.close();
-    audioCtxRef.current = null;
-    analyserRef.current = null;
-    dataRef.current = null;
-    setIsRecording(false);
-    setHint(null);
-    shownHintRef.current = null;
-    resetVisuals();
+  // 컴포넌트가 언마운트될 때(탭 전환 등) 마이크 스트림/레코더가 계속 켜진 채로 남지 않도록
+  // 강제로 정리한다. blob은 필요 없으므로 onstop 핸들러를 붙이지 않고 그냥 멈춘다.
+  useEffect(() => {
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      if (
+        mediaRecorderRef.current &&
+        mediaRecorderRef.current.state !== "inactive"
+      ) {
+        mediaRecorderRef.current.onstop = null;
+        mediaRecorderRef.current.stop();
+      }
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+      audioCtxRef.current?.close();
+    };
   }, []);
 
-  useEffect(() => stopRecording, [stopRecording]);
+  // recordedUrl이 바뀌거나(재시도) 언마운트될 때 이전 blob URL을 해제한다.
+  useEffect(() => {
+    return () => {
+      if (recordedUrl) URL.revokeObjectURL(recordedUrl);
+    };
+  }, [recordedUrl]);
 
   const startRecording = useCallback(async () => {
     setError(null);
-    setVoiceVerified(false);
+    setRecordedUrl(null);
     setHint(null);
-    voiceAccumulatedMsRef.current = 0;
-    lastTickAtRef.current = null;
     everExceededThresholdRef.current = false;
     everVoiceLikeRef.current = false;
     shownHintRef.current = null;
@@ -150,6 +156,16 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
       });
       streamRef.current = stream;
 
+      // 시각화용 AnalyserNode와 별개로, 실제 오디오도 녹음해둔다 — 사용자가 다 읽고
+      // 녹음을 마치면 자기 목소리를 다시 들어볼 수 있게 하기 위함.
+      chunksRef.current = [];
+      const recorder = new MediaRecorder(stream);
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+
       const audioCtx = new AudioContext();
       audioCtxRef.current = audioCtx;
 
@@ -163,7 +179,7 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
       dataRef.current = new Uint8Array(
         new ArrayBuffer(analyser.frequencyBinCount),
       );
-      setIsRecording(true);
+      setPhase("recording");
 
       const step = Math.max(
         1,
@@ -184,9 +200,6 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
         analyserNode.getByteFrequencyData(data);
 
         const now = performance.now();
-        const dt =
-          lastTickAtRef.current === null ? 0 : now - lastTickAtRef.current;
-        lastTickAtRef.current = now;
 
         let sum = 0;
         for (let i = 0; i < BAR_COUNT; i++) {
@@ -210,25 +223,17 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
           everExceededThresholdRef.current = true;
         }
 
-        let verified = false;
         if (isVoiceLike) {
           everVoiceLikeRef.current = true;
-          voiceAccumulatedMsRef.current += dt;
-          if (voiceAccumulatedMsRef.current >= VOICE_SUSTAIN_MS) {
-            verified = true;
-            setVoiceVerified(true);
-          }
         }
 
-        if (verified) {
+        if (everVoiceLikeRef.current) {
           shownHintRef.current = null;
           setHint(null);
         } else if (now - recordingStartRef.current >= HINT_DELAY_MS) {
           const nextHint = !everExceededThresholdRef.current
             ? HINT_VOLUME_TOO_LOW
-            : !everVoiceLikeRef.current
-              ? HINT_NOISE_DETECTED
-              : HINT_TOO_SHORT;
+            : HINT_NOISE_DETECTED;
           if (shownHintRef.current !== nextHint) {
             shownHintRef.current = nextHint;
             setHint(nextHint);
@@ -244,11 +249,83 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
     }
   }, []);
 
-  const handleToggle = () => {
-    if (isRecording) {
-      stopRecording();
+  /**
+   * 사용자가 "다 읽었어요"를 눌러 녹음을 마쳤을 때 호출된다. 목소리로 판정된 순간이 한 번이라도
+   * 있었으면 통과 처리하고(얼마나 길게 말했는지는 보지 않음 — 그건 재생 화면에서 본인이 직접
+   * 들어보고 판단할 몫이다), 방금 녹음한 오디오를 재생해볼 수 있는 단계로 넘어간다(reviewing).
+   * 실패했다면 이유에 맞는 안내 문구를 보여주고 처음으로 되돌린다.
+   */
+  const finishRecording = useCallback(() => {
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+
+    const passed = everVoiceLikeRef.current;
+    const recorder = mediaRecorderRef.current;
+
+    const releaseHardware = () => {
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+      audioCtxRef.current?.close();
+      audioCtxRef.current = null;
+      analyserRef.current = null;
+      dataRef.current = null;
+      resetVisuals();
+    };
+
+    const finalize = (blob: Blob | null) => {
+      releaseHardware();
+      if (passed && blob && blob.size > 0) {
+        setRecordedUrl(URL.createObjectURL(blob));
+        setHint(null);
+        shownHintRef.current = null;
+        setPhase("reviewing");
+      } else {
+        const nextHint = !everExceededThresholdRef.current
+          ? HINT_VOLUME_TOO_LOW
+          : HINT_NOISE_DETECTED;
+        setHint(nextHint);
+        setPhase("idle");
+      }
+    };
+
+    if (recorder && recorder.state !== "inactive") {
+      recorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: recorder.mimeType });
+        chunksRef.current = [];
+        mediaRecorderRef.current = null;
+        finalize(blob);
+      };
+      recorder.stop();
+    } else {
+      mediaRecorderRef.current = null;
+      finalize(null);
+    }
+  }, []);
+
+  const handlePrimaryAction = () => {
+    if (phase === "recording") {
+      finishRecording();
     } else {
       startRecording();
+    }
+  };
+
+  const handleRetry = () => {
+    setRecordedUrl(null);
+    setIsPlaying(false);
+    setPhase("idle");
+  };
+
+  const handleTogglePlayback = () => {
+    const audioEl = audioElRef.current;
+    if (!audioEl) return;
+    if (isPlaying) {
+      audioEl.pause();
+      setIsPlaying(false);
+    } else {
+      audioEl.currentTime = 0;
+      void audioEl.play();
+      setIsPlaying(true);
     }
   };
 
@@ -263,16 +340,16 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
         <p
           className={cn(
             "text-sm",
-            hint && !voiceVerified ? "text-orange-500" : "text-zinc-500",
+            hint && phase !== "reviewing" ? "text-orange-500" : "text-zinc-500",
           )}
         >
-          {voiceVerified
-            ? "마이크 테스트를 완료했어요!"
-            : (hint ?? "목소리가 잘 녹음되는지 확인해보세요.")}
+          {phase === "reviewing"
+            ? "녹음을 마쳤어요! 내 목소리를 다시 들어보세요."
+            : (hint ?? "문장을 다 읽으면 버튼을 눌러 녹음을 마쳐주세요.")}
         </p>
       </div>
 
-      {!voiceVerified && (
+      {phase !== "reviewing" && (
         <div className="rounded-xl bg-zinc-50 p-4 text-center">
           <p className="mb-1 text-xs font-medium text-zinc-400">
             아래 문장을 소리 내어 읽어보세요
@@ -284,29 +361,49 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
       )}
 
       <div className="flex flex-col items-center gap-5">
-        {voiceVerified ? (
-          <button
-            type="button"
-            onClick={handleNext}
-            className="flex items-center justify-center"
-          >
+        {phase === "reviewing" ? (
+          <div className="flex flex-col items-center gap-3">
             <Image
               src="/mascots/mike_test_ok.png"
               alt="마이크 테스트 성공"
-              width={400}
-              height={220}
-              className="w-64 sm:w-72"
+              width={320}
+              height={176}
+              className="w-52 sm:w-60"
             />
-          </button>
+            <button
+              type="button"
+              onClick={handleTogglePlayback}
+              aria-pressed={isPlaying}
+              className={cn(
+                "flex size-16 items-center justify-center rounded-full shadow-md transition-transform duration-100",
+                isPlaying ? "bg-red-500" : "bg-orange-600",
+              )}
+            >
+              {isPlaying ? (
+                <Pause className="size-6 text-white" />
+              ) : (
+                <Play className="size-6 translate-x-0.5 text-white" />
+              )}
+            </button>
+            <p className="text-xs text-zinc-400">
+              {isPlaying ? "재생 중이에요" : "눌러서 내 목소리를 들어보세요"}
+            </p>
+            <audio
+              ref={audioElRef}
+              src={recordedUrl ?? undefined}
+              onEnded={() => setIsPlaying(false)}
+              className="hidden"
+            />
+          </div>
         ) : (
           <button
             ref={micButtonRef}
             type="button"
-            onClick={handleToggle}
-            aria-pressed={isRecording}
+            onClick={handlePrimaryAction}
+            aria-pressed={phase === "recording"}
             className={cn(
               "flex size-24 items-center justify-center rounded-full shadow-md transition-transform duration-100",
-              isRecording ? "bg-red-500" : "bg-orange-600",
+              phase === "recording" ? "bg-red-500" : "bg-orange-600",
             )}
           >
             <Image
@@ -320,53 +417,66 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
           </button>
         )}
 
-        <div className="flex h-10 items-center gap-1">
-          {Array.from({ length: BAR_COUNT }, (_, i) => (
-            <span
-              key={i}
-              ref={(el) => {
-                barRefs.current[i] = el;
-              }}
-              className={cn(
-                "w-1 rounded-full transition-[height] duration-75",
-                isRecording ? "bg-orange-400" : "bg-orange-200",
-              )}
-              style={{ height: IDLE_BAR_HEIGHT }}
-            />
-          ))}
-        </div>
+        {phase !== "reviewing" && (
+          <div className="flex h-10 items-center gap-1">
+            {Array.from({ length: BAR_COUNT }, (_, i) => (
+              <span
+                key={i}
+                ref={(el) => {
+                  barRefs.current[i] = el;
+                }}
+                className={cn(
+                  "w-1 rounded-full transition-[height] duration-75",
+                  phase === "recording" ? "bg-orange-400" : "bg-orange-200",
+                )}
+                style={{ height: IDLE_BAR_HEIGHT }}
+              />
+            ))}
+          </div>
+        )}
 
         {error && <p className="text-center text-xs text-red-500">{error}</p>}
       </div>
 
       <div className="flex flex-col gap-2">
-        {voiceVerified ? (
-          <Button
-            size="lg"
-            onClick={handleNext}
-            className="h-14 w-full flex-col gap-0.5 rounded-xl bg-orange-500 text-white hover:bg-orange-600"
-          >
-            <span className="text-base font-semibold">다음: 사운드 체크</span>
-            <span className="text-xs font-normal opacity-80">
-              Next: Sound Check
-            </span>
-          </Button>
+        {phase === "reviewing" ? (
+          <>
+            <Button
+              size="lg"
+              onClick={handleNext}
+              className="h-14 w-full flex-col gap-0.5 rounded-xl bg-orange-500 text-white hover:bg-orange-600"
+            >
+              <span className="text-base font-semibold">다음: 사운드 체크</span>
+              <span className="text-xs font-normal opacity-80">
+                Next: Sound Check
+              </span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRetry}
+              className="h-9 w-full text-zinc-500 hover:bg-zinc-50 hover:text-orange-600"
+            >
+              <RotateCcw className="size-3.5" />
+              다시 녹음하기
+            </Button>
+          </>
         ) : (
           <Button
             variant="outline"
             size="lg"
-            onClick={handleToggle}
+            onClick={handlePrimaryAction}
             className="h-12 w-full border-orange-300 text-base text-orange-600 hover:bg-orange-50"
           >
             <Mic className="size-4" />
-            {isRecording ? "녹음 테스트 중지" : "녹음 테스트 시작"}
+            {phase === "recording" ? "다 읽었어요" : "녹음 테스트 시작"}
           </Button>
         )}
-        <p className="text-center text-xs text-zinc-400">
-          {voiceVerified
-            ? "이어서 소리가 잘 들리는지 확인할게요."
-            : "마이크 테스트가 완료되면 사운드 체크로 넘어가요."}
-        </p>
+        {phase !== "reviewing" && (
+          <p className="text-center text-xs text-zinc-400">
+            문장을 다 읽으면 버튼을 눌러 녹음을 마쳐주세요.
+          </p>
+        )}
       </div>
     </section>
   );

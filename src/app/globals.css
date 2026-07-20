@@ -245,6 +245,23 @@
   }
 }
 
+/**
+ * 시험 준비 다이얼로그(동의 → 마이크 테스트 → 사운드 체크 → 튜토리얼)가 다음 단계로 넘어갈 때
+ * 카드가 오른쪽에서 살짝 밀려들어오며 나타나는 모션. 단계 전환이 순간적으로 뚝 끊기지 않고
+ * 한 걸음씩 앞으로 나아가는 것처럼 느껴지도록 하기 위함(특히 마이크 테스트 완료 → 사운드 체크
+ * 진입 구간에서 체감이 컸음).
+ */
+@keyframes prepare-step-slide-in {
+  from {
+    transform: translateX(14px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 /** 모범·추천답안 토글 시 이전 답안이 즉시 스냅되지 않고 방향에 맞춰 슬라이드 인. --exam-model-answer-slide-x로 좌우 방향을 정한다. */
 @keyframes exam-model-answer-slide {
   from {
