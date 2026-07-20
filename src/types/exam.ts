@@ -162,6 +162,19 @@ export interface RawExamCorrectionItem {
 }
 
 /**
+ * Azure Pronunciation Assessment 세부 지표 하나. 실측 응답에서 배열의 각 원소가 4개 키
+ * (accuracy_score/fluency_score/completeness_score/prosody_score) 중 딱 하나만 담은
+ * 채로 내려온다 — 예: [{accuracy_score: 94.7}, {fluency_score: 93.3}, ...]. 원소 순서나
+ * 개수가 보장되지 않아 매퍼(map-exam-question-feedback.ts)에서 하나의 객체로 합친다.
+ */
+export type RawExamDetailedScoreItem = Partial<
+  Record<
+    "accuracy_score" | "fluency_score" | "completeness_score" | "prosody_score",
+    number
+  >
+>;
+
+/**
  * GET /api/v1/exams/{examId}/questions/{questionNumber} 의 result.question.feedback.
  * 스웨거 스펙(v3/api-docs)에는 이 안이 snake_case로 문서화돼 있지만,
  * 실제 서버 응답은 camelCase로 내려온다 — 스펙이 실제 구현과 어긋나 있으니
@@ -176,7 +189,8 @@ export interface RawExamQuestionFeedback {
   pronunciation: string;
   fluency: string;
   content: string;
-  pronunciationFluencyScore: number;
+  /** Azure Pronunciation Assessment 세부 지표(정확도/유창성/완전성/운율), 0~100점. */
+  detailedScores?: RawExamDetailedScoreItem[] | null;
   /** Part 1(낭독)에는 내용 적합성 개념이 없어 null로 내려온다. */
   contentRelevanceScore: number | null;
   grammarVocabulary: string;
@@ -262,6 +276,18 @@ export interface ExamCorrectionItem {
   severity: string;
 }
 
+/**
+ * Azure Pronunciation Assessment 세부 지표(0~100점). completeness는 Part 1(낭독)에만
+ * 의미가 있어 파트 2 이후 화면에서는 값이 있어도 표시하지 않는다 —
+ * src/components/exam/exam-question-feedback-screen.tsx 참고.
+ */
+export interface ExamDetailedScores {
+  accuracyScore: number | null;
+  fluencyScore: number | null;
+  completenessScore: number | null;
+  prosodyScore: number | null;
+}
+
 export interface ExamQuestionFeedback {
   summary: string;
   level: string;
@@ -270,7 +296,7 @@ export interface ExamQuestionFeedback {
   pronunciation: string;
   fluency: string;
   content: string;
-  pronunciationFluencyScore: number;
+  detailedScores: ExamDetailedScores;
   contentRelevanceScore: number | null;
   grammarVocabulary: string;
   actionItems: string[];

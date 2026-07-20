@@ -42,8 +42,13 @@ function clampPercent(ratio: number): number {
   return Math.min(100, Math.max(0, ratio * 100));
 }
 
-/** pronunciationFluencyScore는 100점 만점으로 내려온다. */
-const PRONUNCIATION_FLUENCY_MAX = 100;
+/** score가 null이면(미채점) ratio도 null로 흘려보내 ScoreCircleStat이 플레이스홀더를 그리게 한다. */
+function toRatio(score: number | null, max: number): number | null {
+  return score === null ? null : score / max;
+}
+
+/** detailedScores(정확도/유창성/완전성/운율)는 100점 만점으로 내려온다. */
+const DETAILED_SCORE_MAX = 100;
 
 /** contentRelevanceScore의 만점은 파트마다 다르다 (Part 1은 채점 대상이 아니라 null로 내려옴). */
 const CONTENT_RELEVANCE_MAX: Record<number, number> = {
@@ -172,7 +177,8 @@ function ScoreCircleStat({
   labelClassName = "text-xs font-semibold text-zinc-500 lg:text-sm",
 }: {
   label: string;
-  ratio: number;
+  /** null이면 미채점 상태로, 대시(—)와 함께 "(미채점)" 라벨을 붙인 플레이스홀더를 그린다. */
+  ratio: number | null;
   size?: number;
   strokeWidth?: number;
   trackClassName?: string;
@@ -180,6 +186,27 @@ function ScoreCircleStat({
   valueClassName?: string;
   labelClassName?: string;
 }) {
+  if (ratio === null) {
+    return (
+      <div className="flex flex-col items-center gap-1.5">
+        <div
+          className="relative flex items-center justify-center"
+          style={{ width: size, height: size }}
+        >
+          <ScoreRing
+            percent={0}
+            size={size}
+            strokeWidth={strokeWidth}
+            trackClassName={trackClassName}
+            progressClassName={progressClassName}
+          />
+          <span className="absolute text-sm font-bold text-white/40">—</span>
+        </div>
+        <span className={labelClassName}>{label} (미채점)</span>
+      </div>
+    );
+  }
+
   const percent = clampPercent(ratio);
 
   return (
@@ -575,16 +602,16 @@ export function ExamQuestionFeedbackScreen({
                 onClick={toggleShowSubScores}
                 aria-pressed={showSubScores}
                 aria-label="전체 점수로 보기"
-                className={`col-start-1 row-start-1 flex cursor-pointer flex-col items-center gap-3 outline-none focus-visible:ring-2 focus-visible:ring-amber-300 sm:flex-row sm:gap-4 ${
+                className={`col-start-1 row-start-1 flex cursor-pointer flex-wrap items-center justify-center gap-3 outline-none focus-visible:ring-2 focus-visible:ring-amber-300 sm:gap-4 ${
                   showSubScores ? "" : "invisible"
                 }`}
               >
                 <ScoreCircleStat
-                  label="발음 & 유창성"
-                  ratio={
-                    detail.feedback.pronunciationFluencyScore /
-                    PRONUNCIATION_FLUENCY_MAX
-                  }
+                  label="발음 정확도"
+                  ratio={toRatio(
+                    detail.feedback.detailedScores.accuracyScore,
+                    DETAILED_SCORE_MAX,
+                  )}
                   size={96}
                   strokeWidth={9}
                   trackClassName="stroke-white/15"
@@ -592,43 +619,63 @@ export function ExamQuestionFeedbackScreen({
                   valueClassName="absolute text-sm font-bold text-amber-50"
                   labelClassName="w-20 text-center text-[11px] leading-tight font-semibold text-white/60"
                 />
-                {detail.partNumber !== 1 &&
-                  (detail.feedback.contentRelevanceScore === null ? (
-                    <div className="flex flex-col items-center gap-1.5">
-                      <div
-                        className="relative flex items-center justify-center"
-                        style={{ width: 96, height: 96 }}
-                      >
-                        <ScoreRing
-                          percent={0}
-                          size={96}
-                          strokeWidth={9}
-                          trackClassName="stroke-white/15"
-                          progressClassName="stroke-amber-300"
-                        />
-                        <span className="absolute text-sm font-bold text-white/40">
-                          —
-                        </span>
-                      </div>
-                      <span className="w-20 text-center text-[11px] leading-tight font-semibold text-white/60">
-                        내용 적합성 (미채점)
-                      </span>
-                    </div>
-                  ) : (
-                    <ScoreCircleStat
-                      label="내용 적합성"
-                      ratio={
-                        detail.feedback.contentRelevanceScore /
-                        CONTENT_RELEVANCE_MAX[detail.partNumber]
-                      }
-                      size={96}
-                      strokeWidth={9}
-                      trackClassName="stroke-white/15"
-                      progressClassName="stroke-amber-300"
-                      valueClassName="absolute text-sm font-bold text-amber-50"
-                      labelClassName="w-20 text-center text-[11px] leading-tight font-semibold text-white/60"
-                    />
-                  ))}
+                <ScoreCircleStat
+                  label="유창성"
+                  ratio={toRatio(
+                    detail.feedback.detailedScores.fluencyScore,
+                    DETAILED_SCORE_MAX,
+                  )}
+                  size={96}
+                  strokeWidth={9}
+                  trackClassName="stroke-white/15"
+                  progressClassName="stroke-amber-300"
+                  valueClassName="absolute text-sm font-bold text-amber-50"
+                  labelClassName="w-20 text-center text-[11px] leading-tight font-semibold text-white/60"
+                />
+                <ScoreCircleStat
+                  label="억양·강세"
+                  ratio={toRatio(
+                    detail.feedback.detailedScores.prosodyScore,
+                    DETAILED_SCORE_MAX,
+                  )}
+                  size={96}
+                  strokeWidth={9}
+                  trackClassName="stroke-white/15"
+                  progressClassName="stroke-amber-300"
+                  valueClassName="absolute text-sm font-bold text-amber-50"
+                  labelClassName="w-20 text-center text-[11px] leading-tight font-semibold text-white/60"
+                />
+                {/* completeness(완전성)는 Part 1(낭독)에만 의미가 있는 지표라 파트 2 이후에는
+                    보여주지 않고, 대신 이 화면의 다른 지표인 내용 적합성을 보여준다. */}
+                {detail.partNumber === 1 ? (
+                  <ScoreCircleStat
+                    label="완전성"
+                    ratio={toRatio(
+                      detail.feedback.detailedScores.completenessScore,
+                      DETAILED_SCORE_MAX,
+                    )}
+                    size={96}
+                    strokeWidth={9}
+                    trackClassName="stroke-white/15"
+                    progressClassName="stroke-amber-300"
+                    valueClassName="absolute text-sm font-bold text-amber-50"
+                    labelClassName="w-20 text-center text-[11px] leading-tight font-semibold text-white/60"
+                  />
+                ) : (
+                  <ScoreCircleStat
+                    label="내용 적합성"
+                    ratio={toRatio(
+                      detail.feedback.contentRelevanceScore,
+                      CONTENT_RELEVANCE_MAX[detail.partNumber],
+                    )}
+                    size={96}
+                    strokeWidth={9}
+                    trackClassName="stroke-white/15"
+                    progressClassName="stroke-amber-300"
+                    valueClassName="absolute text-sm font-bold text-amber-50"
+                    labelClassName="w-20 text-center text-[11px] leading-tight font-semibold text-white/60"
+                  />
+                )}
               </button>
             </div>
 
