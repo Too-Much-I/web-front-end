@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -42,15 +43,21 @@ export default function Home() {
         </ExamStartButton>
       </header>
 
-      <main className="mx-auto flex w-full max-w-6xl flex-col items-center gap-10 px-6 pt-10 pb-20 lg:max-w-7xl lg:flex-row lg:items-center lg:gap-8 xl:gap-10 2xl:max-w-[100rem] 2xl:gap-12">
+      <main className="mx-auto flex w-full max-w-6xl flex-col items-center gap-10 px-6 pt-10 pb-12 lg:max-w-7xl lg:flex-row lg:items-center lg:gap-8 xl:gap-10 2xl:max-w-[100rem] 2xl:gap-12">
         <div className="flex flex-col items-center gap-6 text-center lg:w-1/2 lg:items-start lg:text-left">
-          <h1 className="max-w-xl text-3xl leading-tight font-bold tracking-tight text-zinc-900 sm:text-4xl lg:text-5xl xl:max-w-3xl 2xl:max-w-4xl 2xl:text-6xl">
-            토익 스피킹, 시험 보기 전에 <br className="hidden sm:block" />{" "}
-            <span className="text-orange-500">내 점수</span>부터 확인하세요
-          </h1>
+          <div className="flex flex-col items-center gap-2 lg:items-start">
+            <p className="text-sm font-semibold tracking-wide text-orange-600 sm:text-base lg:text-lg">
+              토익 스피킹 AI 모의고사
+            </p>
+            <h1 className="max-w-xl text-3xl leading-tight font-bold tracking-tight text-zinc-900 sm:text-4xl lg:text-5xl xl:max-w-3xl 2xl:max-w-4xl 2xl:text-6xl">
+              응시료 84,000원 내기 전에 <br className="hidden sm:block" />{" "}
+              <span className="text-orange-500">내 등급</span>부터 확인하세요
+            </h1>
+          </div>
           <p className="max-w-lg text-base leading-relaxed text-zinc-500 sm:text-lg lg:max-w-xl lg:text-xl">
-            실제 시험처럼 모의고사를 보고 나면, 토선생 AI가 공식 채점 기준으로
-            점수와 감점 이유를 바로 알려드려요.
+            지금 내 실력은 IH일까, AL까지는 몇 점 남았을까요? 실제 시험처럼
+            모의고사를 보고 나면, 토선생 AI가 공식 채점 기준으로 점수와 감점
+            이유를 바로 알려드려요.
           </p>
           <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-zinc-600 lg:justify-start lg:text-base">
             <li className="flex items-center gap-1.5">
@@ -85,6 +92,17 @@ export default function Home() {
           <HeroVideo />
         </div>
       </main>
+
+      <ScrollToSectionLink
+        targetId="service-intro"
+        className="mx-auto flex flex-col items-center gap-1 pb-4 text-sm font-medium text-zinc-400 transition-colors hover:text-orange-500 lg:text-base"
+      >
+        실제 채점 리포트 미리 보기
+        <ChevronDown
+          className="size-5 animate-bounce motion-reduce:animate-none"
+          aria-hidden
+        />
+      </ScrollToSectionLink>
 
       <PhoneDemo />
 

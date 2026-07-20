@@ -25,13 +25,7 @@ export function HeroVideo() {
   }, []);
 
   return (
-    <video
-      ref={videoRef}
-      loop
-      muted
-      playsInline
-      className="w-full"
-    >
+    <video ref={videoRef} loop muted playsInline className="w-full">
       <source src="/hero/speaking.webm" type="video/webm" />
       <source src="/hero/speaking.mp4" type="video/mp4" />
     </video>
