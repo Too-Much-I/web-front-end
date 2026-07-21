@@ -78,14 +78,3 @@ export function getExamPartTiming(
       return { prepTimeSec: 30, speakTimeSec: 30 };
   }
 }
-
-/** questionNumber만으로 파트 내 몇 번째 문제인지 판별해 타이밍을 계산한다. */
-export function getExamPartTimingByQuestionNumber(
-  partNumber: number,
-  questionNumber: number,
-): ExamPartTiming {
-  const questionNumbers = getExamPartQuestionNumbers(partNumber);
-  const isLastInPart =
-    questionNumbers[questionNumbers.length - 1] === questionNumber;
-  return getExamPartTiming(partNumber, isLastInPart);
-}
