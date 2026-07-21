@@ -297,6 +297,12 @@ function ExamModelAnswerTab({ feedback }: { feedback: ExamQuestionFeedback }) {
           </button>
         </div>
       )}
+      {hasModel && hasRecommended && (
+        <p className={`${jua.className} text-sm text-orange-500 lg:text-base`}>
+          모범답안은 문제에 맞춰 미리 준비된 예시 답변이고, 추천답안은 내가
+          답변한 내용을 다듬어 만든 답변이에요.
+        </p>
+      )}
       <div className="flex items-end gap-3">
         <div className="relative h-20 w-20 shrink-0 sm:h-24 sm:w-24">
           <Image
