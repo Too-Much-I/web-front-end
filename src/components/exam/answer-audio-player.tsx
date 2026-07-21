@@ -36,6 +36,9 @@ function resolveAudioDuration(
   isFixingDurationRef: RefObject<boolean>,
   setDuration: (seconds: number) => void,
 ) {
+  // onLoadedMetadata와 마운트 시 readyState 체크가 거의 동시에 이 함수를 부를 수 있어,
+  // 이미 seek 우회가 진행 중이면 재진입해 timeupdate 리스너를 중복 등록하지 않도록 막는다.
+  if (isFixingDurationRef.current) return;
   if (Number.isFinite(audio.duration)) {
     setDuration(audio.duration);
     return;
