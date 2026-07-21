@@ -31,7 +31,6 @@ import {
   getExamPartMeta,
   getExamPartNumberByQuestionNumber,
   getExamPartQuestionNumbers,
-  getExamPartTimingByQuestionNumber,
 } from "@/features/exam/part-meta";
 import { useReanswerSubmission } from "@/features/exam/use-reanswer-submission";
 import { useRevealOnScroll } from "@/features/exam/use-reveal-on-scroll";
@@ -362,10 +361,6 @@ export function ExamQuestionFeedbackScreen({
   const mascot = isAboveHalf
     ? { src: "/mascots/good_rabbit.png", alt: "만족스러워하는 토끼 캐릭터" }
     : { src: "/mascots/hmm_rabbit.png", alt: "고민하는 토끼 캐릭터" };
-  const { speakTimeSec } = getExamPartTimingByQuestionNumber(
-    detail.partNumber,
-    detail.questionNumber,
-  );
   const [isBetaTooltipOpen, setIsBetaTooltipOpen] = useState(false);
   const [answerPlaybackTime, setAnswerPlaybackTime] = useState(0);
   const [showSubScores, setShowSubScores] = useState(false);
@@ -766,7 +761,6 @@ export function ExamQuestionFeedbackScreen({
                     <AnswerAudioPlayer
                       ref={audioPlayerRef}
                       audioUrl={detail.audioUrl}
-                      durationSec={speakTimeSec}
                       onTimeUpdate={setAnswerPlaybackTime}
                       compact
                     />

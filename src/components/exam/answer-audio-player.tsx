@@ -4,6 +4,7 @@ import { ChevronDown, Pause, Play } from "lucide-react";
 import Image from "next/image";
 import {
   type Ref,
+  type RefObject,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -21,6 +22,37 @@ const MIN_BAR_COUNT = 12;
 const RABBIT_SIZE_RATIO = 0.14;
 const MIN_RABBIT_SIZE_PX = 32;
 const MAX_RABBIT_SIZE_PX = 68;
+/** compact(스크립트와 한 줄로 묶인) 레이아웃에서는 트랙 높이가 낮아 같은 비율을 쓰면 넘치므로 별도 상한선을 둔다. */
+const COMPACT_RABBIT_SIZE_RATIO = 0.16;
+const MIN_COMPACT_RABBIT_SIZE_PX = 28;
+const MAX_COMPACT_RABBIT_SIZE_PX = 48;
+
+/**
+ * `<audio>`의 duration을 읽어 콜백에 반영한다. MediaRecorder(webm/opus 등)로 만든 오디오는
+ * Chrome에서 duration이 Infinity로 잡히는 알려진 버그가 있어, 끝으로 seek했다가 되돌려 실제 길이를 다시 계산시킨다.
+ */
+function resolveAudioDuration(
+  audio: HTMLAudioElement,
+  isFixingDurationRef: RefObject<boolean>,
+  setDuration: (seconds: number) => void,
+) {
+  // onLoadedMetadata와 마운트 시 readyState 체크가 거의 동시에 이 함수를 부를 수 있어,
+  // 이미 seek 우회가 진행 중이면 재진입해 timeupdate 리스너를 중복 등록하지 않도록 막는다.
+  if (isFixingDurationRef.current) return;
+  if (Number.isFinite(audio.duration)) {
+    setDuration(audio.duration);
+    return;
+  }
+  isFixingDurationRef.current = true;
+  audio.currentTime = 1e101;
+  const handleTimeUpdate = () => {
+    audio.removeEventListener("timeupdate", handleTimeUpdate);
+    audio.currentTime = 0;
+    isFixingDurationRef.current = false;
+    if (Number.isFinite(audio.duration)) setDuration(audio.duration);
+  };
+  audio.addEventListener("timeupdate", handleTimeUpdate);
+}
 
 function resamplePeaks(rawPeaks: number[], targetCount: number): number[] {
   if (targetCount <= 0 || rawPeaks.length === 0) return [];
@@ -90,32 +122,33 @@ export interface AnswerAudioPlayerHandle {
 }
 
 /**
- * 답변 녹음(내 발화) 재생 플레이어. 답변 시간은 문제별로 고정된 값(`durationSec`, TOEIC Speaking
- * 정규 시험 구성 기준)을 그대로 총 길이로 쓴다 — 실제 배포 전 제거될 QA 이동 바로 답변을 중간에
- * 끊지 않는 한, 녹음 파일은 항상 정확히 이 길이만큼 캡처되기 때문이다. `<audio>`의 duration을
- * 직접 읽는 방식은 (1) MediaRecorder 녹음 파일에서 흔한 Chrome의 duration=Infinity 버그,
+ * 답변 녹음(내 발화) 재생 플레이어. 재생시간은 `<audio>`에서 실제 파일 길이를 직접 읽어 쓴다 —
+ * 답변 조기 제출(`handleEarlySubmit`, exam-session-screen.tsx)이 가능해지면서 녹음 파일이
+ * 문제별 고정 답변 시간(speakTimeSec)보다 짧게 캡처될 수 있어, 고정값을 쓰면 실제 파일보다
+ * 길게 표시되고 말하는 토끼가 파형 끝에 닿지 못하는 문제가 있었다. `<audio>`의 duration을
+ * 직접 읽을 때는 두 가지를 우회해야 한다: (1) MediaRecorder 녹음 파일에서 흔한 Chrome의
+ * duration=Infinity 버그 — 끝으로 seek했다가 되돌려 재계산시킨다(`resolveAudioDuration`).
  * (2) SSR로 렌더된 <audio>가 하이드레이션 전부터 로드를 시작해 loadedmetadata 리스너 연결 전에
- * 이벤트가 지나가버리는 레이스 — 이 두 가지를 다 우회해야 해서 이 고정값 방식으로 바꿨다.
+ * 이벤트가 지나가버리는 레이스 — 마운트 시 `readyState`를 직접 확인해 우회한다.
  * 자세한 배경은 docs/answer-audio-player-duration-fix.md 참고.
  */
 export function AnswerAudioPlayer({
   audioUrl,
-  durationSec,
   onTimeUpdate,
   compact = false,
   ref,
 }: {
   audioUrl: string;
-  durationSec: number;
   /** 재생 위치가 바뀔 때마다(초 단위) 호출된다 — 스크립트 단어 하이라이트 등 재생 위치 동기화용. */
   onTimeUpdate?: (seconds: number) => void;
-  /** 스크립트와 한 카드에 묶어 쓸 때 — 배경 박스 없이 얇은 한 줄 컨트롤로 줄이고 말하는 토끼 장식을 뺀다. */
+  /** 스크립트와 한 카드에 묶어 쓸 때 — 배경 박스 없이 얇은 한 줄 컨트롤로 줄인다. */
   compact?: boolean;
   ref?: Ref<AnswerAudioPlayerHandle>;
 }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const rateMenuRef = useRef<HTMLDivElement>(null);
   const waveformRef = useRef<HTMLButtonElement>(null);
+  const isFixingDurationRef = useRef(false);
 
   useImperativeHandle(ref, () => ({
     seekTo(seconds: number) {
@@ -128,6 +161,7 @@ export function AnswerAudioPlayer({
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [isRateMenuOpen, setIsRateMenuOpen] = useState(false);
   const [peaks, setPeaks] = useState<number[] | null>(null);
@@ -174,6 +208,15 @@ export function AnswerAudioPlayer({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isRateMenuOpen]);
 
+  useEffect(() => {
+    const audio = audioRef.current;
+    // 서버 렌더링된 <audio src>는 하이드레이션 전부터 로드가 시작되므로, loadedmetadata가
+    // React 리스너 연결 전에 이미 발생해 있을 수 있다. 마운트 시점에 한 번 직접 확인한다.
+    if (audio && audio.readyState >= 1) {
+      resolveAudioDuration(audio, isFixingDurationRef, setDuration);
+    }
+  }, []);
+
   function handleTogglePlay() {
     const audio = audioRef.current;
     if (!audio) return;
@@ -183,22 +226,25 @@ export function AnswerAudioPlayer({
 
   function handleSeek(e: React.MouseEvent<HTMLButtonElement>) {
     const audio = audioRef.current;
-    if (!audio || !durationSec) return;
+    if (!audio || !duration) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const ratio = Math.min(
       1,
       Math.max(0, (e.clientX - rect.left) / rect.width),
     );
-    audio.currentTime = ratio * durationSec;
+    audio.currentTime = ratio * duration;
   }
 
   const progressRatio =
-    durationSec > 0 ? Math.min(1, Math.max(0, currentTime / durationSec)) : 0;
+    duration > 0 ? Math.min(1, Math.max(0, currentTime / duration)) : 0;
   const bars = resamplePeaks(peaks ?? FALLBACK_RAW_PEAKS, barCount);
   const rabbitSize = Math.round(
     Math.min(
-      MAX_RABBIT_SIZE_PX,
-      Math.max(MIN_RABBIT_SIZE_PX, trackWidth * RABBIT_SIZE_RATIO),
+      compact ? MAX_COMPACT_RABBIT_SIZE_PX : MAX_RABBIT_SIZE_PX,
+      Math.max(
+        compact ? MIN_COMPACT_RABBIT_SIZE_PX : MIN_RABBIT_SIZE_PX,
+        trackWidth * (compact ? COMPACT_RABBIT_SIZE_RATIO : RABBIT_SIZE_RATIO),
+      ),
     ),
   );
 
@@ -220,7 +266,15 @@ export function AnswerAudioPlayer({
           setIsPlaying(false);
           onTimeUpdate?.(Number.NaN);
         }}
+        onLoadedMetadata={(e) =>
+          resolveAudioDuration(e.currentTarget, isFixingDurationRef, setDuration)
+        }
+        onDurationChange={(e) => {
+          const d = e.currentTarget.duration;
+          if (Number.isFinite(d)) setDuration(d);
+        }}
         onTimeUpdate={(e) => {
+          if (isFixingDurationRef.current) return;
           setCurrentTime(e.currentTarget.currentTime);
           onTimeUpdate?.(e.currentTarget.currentTime);
         }}
@@ -271,7 +325,7 @@ export function AnswerAudioPlayer({
           })}
         </button>
 
-        {!compact && currentTime > 0 && (
+        {currentTime > 0 && (
           <Image
             src="/mascots/speaking_rabbit_v2.png"
             alt="말하는 토끼 캐릭터"
@@ -289,7 +343,7 @@ export function AnswerAudioPlayer({
       <span
         className={`shrink-0 text-zinc-400 tabular-nums ${compact ? "text-[11px]" : "text-xs"}`}
       >
-        {formatTime(currentTime)} / {formatTime(durationSec)}
+        {formatTime(currentTime)} / {formatTime(duration)}
       </span>
 
       <div ref={rateMenuRef} className="relative shrink-0">
