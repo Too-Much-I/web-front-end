@@ -8,8 +8,8 @@ import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 /**
- * 시험 세션 진입 직전, 실제 시험 화면을 축소한 목업으로 진행 방식을 단계별로 설명하는
- * 튜토리얼 패널. 경험자는 인트로에서 바로 건너뛸 수 있다.
+ * 준비 흐름 맨 앞(동의/마이크/사운드 체크보다 먼저)에서, 실제 시험 화면을 축소한 목업으로
+ * 진행 방식을 단계별로 설명하는 튜토리얼 패널. 경험자는 인트로에서 바로 건너뛸 수 있다.
  *
  * 목업의 타이머/인디케이터/버튼은 exam-session-screen.tsx의 실제 UI를 축소 재현한
  * 것이므로, 시험 화면 쪽 디자인이 바뀌면 여기도 함께 맞춰야 한다.
@@ -75,7 +75,15 @@ function MockFrame({
   );
 }
 
-function MockTimer({ label, value, red = false }: { label: string; value: string; red?: boolean }) {
+function MockTimer({
+  label,
+  value,
+  red = false,
+}: {
+  label: string;
+  value: string;
+  red?: boolean;
+}) {
   return (
     <div className="flex flex-col items-center">
       <span className="w-36 rounded-t-md bg-blue-950 py-1 text-center text-[8px] font-extrabold tracking-widest text-white">
@@ -129,7 +137,13 @@ function MockIndicator({
   );
 }
 
-function MockPillButton({ children, highlight = false }: { children: ReactNode; highlight?: boolean }) {
+function MockPillButton({
+  children,
+  highlight = false,
+}: {
+  children: ReactNode;
+  highlight?: boolean;
+}) {
   return (
     <span
       className={cn(
@@ -164,10 +178,14 @@ const FULL_TUTORIAL_STEPS: TutorialStep[] = [
       "전체 시험은 5개 파트, 약 20분이에요. 지금 몇 번째 문제인지는 화면 위에서 늘 확인할 수 있어요.",
     tip: "다음 문제로 자동으로 넘어가고, 뒤로 갈 수 없어요.",
     mock: (
-      <MockFrame qnum="Question 3 of 11" badge="Part 2 · Describe a Picture" highlightQnum>
+      <MockFrame
+        qnum="Question 3 of 11"
+        badge="Part 2 · Describe a Picture"
+        highlightQnum
+      >
         <MockText>
-          In the picture, I can see a busy outdoor market with several vendors selling fresh
-          fruits and vegetables…
+          In the picture, I can see a busy outdoor market with several vendors
+          selling fresh fruits and vegetables…
         </MockText>
         <MockTimer label="PREPARATION TIME" value="00:45" />
       </MockFrame>
@@ -180,8 +198,8 @@ const FULL_TUTORIAL_STEPS: TutorialStep[] = [
     mock: (
       <MockFrame qnum="Question 5 of 11" badge="Part 3 · Respond to Questions">
         <MockText>
-          Imagine that a marketing firm is doing research in your area. You have agreed to
-          answer some questions about shopping.
+          Imagine that a marketing firm is doing research in your area. You have
+          agreed to answer some questions about shopping.
         </MockText>
         <MockIndicator color="blue" text="질문을 듣고 있어요" highlight />
       </MockFrame>
@@ -194,7 +212,9 @@ const FULL_TUTORIAL_STEPS: TutorialStep[] = [
     mock: (
       <MockFrame qnum="Question 5 of 11" badge="Part 3 · Respond to Questions">
         <MockTimer label="PREPARATION TIME" value="00:23" />
-        <span className="text-[9px] text-zinc-500">곧 답변 시간이 시작돼요.</span>
+        <span className="text-[9px] text-zinc-500">
+          곧 답변 시간이 시작돼요.
+        </span>
         <MockPillButton highlight>준비 완료, 바로 답변 시작하기</MockPillButton>
       </MockFrame>
     ),
@@ -225,11 +245,15 @@ const FULL_TUTORIAL_STEPS: TutorialStep[] = [
     description:
       "중간에 그만둬야 한다면 '중단하기'를 누르세요. 그때까지 푼 문제는 그대로 채점해 드려요.",
     mock: (
-      <MockFrame qnum="Question 7 of 11" badge="Part 4 · Respond Using Information" highlightStop>
+      <MockFrame
+        qnum="Question 7 of 11"
+        badge="Part 4 · Respond Using Information"
+        highlightStop
+      >
         <MockTimer label="PREPARATION TIME" value="00:03" />
         <p className="max-w-48 text-center text-[8px] leading-relaxed text-zinc-400">
-          다음 문제로 자동으로 전환되며 뒤로 갈 수 없어요. 중단하기를 누르면 지금까지 응시한
-          문제까지 채점 결과를 받을 수 있어요.
+          다음 문제로 자동으로 전환되며 뒤로 갈 수 없어요. 중단하기를 누르면
+          지금까지 응시한 문제까지 채점 결과를 받을 수 있어요.
         </p>
       </MockFrame>
     ),
@@ -245,10 +269,15 @@ const TRIAL_TUTORIAL_STEPS: TutorialStep[] = [
       "맛보기는 약 1분이에요. 실제 시험(5개 파트, 11문항)의 첫 문제 유형을 그대로 체험해요.",
     tip: "끝나면 바로 채점 결과와 피드백을 확인할 수 있어요.",
     mock: (
-      <MockFrame qnum="Question 1 of 1" badge="Part 1 · Read a Text Aloud" highlightQnum showStop={false}>
+      <MockFrame
+        qnum="Question 1 of 1"
+        badge="Part 1 · Read a Text Aloud"
+        highlightQnum
+        showStop={false}
+      >
         <MockText>
-          Welcome aboard Flight 207 to Chicago. In a few minutes, our crew will begin the
-          in-flight service with drinks, snacks, and magazines…
+          Welcome aboard Flight 207 to Chicago. In a few minutes, our crew will
+          begin the in-flight service with drinks, snacks, and magazines…
         </MockText>
         <MockTimer label="PREPARATION TIME" value="00:45" />
       </MockFrame>
@@ -259,19 +288,30 @@ const TRIAL_TUTORIAL_STEPS: TutorialStep[] = [
     description: "PREPARATION TIME 동안 화면의 지문을 눈으로 미리 읽어봐요.",
     tip: "준비가 일찍 끝났다면 버튼으로 바로 시작할 수 있어요.",
     mock: (
-      <MockFrame qnum="Question 1 of 1" badge="Part 1 · Read a Text Aloud" showStop={false}>
+      <MockFrame
+        qnum="Question 1 of 1"
+        badge="Part 1 · Read a Text Aloud"
+        showStop={false}
+      >
         <MockTimer label="PREPARATION TIME" value="00:23" />
-        <span className="text-[9px] text-zinc-500">곧 답변 시간이 시작돼요.</span>
+        <span className="text-[9px] text-zinc-500">
+          곧 답변 시간이 시작돼요.
+        </span>
         <MockPillButton highlight>준비 완료, 바로 답변 시작하기</MockPillButton>
       </MockFrame>
     ),
   },
   {
     title: "빨간 타이머가 켜지면 녹음 중이에요",
-    description: "지문을 소리 내어 읽어주세요. 시간이 끝나면 자동으로 제출돼요.",
+    description:
+      "지문을 소리 내어 읽어주세요. 시간이 끝나면 자동으로 제출돼요.",
     tip: "낭독을 일찍 마쳤다면 '답변 완료' 버튼으로 바로 제출할 수 있어요.",
     mock: (
-      <MockFrame qnum="Question 1 of 1" badge="Part 1 · Read a Text Aloud" showStop={false}>
+      <MockFrame
+        qnum="Question 1 of 1"
+        badge="Part 1 · Read a Text Aloud"
+        showStop={false}
+      >
         <MockTimer label="RESPONSE TIME" value="00:12" red />
         <MockIndicator color="red" text="답변을 녹음하고 있어요" />
         <div className="flex h-5 items-center gap-[3px]">
@@ -305,7 +345,8 @@ export function ExamTutorialPanel({
   onFinish: () => void;
 }) {
   const [stage, setStage] = useState<Stage>("intro");
-  const steps = examMode === "trial" ? TRIAL_TUTORIAL_STEPS : FULL_TUTORIAL_STEPS;
+  const steps =
+    examMode === "trial" ? TRIAL_TUTORIAL_STEPS : FULL_TUTORIAL_STEPS;
 
   const handleStart = () => {
     if (!isReview) trackEvent("tutorial_start", { exam_mode: examMode });
@@ -341,7 +382,9 @@ export function ExamTutorialPanel({
             priority
           />
           <div className="flex flex-col gap-1">
-            <p className="text-lg font-bold text-blue-950">토익 스피킹이 처음이신가요?</p>
+            <p className="text-lg font-bold text-blue-950">
+              토익 스피킹이 처음이신가요?
+            </p>
             <p className="mt-1 text-sm text-zinc-500">
               30초면 충분해요. 실제 시험 화면으로
               <br className="hidden sm:block" /> 진행 방식을 미리 보여드릴게요.
@@ -418,7 +461,9 @@ export function ExamTutorialPanel({
                   onClick={() => setStage(i)}
                   className={cn(
                     "h-2 rounded-full transition-all",
-                    i === stage ? "w-5 bg-orange-500" : "w-2 bg-zinc-200 hover:bg-zinc-300",
+                    i === stage
+                      ? "w-5 bg-orange-500"
+                      : "w-2 bg-zinc-200 hover:bg-zinc-300",
                   )}
                 />
               ))}
@@ -443,8 +488,10 @@ export function ExamTutorialPanel({
             className="w-28 sm:w-32"
           />
           <div className="flex flex-col gap-1">
-            <h2 className="text-base font-bold text-orange-500">준비 끝!</h2>
-            <p className="text-lg font-bold text-blue-950">이제 시작해 볼까요?</p>
+            <h2 className="text-base font-bold text-orange-500">좋아요!</h2>
+            <p className="text-lg font-bold text-blue-950">
+              이제 시험 볼 준비를 마쳐볼까요?
+            </p>
           </div>
           <Button
             size="lg"

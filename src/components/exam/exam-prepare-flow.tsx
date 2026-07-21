@@ -19,9 +19,9 @@ import { cn } from "@/lib/utils";
 type PrepareDialogStep = "consent" | "mic" | "sound" | "tutorial" | null;
 
 /** 다이얼로그가 실제로 진행하는 순서. 상단 진행 표시와 "몇 걸음 남았는지" 계산에 쓴다. */
-const PREPARE_FLOW_STEPS = ["consent", "mic", "sound", "tutorial"] as const;
+const PREPARE_FLOW_STEPS = ["tutorial", "consent", "mic", "sound"] as const;
 
-/** 동의 → 마이크 → 사운드 → 튜토리얼로 이어지는 흐름의 현재 위치를 점으로 보여준다. */
+/** 튜토리얼(최초 1회) → 동의 → 마이크 → 사운드로 이어지는 흐름의 현재 위치를 점으로 보여준다. */
 function PrepareStepProgress({
   current,
 }: {
@@ -87,7 +87,7 @@ export function ExamPrepareFlow() {
             {isTrial ? "맛보기" : "notification"}
           </Badge>
 
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2.5">
             <h1 className="text-2xl font-bold text-zinc-900 lg:text-3xl xl:text-4xl">
               TOEIC® Speaking Mock Exam
             </h1>
@@ -96,6 +96,20 @@ export function ExamPrepareFlow() {
                 ? "Part 1 - 1번 문제만 짧게 풀어보는 맛보기예요"
                 : "토익 스피킹 실전 모의고사"}
             </p>
+            <button
+              type="button"
+              onClick={() => {
+                setIsTutorialReview(true);
+                setDialogStep("tutorial");
+              }}
+              className="flex w-fit items-center gap-1.5 rounded-full border border-orange-200 bg-orange-50 py-1 pr-3 pl-2 text-xs font-semibold text-orange-600 transition-colors hover:bg-orange-100 lg:text-sm"
+            >
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-orange-400 opacity-75 motion-reduce:hidden" />
+                <span className="relative inline-flex size-2 rounded-full bg-orange-500" />
+              </span>
+              시험 진행 방식 미리 보기
+            </button>
           </div>
 
           <Separator />
@@ -144,22 +158,18 @@ export function ExamPrepareFlow() {
 
           <Button
             size="lg"
-            onClick={() => setDialogStep("consent")}
+            onClick={() => {
+              setIsTutorialReview(false);
+              setDialogStep(
+                localStorage.getItem(TUTORIAL_SEEN_KEY)
+                  ? "consent"
+                  : "tutorial",
+              );
+            }}
             className="mt-auto h-12 w-full rounded-full bg-orange-500 text-white hover:bg-orange-600 lg:h-14 lg:text-lg"
           >
-            다음 (마이크 테스트)
+            다음
           </Button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setIsTutorialReview(true);
-              setDialogStep("tutorial");
-            }}
-            className="mx-auto -mt-2 text-sm text-zinc-400 underline underline-offset-2 hover:text-orange-600"
-          >
-            시험 진행 방식 미리 보기
-          </button>
         </section>
       </div>
 
@@ -196,14 +206,9 @@ export function ExamPrepareFlow() {
               <SoundCheckPanel
                 onCompleted={() => {
                   trackEvent("sound_check_complete", { exam_mode: examMode });
-                  if (localStorage.getItem(TUTORIAL_SEEN_KEY)) {
-                    router.push(
-                      isTrial ? "/exam/session?mode=trial" : "/exam/session",
-                    );
-                    return;
-                  }
-                  setIsTutorialReview(false);
-                  setDialogStep("tutorial");
+                  router.push(
+                    isTrial ? "/exam/session?mode=trial" : "/exam/session",
+                  );
                 }}
               />
             )}
@@ -211,18 +216,14 @@ export function ExamPrepareFlow() {
               <ExamTutorialPanel
                 examMode={examMode}
                 isReview={isTutorialReview}
-                finishLabel={
-                  isTutorialReview ? "확인했어요" : "모의고사 시작하기"
-                }
+                finishLabel={isTutorialReview ? "확인했어요" : "다음 (동의)"}
                 onFinish={() => {
                   localStorage.setItem(TUTORIAL_SEEN_KEY, "true");
                   if (isTutorialReview) {
                     setDialogStep(null);
                     return;
                   }
-                  router.push(
-                    isTrial ? "/exam/session?mode=trial" : "/exam/session",
-                  );
+                  setDialogStep("consent");
                 }}
               />
             )}
