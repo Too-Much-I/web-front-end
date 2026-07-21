@@ -102,12 +102,15 @@ export function AnswerAudioPlayer({
   audioUrl,
   durationSec,
   onTimeUpdate,
+  compact = false,
   ref,
 }: {
   audioUrl: string;
   durationSec: number;
   /** 재생 위치가 바뀔 때마다(초 단위) 호출된다 — 스크립트 단어 하이라이트 등 재생 위치 동기화용. */
   onTimeUpdate?: (seconds: number) => void;
+  /** 스크립트와 한 카드에 묶어 쓸 때 — 배경 박스 없이 얇은 한 줄 컨트롤로 줄이고 말하는 토끼 장식을 뺀다. */
+  compact?: boolean;
   ref?: Ref<AnswerAudioPlayerHandle>;
 }) {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -200,7 +203,13 @@ export function AnswerAudioPlayer({
   );
 
   return (
-    <div className="flex items-center gap-4 rounded-2xl bg-zinc-50 p-4 ring-1 ring-zinc-100">
+    <div
+      className={`flex items-center ${
+        compact
+          ? "gap-3"
+          : "gap-4 rounded-2xl bg-zinc-50 p-4 ring-1 ring-zinc-100"
+      }`}
+    >
       <audio
         ref={audioRef}
         src={audioUrl}
@@ -222,22 +231,30 @@ export function AnswerAudioPlayer({
         type="button"
         onClick={handleTogglePlay}
         aria-label={isPlaying ? "일시정지" : "재생"}
-        className="flex size-11 shrink-0 items-center justify-center rounded-full bg-orange-500 text-white transition-colors hover:bg-orange-600"
+        className={`flex shrink-0 items-center justify-center rounded-full bg-orange-500 text-white transition-colors hover:bg-orange-600 ${
+          compact ? "size-9" : "size-11"
+        }`}
       >
         {isPlaying ? (
-          <Pause className="size-5" fill="currentColor" />
+          <Pause
+            className={compact ? "size-4" : "size-5"}
+            fill="currentColor"
+          />
         ) : (
-          <Play className="size-5 translate-x-0.5" fill="currentColor" />
+          <Play
+            className={`${compact ? "size-4" : "size-5"} translate-x-0.5`}
+            fill="currentColor"
+          />
         )}
       </button>
 
-      <div className="relative h-8 min-w-0 flex-1">
+      <div className={`relative min-w-0 flex-1 ${compact ? "h-5" : "h-8"}`}>
         <button
           ref={waveformRef}
           type="button"
           onClick={handleSeek}
           aria-label="재생 위치 선택"
-          className="flex h-8 w-full items-center gap-[2px]"
+          className={`flex w-full items-center gap-[2px] ${compact ? "h-5" : "h-8"}`}
         >
           {bars.map((peak, i) => {
             const heightPercent = Math.max(12, peak * 100);
@@ -254,7 +271,7 @@ export function AnswerAudioPlayer({
           })}
         </button>
 
-        {currentTime > 0 && (
+        {!compact && currentTime > 0 && (
           <Image
             src="/mascots/speaking_rabbit_v2.png"
             alt="말하는 토끼 캐릭터"
@@ -269,7 +286,9 @@ export function AnswerAudioPlayer({
         )}
       </div>
 
-      <span className="shrink-0 text-xs text-zinc-400 tabular-nums">
+      <span
+        className={`shrink-0 text-zinc-400 tabular-nums ${compact ? "text-[11px]" : "text-xs"}`}
+      >
         {formatTime(currentTime)} / {formatTime(durationSec)}
       </span>
 
@@ -277,10 +296,12 @@ export function AnswerAudioPlayer({
         <button
           type="button"
           onClick={() => setIsRateMenuOpen((v) => !v)}
-          className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-sm font-semibold text-zinc-700 hover:bg-zinc-50"
+          className={`flex items-center gap-1 rounded-lg border border-zinc-200 bg-white font-semibold text-zinc-700 hover:bg-zinc-50 ${
+            compact ? "px-2 py-1 text-xs" : "px-2.5 py-1.5 text-sm"
+          }`}
         >
           {playbackRate.toFixed(1)}x
-          <ChevronDown className="size-3.5" />
+          <ChevronDown className={compact ? "size-3" : "size-3.5"} />
         </button>
 
         {isRateMenuOpen && (

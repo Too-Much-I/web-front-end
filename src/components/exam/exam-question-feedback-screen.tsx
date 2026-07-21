@@ -744,79 +744,75 @@ export function ExamQuestionFeedbackScreen({
           value="my-answer"
           className="mt-6 flex animate-[exam-tab-slide_220ms_ease-out] flex-col gap-6 motion-reduce:animate-none"
         >
-          {(detail.partNumber !== 1 || detail.audioUrl) && (
-            <div
-              className={`grid grid-cols-1 gap-4 lg:gap-6 ${
-                detail.partNumber !== 1 && detail.audioUrl
-                  ? "lg:grid-cols-2"
-                  : ""
-              }`}
-            >
-              {detail.partNumber !== 1 && (
-                <ExamPriorityPanel
-                  correctionItems={detail.feedback.correctionItems}
-                  nextStrategy={detail.feedback.nextStrategy}
-                />
-              )}
+          <div
+            className={`grid grid-cols-1 gap-4 lg:gap-6 ${
+              detail.partNumber !== 1 ? "lg:grid-cols-2" : ""
+            }`}
+          >
+            {detail.partNumber !== 1 && (
+              <ExamPriorityPanel
+                correctionItems={detail.feedback.correctionItems}
+                nextStrategy={detail.feedback.nextStrategy}
+              />
+            )}
+
+            <div className="rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
+              <span
+                className={`${jua.className} text-base text-blue-950 lg:text-lg`}
+              >
+                내 답변
+              </span>
 
               {detail.audioUrl && (
-                <div className="rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
-                  <span
-                    className={`${jua.className} text-base text-blue-950 lg:text-lg`}
-                  >
-                    내 답변 음성
-                  </span>
+                <>
                   <div className="mt-3">
                     <AnswerAudioPlayer
                       ref={audioPlayerRef}
                       audioUrl={detail.audioUrl}
                       durationSec={speakTimeSec}
                       onTimeUpdate={setAnswerPlaybackTime}
+                      compact
                     />
                   </div>
-                </div>
+                  <hr className="mt-4 border-zinc-100" />
+                </>
               )}
-            </div>
-          )}
 
-          {detail.partNumber !== 1 ? (
-            <ExamMarkedTranscript
-              transcript={detail.transcript}
-              correctionItems={detail.feedback.correctionItems}
-            />
-          ) : detail.spokenWordSequence.length > 0 ? (
-            <ExamPronunciationTranscript
-              spokenWordSequence={detail.spokenWordSequence}
-              currentTimeSec={answerPlaybackTime}
-              onWordClick={
-                detail.audioUrl
-                  ? (sec) => audioPlayerRef.current?.seekTo(sec)
-                  : undefined
-              }
-            />
-          ) : (
-            <div className="rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
-              <span
-                className={`${jua.className} text-base text-blue-950 lg:text-lg`}
-              >
-                답변 스크립트
-              </span>
-              <div className="mt-3 flex flex-col items-center justify-center gap-2 rounded-2xl bg-zinc-50 p-6 text-center ring-1 ring-zinc-100">
-                <div className="relative h-16 w-16 shrink-0">
-                  <Image
-                    src="/mascots/hmm_rabbit.png"
-                    alt="응답이 감지되지 않았음을 안내하는 캐릭터"
-                    fill
-                    sizes="64px"
-                    className="object-contain"
+              <div className={detail.audioUrl ? "mt-4" : "mt-3"}>
+                {detail.partNumber !== 1 ? (
+                  <ExamMarkedTranscript
+                    transcript={detail.transcript}
+                    correctionItems={detail.feedback.correctionItems}
                   />
-                </div>
-                <span className="text-sm font-semibold text-zinc-400 lg:text-base">
-                  응답이 감지되지 않았어요
-                </span>
+                ) : detail.spokenWordSequence.length > 0 ? (
+                  <ExamPronunciationTranscript
+                    spokenWordSequence={detail.spokenWordSequence}
+                    currentTimeSec={answerPlaybackTime}
+                    onWordClick={
+                      detail.audioUrl
+                        ? (sec) => audioPlayerRef.current?.seekTo(sec)
+                        : undefined
+                    }
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-2 rounded-2xl bg-zinc-50 p-6 text-center ring-1 ring-zinc-100">
+                    <div className="relative h-16 w-16 shrink-0">
+                      <Image
+                        src="/mascots/hmm_rabbit.png"
+                        alt="응답이 감지되지 않았음을 안내하는 캐릭터"
+                        fill
+                        sizes="64px"
+                        className="object-contain"
+                      />
+                    </div>
+                    <span className="text-sm font-semibold text-zinc-400 lg:text-base">
+                      응답이 감지되지 않았어요
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
-          )}
+          </div>
         </TabsContent>
 
         <TabsContent

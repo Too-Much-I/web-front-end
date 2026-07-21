@@ -154,18 +154,18 @@ export function ExamPronunciationTranscript({
   onWordClick?: (startSec: number) => void;
 }) {
   return (
-    <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
-      <span className={`${jua.className} text-base text-blue-950`}>
-        답변 스크립트
-      </span>
-
+    <>
       {onWordClick && (
-        <p className={`${jua.className} mt-1 text-base text-orange-500`}>
+        <p className={`${jua.className} text-base text-orange-500`}>
           단어를 클릭하면 그 부분부터 다시 들을 수 있어요.
         </p>
       )}
 
-      <div className="relative mt-3 overflow-hidden rounded-2xl bg-[#fdfaf1] pl-12 ring-1 ring-zinc-100">
+      <div
+        className={`relative overflow-hidden rounded-2xl bg-[#fdfaf1] pl-12 ring-1 ring-zinc-100 ${
+          onWordClick ? "mt-3" : ""
+        }`}
+      >
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -209,6 +209,6 @@ export function ExamPronunciationTranscript({
           </span>
         ))}
       </div>
-    </div>
+    </>
   );
 }

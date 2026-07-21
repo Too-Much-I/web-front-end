@@ -263,18 +263,18 @@ export function ExamMarkedTranscript({
   const marked = renderForest(transcript, forest, 0, transcript.length);
 
   return (
-    <div className="mt-6 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100">
-      <span className={`${jua.className} text-base text-blue-950`}>
-        답변 스크립트
-      </span>
-
+    <>
       {correctionItems.length > 0 && (
-        <p className={`${jua.className} mt-1 text-base text-orange-500`}>
+        <p className={`${jua.className} text-base text-orange-500`}>
           형광펜으로 칠해진 부분을 클릭하면 감점 이유를 확인할 수 있어요.
         </p>
       )}
 
-      <div className="relative mt-3 overflow-hidden rounded-2xl bg-[#fdfaf1] pl-12 ring-1 ring-zinc-100">
+      <div
+        className={`relative overflow-hidden rounded-2xl bg-[#fdfaf1] pl-12 ring-1 ring-zinc-100 ${
+          correctionItems.length > 0 ? "mt-3" : ""
+        }`}
+      >
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -293,6 +293,6 @@ export function ExamMarkedTranscript({
           {marked}
         </p>
       </div>
-    </div>
+    </>
   );
 }
