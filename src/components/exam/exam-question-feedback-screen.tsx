@@ -537,9 +537,6 @@ export function ExamQuestionFeedbackScreen({
             </h1>
           </div>
         </div>
-        <span className="rounded-full bg-blue-950 px-4 py-1.5 text-sm font-semibold text-white lg:text-base">
-          {detail.feedback.level}
-        </span>
       </div>
 
       {/* 모바일에서는 토끼가 칠판 왼쪽 아래 모서리 바깥에 서서 살짝만 겹치고(콘텐츠는 전체 폭 사용),
