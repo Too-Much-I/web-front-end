@@ -34,6 +34,12 @@ export default function Home() {
           <ScrollToSectionLink targetId="faq" className="hover:text-orange-500">
             자주 묻는 질문
           </ScrollToSectionLink>
+          <Link
+            href="/guide/toeic-speaking-parts"
+            className="hidden hover:text-orange-500 md:inline"
+          >
+            토익 스피킹 가이드
+          </Link>
           <Link href="/contact" className="hover:text-orange-500">
             문의하기
           </Link>
@@ -111,7 +117,13 @@ export default function Home() {
       <footer className="border-t border-orange-200/60 px-6 py-8 sm:px-10">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 text-sm text-zinc-500 sm:flex-row md:text-base lg:max-w-7xl 2xl:max-w-[100rem]">
           <span>© {new Date().getFullYear()} 토선생. All rights reserved.</span>
-          <nav className="flex items-center gap-5">
+          <nav className="flex flex-wrap items-center justify-center gap-5">
+            <Link
+              href="/guide/toeic-speaking-parts"
+              className="hover:text-orange-500"
+            >
+              토익 스피킹 가이드
+            </Link>
             <Link href="/terms" className="hover:text-orange-500">
               이용약관
             </Link>
