@@ -173,6 +173,17 @@
   }
 }
 
+/** 뉴스레터 팝업 위로 빼꼼 올라온 토끼가 살랑살랑 몸을 흔드는 모션. */
+@keyframes mascot-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(4deg);
+  }
+}
+
 @keyframes gift-pop {
   0% {
     transform: scale(1) rotate(6deg);
