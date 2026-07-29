@@ -7,6 +7,7 @@ import {
   TOTAL_DURATION_LABEL,
   TOTAL_QUESTION_COUNT,
 } from "@/features/guide/part-guide-content";
+import { DEFAULT_OG_IMAGE } from "@/lib/site-config";
 
 const TITLE = "토익 스피킹 파트별 유형 총정리";
 const DESCRIPTION =
@@ -25,6 +26,13 @@ export const metadata: Metadata = {
     siteName: "토선생",
     locale: "ko_KR",
     type: "article",
+    images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${TITLE} | 토선생`,
+    description: DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 
