@@ -74,8 +74,9 @@ CMS는 쓰지 않는다. 프론트 규약은 이 레포의 기존 패턴을 따�
 | `/blog/search`             | 동적                            | `noindex, follow` |
 | `/rss.xml`, `/sitemap.xml` | 정적 + ISR 5분                  | —                 |
 
-검색만 동적인 이유, 페이지네이션을 `?page=`가 아니라 경로로 둔 이유, 순수 SSG가
-아니라 ISR인 이유는 모두 `docs/blog-search-route-separation.md`에 있다.
+검색만 동적인 이유와 페이지네이션을 `?page=`가 아니라 경로로 둔 이유는
+`docs/blog-search-route-separation.md`에 있다. SSR·CSR이 아니라 ISR을 택한 이유와
+재검증이 런타임에 실제로 하는 일은 `docs/blog-isr-rendering-strategy.md`에 있다.
 
 `revalidate`는 세그먼트 설정이라 정적으로 분석돼야 하므로 각 라우트에 리터럴
 `300`을 직접 적는다. `BLOG_REVALIDATE_SECONDS`는 fetch의 `next.revalidate`
