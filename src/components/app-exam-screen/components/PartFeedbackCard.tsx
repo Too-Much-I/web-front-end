@@ -71,7 +71,7 @@ export function PartFeedbackCard({
               >
                 Part {part.partNumber}
               </p>
-              <h3 className="mt-1 text-sm text-zinc-900">{part.titleKo}</h3>
+              <h3 className="mt-1 text-sm text-blue-950">{part.titleKo}</h3>
             </div>
             <span
               className="rounded-full px-3 py-1.5 text-sm"

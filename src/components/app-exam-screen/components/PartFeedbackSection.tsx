@@ -15,7 +15,7 @@ export function PartFeedbackSection({
 }: PartFeedbackSectionProps) {
   return (
     <section className="mt-10">
-      <h2 className="text-2xl text-zinc-900">파트별 피드백</h2>
+      <h2 className="text-2xl text-blue-950">파트별 피드백</h2>
       <p className="mt-2 text-base text-zinc-500">
         버튼을 누르면 해당 문제의 상세 피드백으로 이어져요.
       </p>

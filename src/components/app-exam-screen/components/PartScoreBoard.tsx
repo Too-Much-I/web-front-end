@@ -19,7 +19,7 @@ export function PartScoreBoard({
 }: PartScoreBoardProps) {
   return (
     <section className="mt-10">
-      <h2 className="text-2xl text-zinc-900">파트별 점수</h2>
+      <h2 className="text-2xl text-blue-950">파트별 점수</h2>
       <p className="mt-2 text-sm text-zinc-500">
         칠판을 돌려 다섯 파트의 점수 균형을 확인해보세요.
       </p>

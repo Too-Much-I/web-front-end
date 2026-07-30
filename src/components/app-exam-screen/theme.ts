@@ -6,6 +6,8 @@ export const feedbackColors = {
   surfaceMuted: "#F7F7F7",
   surfaceSubtle: "#FFF9F2",
   brand: "#F76910",
+  // 승인된 교실 콘셉트의 칠판·나무 프레임에만 쓰는 의미 토큰이다.
+  // 일반 제목과 액센트에는 프로젝트 공통 blue-950/orange 계열을 사용한다.
   scoreSurface: "#07513D",
   scoreTrack: "#397464",
   chalkboard: "#174D3C",
