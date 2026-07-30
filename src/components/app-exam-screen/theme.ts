@@ -1,0 +1,46 @@
+export const feedbackColors = {
+  ink: "#111827",
+  inkMuted: "#6B7280",
+  line: "#E5E7EB",
+  surface: "#FFFFFF",
+  surfaceMuted: "#F7F7F7",
+  surfaceSubtle: "#FFF9F2",
+  brand: "#F76910",
+  // 승인된 교실 콘셉트의 칠판·나무 프레임에만 쓰는 의미 토큰이다.
+  // 일반 제목과 액센트에는 프로젝트 공통 blue-950/orange 계열을 사용한다.
+  scoreSurface: "#07513D",
+  scoreTrack: "#397464",
+  chalkboard: "#174D3C",
+  chalk: "#F7F2D7",
+  chalkMuted: "#C8DCCF",
+  wood: "#A76B3D",
+  woodLight: "#D49A62",
+  cardTint: "#FFF8EF",
+  cardLine: "#FFC3A2",
+  positive: "#169B5B",
+  positiveSoft: "#EAF8F0",
+  cautionSoft: "#FFF6DF",
+  radarGrid: "#89AA9D",
+  radarFill: "#FFCD45",
+  radarPoint: "#FF8B32",
+  part: {
+    surface: "#FFFDF8",
+    border: "#E9DED0",
+    accent: "#F76910",
+    body: "#374151",
+    action: "#FFF1E7",
+    actionText: "#993B00",
+    positive: "#137A4B",
+    positiveSoft: "#E8F5EE",
+    caution: "#A86600",
+    cautionSoft: "#FFF4D8",
+    improvement: "#C8454B",
+    improvementSoft: "#FDECEC",
+    pending: "#6B7280",
+    pendingSoft: "#F3F4F6",
+  },
+} as const;
+
+export const cardShadow = {
+  boxShadow: "0 2px 16px rgb(0 0 0 / 8%)",
+} as const;

@@ -222,6 +222,29 @@
   }
 }
 
+/** 앱 종합 피드백의 이전·다음 단계가 이동 방향에 맞춰 들어온다. */
+@keyframes app-feedback-step-next {
+  from {
+    transform: translateX(18px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes app-feedback-step-previous {
+  from {
+    transform: translateX(-18px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 /**
  * 문제별 피드백 콘텐츠가 새 회차로 바뀔 때(제출 후 자동 전환, 날개 버튼 이동) 이전 콘텐츠는 사라지고
  * 새 콘텐츠는 동시에 나타나는 크로스페이드. animationend에서 정리 로직이 도는 요소가 있으므로,

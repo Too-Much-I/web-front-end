@@ -340,12 +340,15 @@ export function ExamQuestionFeedbackScreen({
   examId,
   detail,
   isTrial,
+  navigationSource,
   onNavigateRetry,
   showCompareHint = false,
 }: {
   examId: string;
   detail: ExamQuestionDetail;
   isTrial: boolean;
+  /** 앱 전용 결과 화면에서 들어온 경우 돌아가기와 문제 이동 경로를 유지한다. */
+  navigationSource?: "app";
   onNavigateRetry: (
     nextRetryCount: number,
     options?: { fromReanswer?: boolean },
@@ -353,6 +356,9 @@ export function ExamQuestionFeedbackScreen({
   /** "다시 답변하기" 채점 완료로 이 회차에 도착했을 때만 true — 날개 버튼 비교 힌트를 켠다. */
   showCompareHint?: boolean;
 }) {
+  const isAppNavigation = navigationSource === "app";
+  const resultHref = `${isAppNavigation ? "/app-exam-screen" : "/exam/result"}?examId=${examId}`;
+  const questionSourceSuffix = isAppNavigation ? "&source=app" : "";
   const partMeta = getExamPartMeta(detail.partNumber);
   const scorePercent = clampPercent(
     detail.maxScore > 0 ? detail.score / detail.maxScore : 0,
@@ -474,7 +480,9 @@ export function ExamQuestionFeedbackScreen({
   });
 
   return (
-    <section className="relative mx-auto w-full max-w-3xl px-6 py-10 lg:max-w-4xl xl:max-w-5xl">
+    <section
+      className={`relative mx-auto w-full max-w-3xl px-6 py-10 lg:max-w-4xl xl:max-w-5xl ${isAppNavigation ? "font-jua" : ""}`}
+    >
       <ExamRetryWingNav
         retryCount={detail.retryCount}
         totalRetryCount={detail.totalRetryCount}
@@ -484,7 +492,7 @@ export function ExamQuestionFeedbackScreen({
 
       {!isTrial && (
         <Link
-          href={`/exam/result?examId=${examId}`}
+          href={resultHref}
           onClick={handleLeaveByLink}
           className="group inline-flex items-center gap-1.5 text-sm font-semibold text-zinc-500 hover:text-zinc-700 lg:text-base"
         >
@@ -914,7 +922,7 @@ export function ExamQuestionFeedbackScreen({
         >
           {prevQuestionNumber !== null ? (
             <Link
-              href={`/exam/result/question?examId=${examId}&questionNumber=${prevQuestionNumber}`}
+              href={`/exam/result/question?examId=${examId}&questionNumber=${prevQuestionNumber}${questionSourceSuffix}`}
               onClick={handleLeaveByLink}
               className="group flex flex-1 items-center gap-2.5 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-zinc-100 transition-colors hover:ring-orange-200 lg:p-5"
             >
@@ -936,7 +944,7 @@ export function ExamQuestionFeedbackScreen({
 
           {nextQuestionNumber !== null ? (
             <Link
-              href={`/exam/result/question?examId=${examId}&questionNumber=${nextQuestionNumber}`}
+              href={`/exam/result/question?examId=${examId}&questionNumber=${nextQuestionNumber}${questionSourceSuffix}`}
               onClick={handleLeaveByLink}
               className="group flex flex-1 items-center justify-end gap-2.5 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-zinc-100 transition-colors hover:ring-orange-200 lg:p-5"
             >
