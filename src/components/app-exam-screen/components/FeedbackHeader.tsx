@@ -1,15 +1,45 @@
 import { feedbackColors } from "@/components/app-exam-screen/theme";
 
-export function FeedbackHeader() {
+type FeedbackHeaderProps = {
+  currentStep: number;
+  totalSteps: number;
+};
+
+export function FeedbackHeader({
+  currentStep,
+  totalSteps,
+}: FeedbackHeaderProps) {
+  const progressPercent = (currentStep / totalSteps) * 100;
+
   return (
-    <header className="pt-3 pb-5">
-      <p className="text-sm" style={{ color: feedbackColors.positive }}>
-        SESSION ANALYSIS
-      </p>
-      <h1 className="mt-1 text-3xl text-blue-950">종합 결과 분석</h1>
-      <p className="mt-2 text-sm text-zinc-500">
-        오늘의 답변을 한 화면에서 차근차근 확인해보세요.
-      </p>
+    <header className="sticky top-0 z-20 bg-[#fff9f2]/95 pt-[env(safe-area-inset-top)] backdrop-blur-sm">
+      <div className="pt-3 pb-4">
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-sm" style={{ color: feedbackColors.positive }}>
+            SESSION ANALYSIS
+          </p>
+          <p className="text-sm text-zinc-500" aria-hidden>
+            {currentStep} / {totalSteps}
+          </p>
+        </div>
+
+        <div
+          role="progressbar"
+          aria-label={`피드백 확인 진행률 ${currentStep}/${totalSteps}`}
+          aria-valuemin={1}
+          aria-valuemax={totalSteps}
+          aria-valuenow={currentStep}
+          className="mt-3 h-2 overflow-hidden rounded-full bg-orange-100"
+        >
+          <div
+            className="h-full rounded-full transition-[width] duration-300 motion-reduce:transition-none"
+            style={{
+              width: `${progressPercent}%`,
+              backgroundColor: feedbackColors.brand,
+            }}
+          />
+        </div>
+      </div>
     </header>
   );
 }
