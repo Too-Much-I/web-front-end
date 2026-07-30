@@ -26,6 +26,10 @@ function getStatusColors(status: FeedbackPartViewModel["status"]) {
       accent: feedbackColors.part.improvement,
       soft: feedbackColors.part.improvementSoft,
     },
+    pending: {
+      accent: feedbackColors.part.pending,
+      soft: feedbackColors.part.pendingSoft,
+    },
   }[status];
 }
 

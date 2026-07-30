@@ -8,13 +8,18 @@ import type { ExamGradingResult } from "@/types/exam";
 export const FEEDBACK_PART_NUMBERS = [1, 2, 3, 4, 5] as const;
 
 export type FeedbackPartNumber = (typeof FEEDBACK_PART_NUMBERS)[number];
-export type FeedbackPartStatus = "positive" | "caution" | "improvement";
+export type FeedbackPartStatus =
+  | "positive"
+  | "caution"
+  | "improvement"
+  | "pending";
 
 export type FeedbackPartViewModel = {
   partNumber: FeedbackPartNumber;
   titleKo: string;
   score: number | null;
   maxScore: number;
+  ratio: number | null;
   status: FeedbackPartStatus;
   statusLabel: string;
   feedback: string;
@@ -40,23 +45,23 @@ type PartPresentation = {
 
 const PART_PRESENTATION: Record<FeedbackPartNumber, PartPresentation> = {
   1: {
-    maxScore: 40,
+    maxScore: 6,
     mascot: feedbackMascots.part1,
   },
   2: {
-    maxScore: 40,
+    maxScore: 6,
     mascot: feedbackMascots.part2,
   },
   3: {
-    maxScore: 40,
+    maxScore: 9,
     mascot: feedbackMascots.part3,
   },
   4: {
-    maxScore: 40,
+    maxScore: 9,
     mascot: feedbackMascots.part4,
   },
   5: {
-    maxScore: 40,
+    maxScore: 5,
     mascot: feedbackMascots.part5,
   },
 };
@@ -65,10 +70,13 @@ function getPartStatus(ratio: number | null): {
   status: FeedbackPartStatus;
   statusLabel: string;
 } {
-  if (ratio !== null && ratio >= 0.8) {
+  if (ratio === null) {
+    return { status: "pending", statusLabel: "점수 없음" };
+  }
+  if (ratio >= 0.8) {
     return { status: "positive", statusLabel: "좋음" };
   }
-  if (ratio !== null && ratio >= 0.6) {
+  if (ratio >= 0.6) {
     return { status: "caution", statusLabel: "보통" };
   }
   return { status: "improvement", statusLabel: "개선 필요" };
@@ -137,6 +145,7 @@ export function createFeedbackParts(
       titleKo: EXAM_PART_META[partNumber].titleKo,
       score,
       maxScore: presentation.maxScore,
+      ratio,
       status,
       statusLabel,
       feedback:
@@ -155,7 +164,7 @@ export function createRadarAxes(
     const part = parts.find((item) => item.partNumber === partNumber);
     const maxScore = part?.maxScore ?? PART_PRESENTATION[partNumber].maxScore;
     const score = part?.score ?? null;
-    const ratio = score === null ? null : normalizeScore(score, maxScore);
+    const ratio = part?.ratio ?? null;
     const angleDegrees = -90 + index * 72;
     const angleRadians = (angleDegrees * Math.PI) / 180;
 

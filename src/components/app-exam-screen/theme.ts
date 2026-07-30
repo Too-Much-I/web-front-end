@@ -34,6 +34,8 @@ export const feedbackColors = {
     cautionSoft: "#FFF4D8",
     improvement: "#C8454B",
     improvementSoft: "#FDECEC",
+    pending: "#6B7280",
+    pendingSoft: "#F3F4F6",
   },
 } as const;
 
