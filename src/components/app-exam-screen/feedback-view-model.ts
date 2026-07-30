@@ -9,10 +9,7 @@ export const FEEDBACK_PART_NUMBERS = [1, 2, 3, 4, 5] as const;
 
 export type FeedbackPartNumber = (typeof FEEDBACK_PART_NUMBERS)[number];
 export type FeedbackPartStatus =
-  | "positive"
-  | "caution"
-  | "improvement"
-  | "pending";
+  "positive" | "caution" | "improvement" | "pending";
 
 export type FeedbackPartViewModel = {
   partNumber: FeedbackPartNumber;
@@ -34,8 +31,6 @@ export type RadarAxis = {
   score: number | null;
   maxScore: number;
   ratio: number | null;
-  angleDegrees: number;
-  point: { x: number; y: number } | null;
 };
 
 type PartPresentation = {
@@ -160,13 +155,11 @@ export function createFeedbackParts(
 export function createRadarAxes(
   parts: readonly FeedbackPartViewModel[],
 ): RadarAxis[] {
-  return FEEDBACK_PART_NUMBERS.map((partNumber, index) => {
+  return FEEDBACK_PART_NUMBERS.map((partNumber) => {
     const part = parts.find((item) => item.partNumber === partNumber);
     const maxScore = part?.maxScore ?? PART_PRESENTATION[partNumber].maxScore;
     const score = part?.score ?? null;
     const ratio = part?.ratio ?? null;
-    const angleDegrees = -90 + index * 72;
-    const angleRadians = (angleDegrees * Math.PI) / 180;
 
     return {
       partNumber,
@@ -175,14 +168,6 @@ export function createRadarAxes(
       score,
       maxScore,
       ratio,
-      angleDegrees,
-      point:
-        ratio === null
-          ? null
-          : {
-              x: Math.cos(angleRadians) * ratio,
-              y: Math.sin(angleRadians) * ratio,
-            },
     };
   });
 }
