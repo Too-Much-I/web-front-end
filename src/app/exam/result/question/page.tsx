@@ -26,6 +26,7 @@ function ExamQuestionFeedbackLoader({
   questionNumber,
   retryCount,
   isTrial,
+  navigationSource,
   onNavigateRetry,
   showCompareHint,
 }: {
@@ -33,6 +34,7 @@ function ExamQuestionFeedbackLoader({
   questionNumber: number;
   retryCount: number;
   isTrial: boolean;
+  navigationSource?: "app";
   onNavigateRetry: (
     nextRetryCount: number,
     options?: { fromReanswer?: boolean },
@@ -101,6 +103,7 @@ function ExamQuestionFeedbackLoader({
             examId={examId}
             detail={outgoingDetail}
             isTrial={isTrial}
+            navigationSource={navigationSource}
             onNavigateRetry={onNavigateRetry}
           />
         </div>
@@ -114,6 +117,7 @@ function ExamQuestionFeedbackLoader({
           examId={examId}
           detail={shownDetail}
           isTrial={isTrial}
+          navigationSource={navigationSource}
           onNavigateRetry={onNavigateRetry}
           showCompareHint={
             showCompareHint && shownDetail.retryCount === retryCount
@@ -131,6 +135,8 @@ function ExamQuestionFeedbackContent() {
   const hasValidParams =
     Boolean(examId) && Number.isInteger(questionNumber) && questionNumber > 0;
   const isTrial = searchParams.get("mode") === "trial";
+  const navigationSource =
+    searchParams.get("source") === "app" ? "app" : undefined;
 
   const [retryCount, setRetryCount] = useState(() =>
     parseRetryCount(searchParams.get("retryCount")),
@@ -177,6 +183,7 @@ function ExamQuestionFeedbackContent() {
           questionNumber={questionNumber}
           retryCount={retryCount}
           isTrial={isTrial}
+          navigationSource={navigationSource}
           onNavigateRetry={handleNavigateRetry}
           showCompareHint={showCompareHint}
         />
