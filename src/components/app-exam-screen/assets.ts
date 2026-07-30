@@ -2,7 +2,7 @@ export const feedbackMascots = {
   scoreGood: "/mascots/good_rabbit_tight.png",
   scoreHmm: "/mascots/hmm_rabbit_tight.png",
   overall: "/mascots/paper_rabbit.png",
-  part1: "/mascots/rabbit_tight.png",
+  part1: "/mascots/paper_rabbit.png",
   part2: "/mascots/book_tight.png",
   part3: "/mascots/mike_tight.png",
   part4: "/mascots/scoring_tight.png",
