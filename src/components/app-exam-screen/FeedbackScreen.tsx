@@ -22,6 +22,30 @@ const SWIPE_DIRECTION_RATIO = 1.2;
 
 type StepDirection = "next" | "previous";
 
+type FeedbackNavigationStateMessage = {
+  type: "FEEDBACK_NAVIGATION_STATE";
+  canGoBackWithinFeedback: boolean;
+};
+
+type FeedbackGoBackMessage = {
+  type: "FEEDBACK_GO_BACK";
+};
+
+declare global {
+  interface Window {
+    ReactNativeWebView?: {
+      postMessage(message: string): void;
+    };
+  }
+}
+
+function isFeedbackGoBackMessage(
+  value: unknown,
+): value is FeedbackGoBackMessage {
+  if (!value || typeof value !== "object") return false;
+  return (value as { type?: unknown }).type === "FEEDBACK_GO_BACK";
+}
+
 export function AppExamScreen({ result }: { result: ExamGradingResult }) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
@@ -37,6 +61,43 @@ export function AppExamScreen({ result }: { result: ExamGradingResult }) {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [currentStep]);
+
+  useEffect(() => {
+    const message: FeedbackNavigationStateMessage = {
+      type: "FEEDBACK_NAVIGATION_STATE",
+      canGoBackWithinFeedback: currentStep > 0,
+    };
+    window.ReactNativeWebView?.postMessage(JSON.stringify(message));
+  }, [currentStep]);
+
+  useEffect(() => {
+    const handleNativeMessage = (event: MessageEvent<unknown>) => {
+      let message: unknown = event.data;
+
+      if (typeof message === "string") {
+        try {
+          message = JSON.parse(message);
+        } catch {
+          return;
+        }
+      }
+
+      if (!isFeedbackGoBackMessage(message)) return;
+      setStepDirection("previous");
+      setCurrentStep((step) => Math.max(step - 1, 0));
+    };
+
+    window.addEventListener("message", handleNativeMessage);
+    document.addEventListener("message", handleNativeMessage as EventListener);
+
+    return () => {
+      window.removeEventListener("message", handleNativeMessage);
+      document.removeEventListener(
+        "message",
+        handleNativeMessage as EventListener,
+      );
+    };
+  }, []);
 
   const moveToStep = (direction: StepDirection) => {
     setStepDirection(direction);
