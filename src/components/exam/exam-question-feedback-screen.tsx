@@ -480,7 +480,9 @@ export function ExamQuestionFeedbackScreen({
   });
 
   return (
-    <section className="relative mx-auto w-full max-w-3xl px-6 py-10 lg:max-w-4xl xl:max-w-5xl">
+    <section
+      className={`relative mx-auto w-full max-w-3xl px-6 py-10 lg:max-w-4xl xl:max-w-5xl ${isAppNavigation ? "font-jua" : ""}`}
+    >
       <ExamRetryWingNav
         retryCount={detail.retryCount}
         totalRetryCount={detail.totalRetryCount}

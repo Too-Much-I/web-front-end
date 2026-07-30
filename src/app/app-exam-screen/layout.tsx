@@ -10,5 +10,5 @@ export const metadata: Metadata = {
 export default function AppExamScreenLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  return children;
+  return <div className="font-jua min-h-dvh">{children}</div>;
 }
