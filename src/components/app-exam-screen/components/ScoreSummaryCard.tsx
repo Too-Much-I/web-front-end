@@ -1,21 +1,28 @@
+"use client";
+
 import { Star } from "lucide-react";
 import Image from "next/image";
 
 import { selectScoreMascot } from "@/components/app-exam-screen/feedback-view-model";
 import { cardShadow, feedbackColors } from "@/components/app-exam-screen/theme";
+import { TypedText } from "@/components/exam/typed-text";
+import { getLevelAbbreviation } from "@/features/exam/target-grade";
+import { useCountUp } from "@/lib/use-count-up";
 import type { ExamGradingResult } from "@/types/exam";
 
 export function ScoreSummaryCard({ result }: { result: ExamGradingResult }) {
-  const scorePercent = Math.min(
+  const displayScore = useCountUp(result.totalScore);
+  const displayPercent = Math.min(
     100,
-    Math.max(0, (result.totalScore / result.maxScore) * 100),
+    Math.max(0, (displayScore / result.maxScore) * 100),
   );
+  const levelAbbreviation = getLevelAbbreviation(result.levelEstimate);
   const scoreMascot = selectScoreMascot(result.totalScore, result.maxScore);
 
   return (
     <section
       aria-labelledby="app-exam-total-score-heading"
-      className="rounded-3xl p-2"
+      className="relative rounded-3xl p-2"
       style={{ ...cardShadow, backgroundColor: feedbackColors.wood }}
     >
       <div
@@ -38,12 +45,12 @@ export function ScoreSummaryCard({ result }: { result: ExamGradingResult }) {
 
         <div className="mt-4 flex flex-row items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <p className="flex flex-row items-end gap-2">
-              <strong className="text-3xl font-normal text-white">
-                {result.totalScore}
+            <p className="flex flex-row flex-nowrap items-end gap-2 whitespace-nowrap">
+              <strong className="shrink-0 text-3xl font-normal text-white">
+                {displayScore}
               </strong>
               <span
-                className="pb-1 text-lg"
+                className="shrink-0 pb-1 text-lg"
                 style={{ color: feedbackColors.chalkMuted }}
               >
                 / {result.maxScore}
@@ -53,11 +60,11 @@ export function ScoreSummaryCard({ result }: { result: ExamGradingResult }) {
               className="mt-1 text-sm"
               style={{ color: feedbackColors.radarFill }}
             >
-              {result.levelEstimate} 예상
+              {levelAbbreviation} 예상
             </p>
           </div>
           <div
-            className="min-w-20 rounded-2xl border px-3 py-2"
+            className="w-20 shrink-0 rounded-2xl border px-3 py-2"
             style={{ borderColor: feedbackColors.radarFill }}
           >
             <p
@@ -67,7 +74,7 @@ export function ScoreSummaryCard({ result }: { result: ExamGradingResult }) {
               LEVEL
             </p>
             <p className="mt-1 text-center text-xl text-white">
-              {result.levelEstimate}
+              {levelAbbreviation}
             </p>
           </div>
         </div>
@@ -84,23 +91,29 @@ export function ScoreSummaryCard({ result }: { result: ExamGradingResult }) {
           <div
             className="h-full rounded-full"
             style={{
-              width: `${scorePercent}%`,
+              width: `${displayPercent}%`,
               backgroundColor: feedbackColors.radarFill,
             }}
           />
         </div>
 
-        <div className="mt-5 flex flex-row items-end gap-3">
-          <p className="min-w-0 flex-1 text-base leading-7 text-white">
-            {result.summary}
-          </p>
-          <Image
-            alt=""
-            src={scoreMascot}
-            width={256}
-            height={256}
-            className="h-24 w-16 shrink-0 object-contain"
+        <div className="mt-5">
+          <TypedText
+            text={result.summary}
+            className="text-base leading-7 text-white"
           />
+          <div
+            aria-hidden
+            className="pointer-events-none relative mt-2 h-8 w-16"
+          >
+            <Image
+              alt=""
+              src={scoreMascot}
+              width={256}
+              height={256}
+              className="absolute -bottom-14 -left-5 z-10 h-24 w-16 max-w-none object-contain"
+            />
+          </div>
         </div>
       </div>
     </section>
