@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, ThumbsUp, TriangleAlert } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
 import {
@@ -357,7 +356,6 @@ export function ExamQuestionFeedbackScreen({
   /** "다시 답변하기" 채점 완료로 이 회차에 도착했을 때만 true — 날개 버튼 비교 힌트를 켠다. */
   showCompareHint?: boolean;
 }) {
-  const router = useRouter();
   const isAppNavigation = navigationSource === "app";
   const resultHref = `${isAppNavigation ? "/app-exam-screen" : "/exam/result"}?examId=${examId}`;
   const questionSourceSuffix = isAppNavigation ? "&source=app" : "";
@@ -471,14 +469,6 @@ export function ExamQuestionFeedbackScreen({
     if (!confirmDiscardUnsavedRecording()) event.preventDefault();
   }
 
-  function handleResultLink(event: React.MouseEvent<HTMLAnchorElement>) {
-    handleLeaveByLink(event);
-    if (event.defaultPrevented || !isAppNavigation) return;
-
-    event.preventDefault();
-    router.back();
-  }
-
   // 탭 상위(여기)에서 들고 있어야, "다시 답변하기" 탭을 벗어나 ExamReanswerPanel이 언마운트돼도
   // 제출~채점 진행 상태가 사라지지 않는다 (자세한 이유는 useReanswerSubmission 참고).
   const reanswerSubmission = useReanswerSubmission({
@@ -501,7 +491,7 @@ export function ExamQuestionFeedbackScreen({
       {!isTrial && (
         <Link
           href={resultHref}
-          onClick={handleResultLink}
+          onClick={handleLeaveByLink}
           className="group inline-flex items-center gap-1.5 text-sm font-semibold text-zinc-500 hover:text-zinc-700 lg:text-base"
         >
           <span className="flex size-6 items-center justify-center rounded-full bg-zinc-100 transition-transform duration-200 group-hover:-translate-x-0.5">
