@@ -200,7 +200,7 @@ export interface RawExamQuestionFeedback {
   offTopicItems: string[] | null;
   /** "모범답안" 탭에 대응. */
   correctedAnswer: string | null;
-  /** "추천답안" 탭에 대응. */
+  /** "추천답안" 탭에 대응. Part 1은 **강세**, ↑/↓ 억양, ✓/✓✓ 쉼 마크업을 포함할 수 있다. */
   recommendedAnswer: string | null;
   nextStrategy: string | null;
 }
@@ -238,6 +238,27 @@ export interface RawExamQuestionInfo {
   speakTimeSec: number;
 }
 
+/**
+ * result.question.retryScores — 회차별 총점. 조회 중인 회차뿐 아니라 그 문제의 전체
+ * 시도가 한 번에 내려오므로, 회차를 오가며 재조회하지 않고도 성장 그래프를 그릴 수 있다.
+ */
+export interface RawExamRetryScore {
+  retryCount: number;
+  score: number;
+}
+
+/**
+ * result.question.retryFeedbackScores — 회차별 세부 지표.
+ * detailedScores는 feedback.detailedScores와 같은 "한 키짜리 객체들의 배열" 형태다.
+ */
+export interface RawExamRetryFeedbackScore {
+  retryCount: number;
+  pronunciationFluencyScore: number | null;
+  /** Part 1(낭독)에는 내용 적합성 개념이 없어 null로 내려온다. */
+  contentRelevanceScore: number | null;
+  detailedScores?: RawExamDetailedScoreItem[] | null;
+}
+
 /** GET /api/v1/exams/{examId}/questions/{questionNumber} 의 result.question */
 export interface RawExamQuestionDetail {
   partNumber: number;
@@ -255,6 +276,9 @@ export interface RawExamQuestionDetail {
   maxScore: number;
   transcript: string;
   feedback: RawExamQuestionFeedback;
+  /** 재시도 기능 이전에 채점된 응답에는 없을 수 있어 optional로 둔다. */
+  retryScores?: RawExamRetryScore[] | null;
+  retryFeedbackScores?: RawExamRetryFeedbackScore[] | null;
   spokenWordSequence?: RawSpokenWord[];
   questionInfo: RawExamQuestionInfo;
 }
@@ -303,6 +327,7 @@ export interface ExamQuestionFeedback {
   correctionItems: ExamCorrectionItem[];
   offTopicItems: string[];
   correctedAnswer: string | null;
+  /** Part 1은 **강세**, ↑/↓ 억양, ✓/✓✓ 쉼 마크업을 포함할 수 있다. */
   recommendedAnswer: string | null;
   nextStrategy: string | null;
 }
@@ -334,6 +359,20 @@ export interface ExamQuestionInfo {
   speakTimeSec: number;
 }
 
+/** 회차별 총점 한 점. retryCount 오름차순으로 정렬된 상태로 매퍼가 넘겨준다. */
+export interface ExamRetryScore {
+  retryCount: number;
+  score: number;
+}
+
+/** 회차별 세부 지표. detailedScores는 매퍼에서 하나의 객체로 합쳐진 뒤 넘어온다. */
+export interface ExamRetryFeedbackScore {
+  retryCount: number;
+  pronunciationFluencyScore: number | null;
+  contentRelevanceScore: number | null;
+  detailedScores: ExamDetailedScores;
+}
+
 export interface ExamQuestionDetail {
   examId: string;
   partNumber: number;
@@ -345,6 +384,10 @@ export interface ExamQuestionDetail {
   maxScore: number;
   transcript: string;
   feedback: ExamQuestionFeedback;
+  /** 이 문제의 전체 회차 총점. 응답에 없으면 빈 배열. */
+  retryScores: ExamRetryScore[];
+  /** 이 문제의 전체 회차 세부 지표. 응답에 없으면 빈 배열. */
+  retryFeedbackScores: ExamRetryFeedbackScore[];
   spokenWordSequence: SpokenWord[];
   questionInfo: ExamQuestionInfo;
 }
