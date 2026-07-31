@@ -138,30 +138,31 @@ function ExamQuestionFeedbackContent() {
   const navigationSource =
     searchParams.get("source") === "app" ? "app" : undefined;
 
-  const [retryCount, setRetryCount] = useState(() =>
-    parseRetryCount(searchParams.get("retryCount")),
-  );
+  /**
+   * 회차는 URL만을 단일 소스로 쓴다 — 로컬 state로 복사해 두면 URL과 어긋날 수 있고,
+   * 그걸 다시 맞추는 코드가 필요해진다.
+   */
+  const retryCount = parseRetryCount(searchParams.get("retryCount"));
+
   // "다시 답변하기" 채점 완료로 새 회차에 도착했는지 여부 — 도착 직후 날개 버튼 비교 힌트를
   // 한 번 보여주기 위한 신호. 날개 버튼 등 다른 경로로 이동하면 다시 꺼진다.
+  // 이건 URL에 담을 일이 아닌 순수 화면 상태라 로컬 state로 둔다.
   const [showCompareHint, setShowCompareHint] = useState(false);
 
-  // useSearchParams()는 실제 Next.js 라우터 내비게이션(예: ExamReanswerPanel의 router.replace)에만
-  // 반응한다 — 날개 버튼이 쓰는 raw history.replaceState는 이 훅을 갱신하지 않으므로, 이 effect는
-  // 오직 진짜 페이지 전환에서만 실행되어 로컬 state를 URL에 맞춰 동기화한다.
-  useEffect(() => {
-    const urlRetryCount = parseRetryCount(searchParams.get("retryCount"));
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 실제 라우터 내비게이션(URL)에 로컬 state를 동기화하는 용도.
-    setRetryCount((prev) => (prev === urlRetryCount ? prev : urlRetryCount));
-  }, [searchParams]);
-
-  // 날개 화살표로 회차를 넘기면 state를 바꾸는 동시에, 새로고침/공유 시에도 같은 회차를
-  // 보게끔 URL도 맞춰준다. App Router의 router.push/replace는 항상 서버 왕복(재로드)이
-  // 생기므로, 여기서는 history.replaceState로 URL만 조용히 바꾼다.
+  /**
+   * 날개 화살표(와 재답변 채점 완료)로 회차를 넘길 때 URL만 바꾼다.
+   * App Router의 router.push/replace는 서버 왕복이 생기지만, 네이티브 History API는
+   * Next가 가로채서 usePathname/useSearchParams만 갱신해 준다(next/dist/client/
+   * components/app-router.js의 replaceState 패치 참고). 그래서 재로드 없이 위
+   * retryCount가 새 값으로 다시 계산되고, 새로고침·공유 시에도 같은 회차를 보게 된다.
+   *
+   * push가 아니라 replace인 이유: 회차를 옮길 때마다 history가 쌓이면 뒤로가기가
+   * 화면을 벗어나지 못하고 회차만 되짚게 된다.
+   */
   function handleNavigateRetry(
     nextRetryCount: number,
     options?: { fromReanswer?: boolean },
   ) {
-    setRetryCount(nextRetryCount);
     setShowCompareHint(Boolean(options?.fromReanswer));
     const url = new URL(window.location.href);
     url.searchParams.set("retryCount", String(nextRetryCount));

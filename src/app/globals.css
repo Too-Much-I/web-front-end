@@ -245,6 +245,23 @@
   }
 }
 
+/** 재도전 전 칠판의 점수 링이 0에서 실제 점수 비율까지 분필로 그려지듯 채워진다. */
+@keyframes app-score-ring-fill {
+  from {
+    stroke-dashoffset: var(--app-score-ring-circumference);
+  }
+}
+
+.app-score-ring-progress {
+  animation: app-score-ring-fill 850ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-score-ring-progress {
+    animation: none;
+  }
+}
+
 /**
  * 문제별 피드백 콘텐츠가 새 회차로 바뀔 때(제출 후 자동 전환, 날개 버튼 이동) 이전 콘텐츠는 사라지고
  * 새 콘텐츠는 동시에 나타나는 크로스페이드. animationend에서 정리 로직이 도는 요소가 있으므로,

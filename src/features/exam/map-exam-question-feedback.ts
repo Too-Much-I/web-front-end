@@ -1,8 +1,12 @@
 import type {
   ExamDetailedScores,
   ExamQuestionDetail,
+  ExamRetryFeedbackScore,
+  ExamRetryScore,
   RawExamDetailedScoreItem,
   RawExamQuestionDetailResult,
+  RawExamRetryFeedbackScore,
+  RawExamRetryScore,
 } from "@/types/exam";
 
 /**
@@ -23,6 +27,36 @@ function mapDetailedScores(
     completenessScore: merged.completeness_score ?? null,
     prosodyScore: merged.prosody_score ?? null,
   };
+}
+
+/**
+ * 회차 배열은 retryCount 오름차순을 보장받지 못하므로 여기서 한 번 정렬해 둔다 —
+ * 성장 그래프는 배열 순서를 그대로 x축으로 쓰기 때문에 순서가 어긋나면 선이 꼬인다.
+ */
+function byRetryCount<T extends { retryCount: number }>(
+  raw: T[] | null | undefined,
+): T[] {
+  return [...(raw ?? [])].sort((a, b) => a.retryCount - b.retryCount);
+}
+
+function mapRetryScores(
+  raw: RawExamRetryScore[] | null | undefined,
+): ExamRetryScore[] {
+  return byRetryCount(raw).map((item) => ({
+    retryCount: item.retryCount,
+    score: item.score,
+  }));
+}
+
+function mapRetryFeedbackScores(
+  raw: RawExamRetryFeedbackScore[] | null | undefined,
+): ExamRetryFeedbackScore[] {
+  return byRetryCount(raw).map((item) => ({
+    retryCount: item.retryCount,
+    pronunciationFluencyScore: item.pronunciationFluencyScore ?? null,
+    contentRelevanceScore: item.contentRelevanceScore ?? null,
+    detailedScores: mapDetailedScores(item.detailedScores),
+  }));
 }
 
 export function mapExamQuestionDetail(
@@ -67,6 +101,8 @@ export function mapExamQuestionDetail(
       recommendedAnswer: question.feedback.recommendedAnswer,
       nextStrategy: question.feedback.nextStrategy,
     },
+    retryScores: mapRetryScores(question.retryScores),
+    retryFeedbackScores: mapRetryFeedbackScores(question.retryFeedbackScores),
     spokenWordSequence: (question.spokenWordSequence ?? []).map((word) => ({
       segmentIndex: word.segmentIndex,
       word: word.word,
