@@ -128,10 +128,6 @@ export default async function BlogPostPage({
               {post.title}
             </h1>
 
-            <p className="text-base leading-relaxed text-zinc-500 sm:text-lg">
-              {post.summary}
-            </p>
-
             <div className="pt-1">
               <BlogShareButtons
                 url={`${SITE_URL}/blog/${post.slug}`}
