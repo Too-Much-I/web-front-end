@@ -87,7 +87,9 @@ export default async function BlogPostPage({
   const post = await getBlogPost(slug, { revalidate: BLOG_REVALIDATE_SECONDS });
   if (!post) notFound();
 
-  const contentHtml = await renderMarkdown(post.contentMarkdown);
+  const contentHtml = await renderMarkdown(post.contentMarkdown, {
+    title: post.title,
+  });
   const readingMinutes = estimateReadingMinutes(
     stripMarkdown(post.contentMarkdown),
   );
