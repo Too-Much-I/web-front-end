@@ -12,9 +12,30 @@ const SCROLL_TRIGGER_RATIO = 0.5;
 /** 닫기만 한 경우 2주 뒤 다시 노출한다. 구독까지 마쳤다면 다시 띄우지 않는다. */
 const DISMISS_SNOOZE_MS = 14 * 24 * 60 * 60 * 1000;
 
+/**
+ * 쿠키·사이트 데이터가 차단된 브라우저나 일부 웹뷰에서는 localStorage 접근 자체가
+ * 예외를 던진다. 노출 억제는 편의 기능이므로, 실패하면 조용히 포기하고 화면은
+ * 계속 동작하게 둔다(읽기 실패 = 억제된 적 없음, 쓰기 실패 = 다음에 또 뜸).
+ */
+function readSuppression(): string | null {
+  try {
+    return window.localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeSuppression(value: string) {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, value);
+  } catch {
+    // 저장하지 못해도 이번 노출은 닫힌다. 다음 방문에 다시 뜨는 정도가 대가다.
+  }
+}
+
 /** 저장된 값은 "subscribed"(영구) 또는 닫은 시각의 타임스탬프(2주간)다. */
 function isSuppressed() {
-  const stored = window.localStorage.getItem(STORAGE_KEY);
+  const stored = readSuppression();
   if (!stored) return false;
   if (stored === "subscribed") return true;
 
@@ -62,12 +83,12 @@ export function NewsletterPopup() {
   }, [visible]);
 
   function close() {
-    window.localStorage.setItem(STORAGE_KEY, String(Date.now()));
+    writeSuppression(String(Date.now()));
     setVisible(false);
   }
 
   function handleSubscribed() {
-    window.localStorage.setItem(STORAGE_KEY, "subscribed");
+    writeSuppression("subscribed");
     setVisible(false);
   }
 

@@ -19,6 +19,7 @@ import {
 import {
   blogBreadcrumbJsonLd,
   blogPostingJsonLd,
+  serializeJsonLd,
 } from "@/features/blog/blog-json-ld";
 import { renderMarkdown, stripMarkdown } from "@/features/blog/render-markdown";
 import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/site-config";
@@ -101,13 +102,13 @@ export default async function BlogPostPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(blogPostingJsonLd(post)),
+          __html: serializeJsonLd(blogPostingJsonLd(post)),
         }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(blogBreadcrumbJsonLd(post)),
+          __html: serializeJsonLd(blogBreadcrumbJsonLd(post)),
         }}
       />
 

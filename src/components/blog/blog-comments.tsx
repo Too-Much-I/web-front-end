@@ -103,10 +103,24 @@ export function BlogComments({ slug }: { slug: string }) {
         </p>
       ) : null}
 
+      {/*
+        조회에 실패하면 data가 비어 "댓글 더 보기"가 사라지므로, 여기서 다시 시도할
+        수단을 준다. 이전 페이지 데이터를 유지하는 방식(keepPreviousData)은 쓰지
+        않는다. 위에서 loadedPages에 이미 본 댓글을 누적하고 있어, 실패한 페이지
+        자리에 직전 페이지가 남으면 같은 댓글이 두 번 그려진다.
+      */}
       {commentsQuery.isError ? (
-        <p className="py-6 text-center text-sm text-zinc-500">
-          댓글을 불러오지 못했어요.
-        </p>
+        <div className="flex flex-col items-center gap-3 py-6">
+          <p className="text-sm text-zinc-500">댓글을 불러오지 못했어요.</p>
+          <button
+            type="button"
+            onClick={() => void commentsQuery.refetch()}
+            disabled={commentsQuery.isFetching}
+            className="rounded-full bg-orange-500 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-60"
+          >
+            {commentsQuery.isFetching ? "불러오는 중…" : "다시 시도"}
+          </button>
+        </div>
       ) : null}
 
       {!commentsQuery.isPending && comments.length === 0 ? (

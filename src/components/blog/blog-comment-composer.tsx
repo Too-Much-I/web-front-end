@@ -49,6 +49,10 @@ export function BlogCommentComposer({
     !isSubmitting;
 
   function handleConfirm() {
+    // 다이얼로그가 닫히기 전에 두 번째 클릭이 들어올 수 있다. 댓글은 수정·삭제가
+    // 안 되므로 중복 등록은 되돌릴 수 없어, 버튼 비활성화와 별개로 여기서도 막는다.
+    if (!canSubmit) return;
+
     setIsConfirmOpen(false);
     onSubmit({ content: trimmed, website });
     setContent("");
@@ -153,6 +157,7 @@ export function BlogCommentComposer({
               </Button>
               <Button
                 onClick={handleConfirm}
+                disabled={!canSubmit}
                 className="h-10 rounded-full bg-orange-500 px-5 text-sm text-white hover:bg-orange-600"
               >
                 등록

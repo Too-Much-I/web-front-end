@@ -25,9 +25,14 @@ export function BlogAvatar({
   avatarImageUrl: string | null;
   className?: string;
 }) {
-  const [hasImageFailed, setHasImageFailed] = useState(false);
+  /**
+   * "실패했다"가 아니라 "어떤 URL이 실패했다"를 기록한다. 닉네임 다시 뽑기처럼
+   * 같은 자리에서 아바타만 바뀌는 경우 이 컴포넌트 인스턴스가 그대로 재사용되는데,
+   * 불리언으로 두면 한 번 실패한 뒤로는 멀쩡한 새 이미지도 영영 안 나온다.
+   */
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
 
-  if (avatarImageUrl && !hasImageFailed) {
+  if (avatarImageUrl && avatarImageUrl !== failedUrl) {
     return (
       <Image
         src={avatarImageUrl}
@@ -36,7 +41,7 @@ export function BlogAvatar({
         width={36}
         height={36}
         unoptimized
-        onError={() => setHasImageFailed(true)}
+        onError={() => setFailedUrl(avatarImageUrl)}
         className={`${className} shrink-0 rounded-full bg-orange-50 object-cover`}
       />
     );
