@@ -161,17 +161,30 @@ export default async function BlogPostPage({
           ) : null}
         </article>
 
-        <section className="mt-12 flex flex-col items-start gap-3 rounded-3xl bg-white p-6 shadow-sm sm:p-8">
-          <strong className="text-base font-bold text-blue-950 sm:text-lg">
-            내 등급, 지금 바로 확인해 볼까요?
-          </strong>
-          <p className="text-sm text-zinc-500 sm:text-base">
-            가입 없이 20분. 실제 시험과 같은 11문항을 풀면 AI가 항목별 감점
-            이유까지 알려드려요.
-          </p>
-          <ExamStartButton className="mt-1 h-12 rounded-full bg-orange-500 px-7 text-base text-white hover:bg-orange-600">
-            무료 모의고사 시작하기
-          </ExamStartButton>
+        <section className="mt-12 flex items-center gap-4 rounded-3xl bg-white p-6 shadow-sm sm:gap-6 sm:p-8">
+          <div className="flex min-w-0 flex-col items-start gap-3">
+            <strong className="text-base font-bold text-blue-950 sm:text-lg">
+              내 등급, 지금 바로 확인해 볼까요?
+            </strong>
+            <p className="text-sm text-zinc-500 sm:text-base">
+              가입 없이 20분. 실제 시험과 같은 11문항을 풀면 AI가 항목별 감점
+              이유까지 알려드려요.
+            </p>
+            <ExamStartButton className="mt-1 h-12 rounded-full bg-orange-500 px-7 text-base text-white hover:bg-orange-600">
+              무료 모의고사 시작하기
+            </ExamStartButton>
+          </div>
+
+          {/* 세로 비율(819:1150)에 맞춘 칸. 폭을 높이에서 역산해 여백이 생기지 않게 한다. */}
+          <div className="relative h-24 w-[4.3rem] shrink-0 sm:h-32 sm:w-[5.7rem] lg:h-36 lg:w-[6.4rem]">
+            <Image
+              src="/mascots/exiting_rabbit.png"
+              alt="두 팔을 들고 신이 나서 뛰는 토선생 캐릭터"
+              fill
+              sizes="(min-width: 1024px) 103px, (min-width: 640px) 92px, 69px"
+              className="object-contain"
+            />
+          </div>
         </section>
 
         <RelatedPosts posts={post.relatedPosts} />
