@@ -18,15 +18,22 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "to-teacher-exam.s3.amazonaws.com",
       },
+      // 블로그 썸네일 버킷(arn:aws:s3:::to-teacher-web-blog, ap-northeast-2).
+      {
+        protocol: "https",
+        hostname: "to-teacher-web-blog.s3.*.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "to-teacher-web-blog.s3.amazonaws.com",
+      },
     ],
   },
   async headers() {
     return [
       {
         source: "/exam/:path*",
-        headers: [
-          { key: "X-Robots-Tag", value: "noindex, nofollow" },
-        ],
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       },
     ];
   },

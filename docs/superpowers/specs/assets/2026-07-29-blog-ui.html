@@ -1,0 +1,1647 @@
+<title>토선생 블로그 UI 시안</title>
+
+<style>
+  /* ---------- 시안 프레임 토큰 (라이트/다크 대응) ---------- */
+  :root {
+    --frame-bg: #f5f3f0;
+    --frame-fg: #27272a;
+    --frame-muted: #78716c;
+    --frame-card: #ffffff;
+    --frame-border: #e7e2dc;
+    --frame-accent: #ea580c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --frame-bg: #14110f;
+      --frame-fg: #f5f3f0;
+      --frame-muted: #a8a29e;
+      --frame-card: #201b18;
+      --frame-border: #332b26;
+      --frame-accent: #fb923c;
+    }
+  }
+  :root[data-theme="light"] {
+    --frame-bg: #f5f3f0;
+    --frame-fg: #27272a;
+    --frame-muted: #78716c;
+    --frame-card: #ffffff;
+    --frame-border: #e7e2dc;
+    --frame-accent: #ea580c;
+  }
+  :root[data-theme="dark"] {
+    --frame-bg: #14110f;
+    --frame-fg: #f5f3f0;
+    --frame-muted: #a8a29e;
+    --frame-card: #201b18;
+    --frame-border: #332b26;
+    --frame-accent: #fb923c;
+  }
+
+  /* ---------- 제품 토큰 (토선생 · 라이트 고정) ---------- */
+  .canvas {
+    --brand: #f97316;
+    --brand-600: #ea580c;
+    --brand-50: #fff7ed;
+    --brand-100: #ffedd5;
+    --brand-200: #fed7aa;
+    --ink: #172554;
+    --text: #52525b;
+    --text-soft: #71717a;
+    --text-faint: #a1a1aa;
+    --line: #f4f4f5;
+    --ground: #fffaf4;
+    --surface: #ffffff;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--frame-bg);
+    color: var(--frame-fg);
+    font-family:
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      "Apple SD Gothic Neo",
+      "Pretendard",
+      "Malgun Gothic",
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.6;
+  }
+
+  .shell {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  /* ---------- 시안 헤더 ---------- */
+  .brief {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .brief__eyebrow {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--frame-accent);
+  }
+  .brief h1 {
+    margin: 0;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  .brief p {
+    margin: 0;
+    max-width: 60ch;
+    color: var(--frame-muted);
+    font-size: 0.95rem;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.25rem;
+  }
+  .segmented {
+    display: inline-flex;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    background: var(--frame-card);
+    border: 1px solid var(--frame-border);
+    border-radius: 999px;
+  }
+  .segmented button {
+    appearance: none;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--frame-muted);
+    padding: 0.45rem 1rem;
+    border-radius: 999px;
+    background: transparent;
+    transition:
+      background 0.15s,
+      color 0.15s;
+  }
+  .segmented button:hover {
+    color: var(--frame-fg);
+  }
+  .segmented button[aria-pressed="true"] {
+    background: var(--frame-accent);
+    color: #fff;
+  }
+  .segmented button:focus-visible {
+    outline: 2px solid var(--frame-accent);
+    outline-offset: 2px;
+  }
+
+  /* ---------- 스테이지 / 뷰포트 ---------- */
+  .stage {
+    display: flex;
+    justify-content: center;
+    background: var(--frame-card);
+    border: 1px solid var(--frame-border);
+    border-radius: 1.5rem;
+    padding: 1rem;
+    overflow: hidden;
+  }
+  .viewport {
+    position: relative;
+    container-type: inline-size;
+    width: 100%;
+    height: min(78vh, 860px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-radius: 1rem;
+    background: var(--ground);
+    scroll-behavior: smooth;
+    transition:
+      width 0.3s ease,
+      border-radius 0.3s ease;
+  }
+  .stage[data-device="mobile"] .viewport {
+    width: 390px;
+    max-width: 100%;
+    border-radius: 2rem;
+    box-shadow:
+      0 0 0 8px rgba(0, 0, 0, 0.06),
+      0 18px 40px -18px rgba(0, 0, 0, 0.35);
+  }
+
+  /* ---------- 제품 헤더 ---------- */
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 1.25rem;
+    background: var(--brand-50);
+  }
+  @container (min-width: 640px) {
+    .app-header {
+      padding: 1.1rem 2.25rem;
+    }
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .logo__mark {
+    width: 2.15rem;
+    height: 2.15rem;
+    border-radius: 0.8rem;
+    flex: none;
+    background: linear-gradient(150deg, #fb923c, #ea580c);
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.95rem;
+  }
+  .logo__word {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--brand);
+  }
+  .app-nav {
+    display: none;
+    gap: 1.75rem;
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+  @container (min-width: 768px) {
+    .app-nav {
+      display: flex;
+    }
+  }
+  .app-nav a {
+    color: inherit;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .app-nav a:hover {
+    color: var(--brand);
+  }
+  .app-nav a[aria-current] {
+    color: var(--brand-600);
+    font-weight: 700;
+  }
+  .cta-pill {
+    flex: none;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    background: var(--brand);
+    color: #fff;
+    font-weight: 600;
+    padding: 0.6rem 1.25rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+  }
+  .cta-pill:hover {
+    background: var(--brand-600);
+  }
+
+  /* 상세 상단 스크롤 진행률 바 */
+  .progress {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    height: 3px;
+    background: rgba(254, 215, 170, 0.45);
+  }
+  .progress__fill {
+    height: 100%;
+    width: 0%;
+    background: var(--brand-600);
+    transition: width 0.08s linear;
+  }
+
+  .page {
+    padding: 0 1.25rem 4rem;
+  }
+  @container (min-width: 640px) {
+    .page {
+      padding: 0 2.25rem 5rem;
+    }
+  }
+  .wrap {
+    max-width: 68rem;
+    margin: 0 auto;
+  }
+  .wrap--read {
+    max-width: 42rem;
+    margin: 0 auto;
+  }
+
+  /* ---------- 목록: 히어로 ---------- */
+  .list-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 2.5rem 0 1.75rem;
+  }
+  .eyebrow {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--brand-600);
+    letter-spacing: 0.02em;
+  }
+  .list-hero h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    line-height: 1.25;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+  @container (min-width: 640px) {
+    .list-hero h1 {
+      font-size: 2.25rem;
+    }
+  }
+  @container (min-width: 1024px) {
+    .list-hero h1 {
+      font-size: 2.6rem;
+    }
+  }
+  .list-hero p {
+    margin: 0;
+    max-width: 40rem;
+    color: var(--text-soft);
+    font-size: 0.95rem;
+  }
+  @container (min-width: 640px) {
+    .list-hero p {
+      font-size: 1.05rem;
+    }
+  }
+
+  /* ---------- 검색 ---------- */
+  .search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin: 0.5rem 0 2rem;
+    max-width: 34rem;
+  }
+  .search svg {
+    position: absolute;
+    left: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--text-faint);
+    pointer-events: none;
+  }
+  .search input {
+    width: 100%;
+    font: inherit;
+    font-size: 0.95rem;
+    padding: 0.9rem 1rem 0.9rem 2.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--brand-200);
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 1px 2px rgba(24, 24, 27, 0.04);
+  }
+  .search input::placeholder {
+    color: var(--text-faint);
+  }
+  .search input:focus {
+    outline: none;
+    border-color: var(--brand);
+    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.14);
+  }
+  .search__count {
+    margin: -1.25rem 0 1.75rem;
+    font-size: 0.85rem;
+    color: var(--text-soft);
+  }
+  .search__count b {
+    color: var(--brand-600);
+  }
+
+  /* ---------- 카드 그리드 ---------- */
+  .post-grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: 1fr;
+  }
+  @container (min-width: 640px) {
+    .post-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @container (min-width: 1024px) {
+    .post-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--surface);
+    border-radius: 1.5rem;
+    box-shadow: 0 1px 3px rgba(24, 24, 27, 0.06);
+    text-decoration: none;
+    color: inherit;
+    transition:
+      transform 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 28px -16px rgba(23, 37, 84, 0.28);
+  }
+  .card:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 3px;
+  }
+  .card__thumb {
+    aspect-ratio: 16 / 9;
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+  }
+  .card__thumb span {
+    font-size: 2.6rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: rgba(255, 255, 255, 0.9);
+    mix-blend-mode: soft-light;
+  }
+  .t-1 {
+    background: linear-gradient(135deg, #fdba74, #ea580c);
+  }
+  .t-2 {
+    background: linear-gradient(135deg, #1e3a8a, #172554);
+  }
+  .t-3 {
+    background: linear-gradient(135deg, #fbbf24, #f97316);
+  }
+  .t-4 {
+    background: linear-gradient(135deg, #fb923c, #1e3a8a);
+  }
+
+  .card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding: 1.25rem;
+    flex: 1;
+  }
+  .card__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+  }
+  .dot {
+    color: var(--text-faint);
+  }
+  .card__meta time,
+  .card__meta .read {
+    color: var(--text-faint);
+  }
+  .card h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.4;
+    font-weight: 700;
+    color: var(--ink);
+    text-wrap: balance;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .card p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-soft);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* 무한 스크롤 로딩 */
+  .loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 2.5rem 0 1rem;
+    color: var(--text-faint);
+    font-size: 0.875rem;
+  }
+  .spinner {
+    width: 1.05rem;
+    height: 1.05rem;
+    border-radius: 999px;
+    border: 2px solid var(--brand-200);
+    border-top-color: var(--brand);
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .loader[hidden] {
+    display: none;
+  }
+
+  .crawl-link {
+    display: block;
+    text-align: center;
+    padding: 1rem 0 0;
+    font-size: 0.85rem;
+    color: var(--text-faint);
+    text-decoration: none;
+  }
+  .crawl-link:hover {
+    color: var(--brand-600);
+    text-decoration: underline;
+  }
+  .end-note {
+    text-align: center;
+    padding: 2rem 0 0;
+    color: var(--text-faint);
+    font-size: 0.85rem;
+  }
+
+  /* ---------- 상세 ---------- */
+  .article-head {
+    padding: 2.5rem 0 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+  .article-head h1 {
+    margin: 0;
+    font-size: 1.7rem;
+    line-height: 1.3;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+  @container (min-width: 640px) {
+    .article-head h1 {
+      font-size: 2.15rem;
+    }
+  }
+  .article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.85rem;
+    color: var(--text-faint);
+  }
+  .share {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-top: 0.35rem;
+  }
+  .share button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--text);
+  }
+  .share button:hover {
+    border-color: var(--brand-200);
+    color: var(--brand-600);
+  }
+  .share button:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+  .share svg {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  .article-cover {
+    height: 12rem;
+    border-radius: 1.5rem;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #1e3a8a, #172554);
+    display: grid;
+    place-items: center;
+  }
+  .article-cover span {
+    font-size: 3rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.16);
+    letter-spacing: -0.05em;
+  }
+  @container (min-width: 640px) {
+    .article-cover {
+      height: 16rem;
+    }
+  }
+
+  .prose {
+    color: var(--text);
+    font-size: 1rem;
+  }
+  .prose > * + * {
+    margin-top: 1.15rem;
+  }
+  .prose h2 {
+    margin-top: 2.5rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .prose p {
+    margin: 0;
+    line-height: 1.85;
+  }
+  .prose ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .prose li {
+    line-height: 1.75;
+  }
+  .prose strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .prose blockquote {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    border-left: 3px solid var(--brand-200);
+    background: rgba(255, 247, 237, 0.75);
+    border-radius: 0 1rem 1rem 0;
+    color: var(--ink);
+    font-size: 0.95rem;
+  }
+
+  .inline-cta {
+    margin-top: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 1.5rem;
+    background: var(--surface);
+    border-radius: 1.5rem;
+    box-shadow: 0 1px 3px rgba(24, 24, 27, 0.06);
+  }
+  .inline-cta strong {
+    color: var(--ink);
+    font-size: 1.05rem;
+  }
+  .inline-cta p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-soft);
+  }
+
+  /* ---------- 댓글 ---------- */
+  .comments {
+    margin-top: 3.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  .comments__head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+  .comments__head h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .comments__head span {
+    color: var(--brand-600);
+    font-weight: 700;
+  }
+
+  .composer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    background: var(--surface);
+    border-radius: 1.5rem;
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(24, 24, 27, 0.06);
+  }
+  .identity {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+  .avatar {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 999px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  .identity__name {
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 0.92rem;
+  }
+  .reroll {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-left: auto;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--text-soft);
+    background: var(--brand-50);
+    border: 0;
+    border-radius: 999px;
+    padding: 0.35rem 0.75rem;
+  }
+  .reroll:hover {
+    color: var(--brand-600);
+  }
+  .reroll:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+  .reroll svg {
+    width: 0.85rem;
+    height: 0.85rem;
+    transition: transform 0.4s ease;
+  }
+  .reroll.is-spinning svg {
+    transform: rotate(360deg);
+  }
+
+  .composer textarea {
+    font: inherit;
+    font-size: 0.92rem;
+    resize: vertical;
+    min-height: 5.5rem;
+    padding: 0.85rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid var(--line);
+    background: #fafafa;
+    color: var(--ink);
+  }
+  .composer textarea::placeholder {
+    color: var(--text-faint);
+  }
+  .composer textarea:focus {
+    outline: none;
+    background: var(--surface);
+    border-color: var(--brand-200);
+    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.12);
+  }
+  .composer__foot {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .composer__note {
+    font-size: 0.78rem;
+    color: var(--text-faint);
+  }
+  .composer__foot .cta-pill {
+    margin-left: auto;
+  }
+
+  .comment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .comment {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1.1rem 1.25rem;
+    background: var(--surface);
+    border-radius: 1.25rem;
+  }
+  .comment__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
+  }
+  .comment__top {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .comment__name {
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--ink);
+  }
+  .comment__time {
+    font-size: 0.78rem;
+    color: var(--text-faint);
+  }
+  .comment__text {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .comment.is-new {
+    animation: pop-in 0.32s ease;
+  }
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ---------- 설계 노트 ---------- */
+  .notes {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 720px) {
+    .notes {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1080px) {
+    .notes {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  .note {
+    background: var(--frame-card);
+    border: 1px solid var(--frame-border);
+    border-radius: 1rem;
+    padding: 1.1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+  .note h3 {
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--frame-accent);
+  }
+  .note p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--frame-muted);
+  }
+  .note code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.82em;
+    color: var(--frame-fg);
+  }
+
+  .screen[hidden] {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+    .viewport {
+      scroll-behavior: auto;
+    }
+  }
+</style>
+
+<div class="shell">
+  <div class="brief">
+    <p class="brief__eyebrow">토선생 · SEO 블로그</p>
+    <h1>/blog UI 시안</h1>
+    <p>
+      카드 목록 + 무한 스크롤 + 검색, 그리고 랜덤 익명 프로필로 다는 댓글까지.
+      기존 랜딩·가이드 페이지와 같은 오렌지/블루 계열을 그대로 쓰고, 카드는
+      <code>rounded-3xl</code> 화이트 + 얕은 그림자로 통일했습니다.
+    </p>
+  </div>
+
+  <div class="controls">
+    <div class="segmented" role="group" aria-label="화면 선택">
+      <button type="button" data-screen="list" aria-pressed="true">
+        목록 /blog
+      </button>
+      <button type="button" data-screen="detail" aria-pressed="false">
+        상세 /blog/[slug]
+      </button>
+    </div>
+    <div class="segmented" role="group" aria-label="뷰포트 선택">
+      <button type="button" data-device="desktop" aria-pressed="true">
+        데스크톱
+      </button>
+      <button type="button" data-device="mobile" aria-pressed="false">
+        모바일 390px
+      </button>
+    </div>
+  </div>
+
+  <div class="stage" data-device="desktop" id="stage">
+    <div class="viewport canvas" id="viewport">
+      <!-- ============ 진행률 바 (상세 전용) ============ -->
+      <div class="progress" id="progress" hidden>
+        <div class="progress__fill" id="progressFill"></div>
+      </div>
+
+      <!-- ============ 공통 헤더 ============ -->
+      <header class="app-header">
+        <div class="logo">
+          <div class="logo__mark" aria-hidden="true">토</div>
+          <span class="logo__word">토선생</span>
+        </div>
+        <nav class="app-nav" aria-label="주요 메뉴">
+          <a href="#">서비스 소개</a>
+          <a href="#">토익 스피킹 가이드</a>
+          <a href="#" aria-current="page">블로그</a>
+          <a href="#">문의하기</a>
+        </nav>
+        <button type="button" class="cta-pill">시작하기</button>
+      </header>
+
+      <!-- ============ 화면 1: 목록 ============ -->
+      <div class="screen" id="screen-list">
+        <div class="page">
+          <div class="wrap">
+            <section class="list-hero">
+              <p class="eyebrow">토선생 블로그</p>
+              <h1>토익 스피킹, 아는 만큼 점수가 오릅니다</h1>
+              <p>
+                등급 기준부터 파트별 답변 템플릿까지. 실제 채점 데이터를 보며
+                정리한 토익 스피킹 학습 노트를 모았어요.
+              </p>
+            </section>
+
+            <div class="search">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                aria-hidden="true"
+              >
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="m20 20-3.5-3.5"></path>
+              </svg>
+              <input
+                type="search"
+                id="search"
+                placeholder="궁금한 주제를 검색해 보세요 (예: Part 2, IH 등급)"
+                aria-label="블로그 글 검색"
+              />
+            </div>
+            <p class="search__count" id="searchCount" hidden></p>
+
+            <div class="post-grid" id="postGrid"></div>
+
+            <div class="loader" id="loader">
+              <span class="spinner" aria-hidden="true"></span>
+              <span>글을 더 불러오는 중…</span>
+            </div>
+            <a class="crawl-link" id="crawlLink" href="#"
+              >다음 페이지 (/blog?page=2)</a
+            >
+            <p class="end-note" id="endNote" hidden>
+              모든 글을 다 읽으셨어요 🎉
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ 화면 2: 상세 ============ -->
+      <div class="screen" id="screen-detail" hidden>
+        <div class="page">
+          <div class="wrap--read">
+            <header class="article-head">
+              <div class="article-meta">
+                <time datetime="2026-07-21">2026년 7월 21일</time>
+                <span class="dot">·</span>
+                <span>7분 분량</span>
+              </div>
+              <h1>토익 스피킹 IH, 실제로 뭘 못해서 못 넘을까</h1>
+              <div class="share">
+                <button type="button" id="copyBtn">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"
+                    ></path>
+                    <path
+                      d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"
+                    ></path>
+                  </svg>
+                  <span id="copyLabel">링크 복사</span>
+                </button>
+                <button type="button">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M21 11.5a8.4 8.4 0 0 1-8.5 8.2 9.6 9.6 0 0 1-2.4-.3L5 21l1.2-3.4A7.9 7.9 0 0 1 4 11.5C4 6.9 7.8 3.3 12.5 3.3S21 6.9 21 11.5Z"
+                    ></path>
+                  </svg>
+                  카카오톡
+                </button>
+                <button type="button">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 4l16 16M20 4L4 20"></path>
+                  </svg>
+                  X에 공유
+                </button>
+              </div>
+            </header>
+
+            <div class="article-cover" aria-hidden="true">
+              <span>IH → AL</span>
+            </div>
+
+            <div class="prose">
+              <p>
+                <strong
+                  >IH에서 멈추는 답변은 대부분 문법이 아니라 구조
+                  때문입니다.</strong
+                >
+                토선생에 쌓인 모의고사 응답을 보면, IM3와 IH를 가르는 지점은
+                어휘 난이도가 아니라 “60초를 어떻게 나눠 쓰느냐”에 훨씬
+                가깝습니다.
+              </p>
+              <p>
+                실제로 IM3 구간 답변의 평균 문장 수는 4.1개, IH 구간은
+                5.8개입니다. 문장 하나하나는 오히려 IH 쪽이 더 짧습니다. 길게
+                말하려다 중간에 끊기는 것보다, 짧은 문장을 끊김 없이 이어 붙이는
+                쪽이 유창성 점수를 더 가져간다는 뜻이에요.
+              </p>
+
+              <h2>1. 감점은 ‘멈춘 자리’에 몰려 있다</h2>
+              <p>
+                채점 기준에서 유창성(fluency)은 말이 빠른지를 보지 않습니다.
+                문장과 문장 사이가 아니라 <em>문장 한가운데에서</em> 멈추는
+                횟수를 봅니다. 단어가 안 떠올라 “uh…” 하고 멈추는 0.8초가
+                반복되면, 발음이 아무리 좋아도 IH 위로 올라가기 어렵습니다.
+              </p>
+              <blockquote>
+                실전 팁 — 단어가 막히면 멈추지 말고 이미 말한 문장을 다른 말로
+                한 번 더 풀어 주세요. 내용 중복은 거의 감점되지 않지만, 침묵은
+                확실히 감점됩니다.
+              </blockquote>
+
+              <h2>2. IH 답변이 공통으로 갖고 있는 3단 구조</h2>
+              <ul>
+                <li>
+                  <strong>입장</strong> — 첫 문장에서 결론부터. “I think A is
+                  better.”
+                </li>
+                <li>
+                  <strong>이유 2개</strong> — 각각 한 문장 + 근거 한 문장씩.
+                </li>
+                <li>
+                  <strong>마무리</strong> — 첫 문장을 다른 표현으로 되짚기.
+                </li>
+              </ul>
+              <p>
+                이 구조를 몸에 익히면 준비 시간 15초 안에 뼈대를 세울 수 있고,
+                답변 도중 다음에 무슨 말을 할지 고민하느라 생기는 침묵이
+                사라집니다.
+              </p>
+
+              <h2>3. 내 답변이 지금 어디쯤인지부터 확인하기</h2>
+              <p>
+                감점 포인트는 사람마다 다릅니다. 발음이 문제인 사람에게 구조
+                연습을 시키면 시간만 버립니다. 실제 시험과 같은 유형으로 한
+                세트를 풀고, 항목별 점수가 어디서 깎였는지 먼저 확인하는 편이
+                훨씬 빠릅니다.
+              </p>
+            </div>
+
+            <div class="inline-cta">
+              <strong>내 등급, 지금 바로 확인해 볼까요?</strong>
+              <p>
+                가입 없이 20분. 실제 시험과 같은 11문항을 풀면 AI가 항목별 감점
+                이유까지 알려드려요.
+              </p>
+              <button type="button" class="cta-pill">
+                무료 모의고사 시작하기
+              </button>
+            </div>
+
+            <!-- ============ 댓글 ============ -->
+            <section class="comments">
+              <div class="comments__head">
+                <h2>댓글</h2>
+                <span id="commentCount">4</span>
+              </div>
+
+              <div class="composer">
+                <div class="identity">
+                  <div class="avatar" id="myAvatar">토</div>
+                  <span class="identity__name" id="myName">성실한 당근</span>
+                  <button type="button" class="reroll" id="rerollBtn">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M21 12a9 9 0 1 1-2.6-6.4"></path>
+                      <path d="M21 3v5h-5"></path>
+                    </svg>
+                    다시 뽑기
+                  </button>
+                </div>
+                <textarea
+                  id="commentInput"
+                  placeholder="글에 대한 생각을 남겨 주세요. 닉네임과 프로필은 자동으로 만들어집니다."
+                ></textarea>
+                <div class="composer__foot">
+                  <span class="composer__note"
+                    >등록한 댓글은 수정·삭제할 수 없어요.</span
+                  >
+                  <button type="button" class="cta-pill" id="submitComment">
+                    댓글 등록
+                  </button>
+                </div>
+              </div>
+
+              <div class="comment-list" id="commentList"></div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div class="note">
+      <h3>목록 · 카드</h3>
+      <p>
+        썸네일 16:9 + 날짜·분량 + 제목 2줄 클램프 + 요약 2줄. 카테고리는 두지
+        않습니다. 컨테이너 쿼리로 1→2→3열이라 모바일 토글에서 바로 확인됩니다.
+      </p>
+    </div>
+    <div class="note">
+      <h3>무한 스크롤 + SEO</h3>
+      <p>
+        스크롤로 다음 배치를 붙이되, 하단 <code>/blog?page=2</code> 링크는 DOM에
+        남깁니다. 크롤러는 이 앵커를, 사용자는 스크롤을 씁니다.
+      </p>
+    </div>
+    <div class="note">
+      <h3>상세 · 읽기 보조</h3>
+      <p>
+        상단 진행률 바, 본문 폭 <code>42rem</code>(약 65자), 날짜·읽는 시간
+        메타, 공유 3종. 링크 복사는 눌러 보면 상태가 바뀝니다.
+      </p>
+    </div>
+    <div class="note">
+      <h3>익명 댓글</h3>
+      <p>
+        닉네임·프로필 색은 입장 시 자동 생성, ‘다시 뽑기’로 재추첨. 등록
+        전용이라 수정·삭제 버튼 자체가 없습니다.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    // ---------------- 데이터 ----------------
+    const POSTS = [
+      {
+        t: "토익 스피킹 IH, 실제로 뭘 못해서 못 넘을까",
+        d: "IM3와 IH를 가르는 건 어휘가 아니라 60초를 나눠 쓰는 방식입니다. 실제 응답 데이터로 확인해 봤어요.",
+        date: "2026.07.21",
+        read: 7,
+        mono: "IH",
+      },
+      {
+        t: "Part 2 사진 묘사, 45초를 채우는 3단 템플릿",
+        d: "전체 → 인물 → 배경 순서만 지켜도 할 말이 떨어지지 않습니다. 문장별 예시 표현까지 정리했습니다.",
+        date: "2026.07.18",
+        read: 6,
+        mono: "P2",
+      },
+      {
+        t: "발음보다 유창성 — AI 채점기가 진짜 보는 것",
+        d: "원어민 발음이 아니어도 AL은 나옵니다. 대신 문장 중간의 침묵은 생각보다 크게 깎입니다.",
+        date: "2026.07.15",
+        read: 5,
+        mono: "AI",
+      },
+      {
+        t: "토익 스피킹 등급표 완전 정리 (NH·IM1~3·IH·AL)",
+        d: "등급별 점수 구간과 기업에서 실제로 요구하는 등급을 한 표로 묶었습니다.",
+        date: "2026.07.11",
+        read: 4,
+        mono: "AL",
+      },
+      {
+        t: "Part 5 의견 제시, 60초 안에 논리를 만드는 법",
+        d: "준비 시간 15초에 뼈대를 세우는 메모법. 이유 2개를 고르는 기준부터 잡아 드립니다.",
+        date: "2026.07.08",
+        read: 8,
+        mono: "P5",
+      },
+      {
+        t: "시험 2주 전, 하루 30분 학습 플랜",
+        d: "1주차는 유형 익히기, 2주차는 실전 타이밍. 요일별로 무엇을 할지 그대로 따라 하면 됩니다.",
+        date: "2026.07.04",
+        read: 6,
+        mono: "14D",
+      },
+      {
+        t: "응시료 84,000원 아끼는 사전 점검 리스트",
+        d: "접수 전에 확인하면 좋은 것들. 컴퓨터·마이크 환경부터 시험장 선택 기준까지.",
+        date: "2026.07.01",
+        read: 5,
+        mono: "84K",
+      },
+      {
+        t: "Part 3 세 번째 문제, 왜 다들 여기서 무너질까",
+        d: "질문이 길어지는 마지막 문항. 다 못 들었을 때 쓸 수 있는 복구 전략을 정리했습니다.",
+        date: "2026.06.27",
+        read: 6,
+        mono: "P3",
+      },
+      {
+        t: "혼자 연습할 때 내 답변을 녹음해서 들어야 하는 이유",
+        d: "머릿속 발음과 실제 발음의 간격. 녹음 후 체크할 5가지 항목을 만들었습니다.",
+        date: "2026.06.23",
+        read: 4,
+        mono: "REC",
+      },
+      {
+        t: "문법 실수, 몇 개까지 괜찮을까",
+        d: "감점되는 실수와 그냥 넘어가는 실수는 다릅니다. 의미 전달을 막는 실수만 잡으세요.",
+        date: "2026.06.19",
+        read: 5,
+        mono: "GRM",
+      },
+      {
+        t: "토익 스피킹 처음이라면 이 순서대로 준비하세요",
+        d: "유형 파악 → 모의고사 1회 → 약점 파악 → 반복. 첫 2주를 헤매지 않는 방법.",
+        date: "2026.06.14",
+        read: 7,
+        mono: "01",
+      },
+      {
+        t: "Part 1 지문 읽기, 끊어 읽기 표시부터 하세요",
+        d: "쉼표가 없어도 끊어야 할 자리가 있습니다. 의미 단위로 나누는 연습법.",
+        date: "2026.06.10",
+        read: 4,
+        mono: "P1",
+      },
+    ];
+    // 썸네일 이미지가 없는 글의 폴백 — 브랜드 계열 그라디언트를 순서대로 돌린다.
+    POSTS.forEach(function (p, i) {
+      p.th = "t-" + ((i % 4) + 1);
+    });
+
+    const PAGE_SIZE = 6;
+    const grid = document.getElementById("postGrid");
+    const loader = document.getElementById("loader");
+    const endNote = document.getElementById("endNote");
+    const crawlLink = document.getElementById("crawlLink");
+    const searchInput = document.getElementById("search");
+    const searchCount = document.getElementById("searchCount");
+    const viewport = document.getElementById("viewport");
+
+    let shown = 0;
+    let filtered = POSTS.slice();
+    let loading = false;
+
+    function cardHTML(p) {
+      return (
+        '<a class="card" href="#" data-goto-detail>' +
+        '<div class="card__thumb ' +
+        p.th +
+        '"><span aria-hidden="true">' +
+        p.mono +
+        "</span></div>" +
+        '<div class="card__body">' +
+        '<div class="card__meta">' +
+        "<time>" +
+        p.date +
+        "</time>" +
+        '<span class="dot">·</span><span class="read">' +
+        p.read +
+        "분 분량</span>" +
+        "</div>" +
+        "<h3>" +
+        p.t +
+        "</h3>" +
+        "<p>" +
+        p.d +
+        "</p>" +
+        "</div>" +
+        "</a>"
+      );
+    }
+
+    function renderNextBatch() {
+      const batch = filtered.slice(shown, shown + PAGE_SIZE);
+      grid.insertAdjacentHTML("beforeend", batch.map(cardHTML).join(""));
+      shown += batch.length;
+      const done = shown >= filtered.length;
+      loader.hidden = done;
+      crawlLink.hidden = done;
+      endNote.hidden = !done || filtered.length === 0;
+    }
+
+    function resetList() {
+      grid.innerHTML = "";
+      shown = 0;
+      endNote.hidden = true;
+      renderNextBatch();
+    }
+
+    resetList();
+
+    // 무한 스크롤 — 바닥 근처에서 다음 배치
+    viewport.addEventListener("scroll", function () {
+      updateProgress();
+      if (document.getElementById("screen-list").hidden) return;
+      if (loading || shown >= filtered.length) return;
+      const nearBottom =
+        viewport.scrollTop + viewport.clientHeight >=
+        viewport.scrollHeight - 240;
+      if (!nearBottom) return;
+      loading = true;
+      setTimeout(function () {
+        renderNextBatch();
+        loading = false;
+      }, 550);
+    });
+
+    // 검색
+    let searchTimer;
+    searchInput.addEventListener("input", function () {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(function () {
+        const q = searchInput.value.trim().toLowerCase();
+        filtered = q
+          ? POSTS.filter(function (p) {
+              return (p.t + p.d).toLowerCase().includes(q);
+            })
+          : POSTS.slice();
+        if (q) {
+          searchCount.hidden = false;
+          searchCount.innerHTML =
+            "‘" +
+            searchInput.value.trim() +
+            "’ 검색 결과 <b>" +
+            filtered.length +
+            "건</b>";
+        } else {
+          searchCount.hidden = true;
+        }
+        resetList();
+        if (filtered.length === 0) {
+          grid.innerHTML =
+            '<p style="grid-column:1/-1;padding:2.5rem 0;color:var(--text-faint);font-size:.95rem">' +
+            "검색 결과가 없어요. 다른 키워드로 찾아보시겠어요?</p>";
+          loader.hidden = true;
+          crawlLink.hidden = true;
+        }
+      }, 220);
+    });
+
+    // ---------------- 화면 전환 ----------------
+    const screens = {
+      list: document.getElementById("screen-list"),
+      detail: document.getElementById("screen-detail"),
+    };
+    const progress = document.getElementById("progress");
+    const progressFill = document.getElementById("progressFill");
+
+    function showScreen(name) {
+      screens.list.hidden = name !== "list";
+      screens.detail.hidden = name !== "detail";
+      progress.hidden = name !== "detail";
+      viewport.scrollTop = 0;
+      updateProgress();
+      document.querySelectorAll("[data-screen]").forEach(function (b) {
+        b.setAttribute("aria-pressed", String(b.dataset.screen === name));
+      });
+    }
+
+    document.querySelectorAll("[data-screen]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        showScreen(btn.dataset.screen);
+      });
+    });
+
+    grid.addEventListener("click", function (e) {
+      const card = e.target.closest("[data-goto-detail]");
+      if (!card) return;
+      e.preventDefault();
+      showScreen("detail");
+    });
+
+    function updateProgress() {
+      if (progress.hidden) return;
+      const max = viewport.scrollHeight - viewport.clientHeight;
+      const pct = max > 0 ? (viewport.scrollTop / max) * 100 : 0;
+      progressFill.style.width = pct.toFixed(1) + "%";
+    }
+
+    // 디바이스 토글
+    const stage = document.getElementById("stage");
+    document.querySelectorAll("[data-device]").forEach(function (btn) {
+      if (!btn.matches("button")) return;
+      btn.addEventListener("click", function () {
+        stage.dataset.device = btn.dataset.device;
+        document.querySelectorAll("button[data-device]").forEach(function (b) {
+          b.setAttribute(
+            "aria-pressed",
+            String(b.dataset.device === btn.dataset.device),
+          );
+        });
+      });
+    });
+
+    // ---------------- 익명 아이덴티티 ----------------
+    const ADJ = [
+      "성실한",
+      "졸린",
+      "긴장한",
+      "차분한",
+      "말많은",
+      "야무진",
+      "느긋한",
+      "당당한",
+      "부지런한",
+      "수줍은",
+    ];
+    const NOUN = [
+      "당근",
+      "토끼",
+      "부엉이",
+      "고양이",
+      "너구리",
+      "다람쥐",
+      "수달",
+      "펭귄",
+      "고슴도치",
+      "판다",
+    ];
+    const AVATAR_BG = [
+      "linear-gradient(140deg,#fb923c,#ea580c)",
+      "linear-gradient(140deg,#60a5fa,#1e3a8a)",
+      "linear-gradient(140deg,#fbbf24,#f97316)",
+      "linear-gradient(140deg,#34d399,#0f766e)",
+      "linear-gradient(140deg,#f472b6,#be185d)",
+      "linear-gradient(140deg,#a78bfa,#5b21b6)",
+    ];
+    const pick = function (a) {
+      return a[Math.floor(Math.random() * a.length)];
+    };
+
+    function makeIdentity() {
+      const name = pick(ADJ) + " " + pick(NOUN);
+      return {
+        name: name,
+        bg: pick(AVATAR_BG),
+        initial: name.split(" ")[1].charAt(0),
+      };
+    }
+
+    const myAvatar = document.getElementById("myAvatar");
+    const myName = document.getElementById("myName");
+    let me = makeIdentity();
+
+    function paintMe() {
+      myName.textContent = me.name;
+      myAvatar.textContent = me.initial;
+      myAvatar.style.background = me.bg;
+    }
+    paintMe();
+
+    const rerollBtn = document.getElementById("rerollBtn");
+    rerollBtn.addEventListener("click", function () {
+      me = makeIdentity();
+      paintMe();
+      rerollBtn.classList.add("is-spinning");
+      setTimeout(function () {
+        rerollBtn.classList.remove("is-spinning");
+      }, 420);
+    });
+
+    // ---------------- 댓글 ----------------
+    const SEED = [
+      {
+        n: "야무진 부엉이",
+        t: "3주 전",
+        x: "문장 중간에 멈추는 게 감점이라는 걸 이제 알았네요. 저는 계속 완벽한 문장 만들려다 침묵만 늘었던 것 같아요.",
+      },
+      {
+        n: "졸린 수달",
+        t: "3주 전",
+        x: "이유 2개 + 근거 1문장씩 구조 그대로 연습했더니 확실히 60초가 안 남아요. 감사합니다!",
+      },
+      {
+        n: "차분한 너구리",
+        t: "2주 전",
+        x: "IM3에서 세 번 미끄러졌는데 어휘만 파고 있었어요. 방향을 잘못 잡았던 거네요…",
+      },
+      {
+        n: "당당한 펭귄",
+        t: "6일 전",
+        x: "모의고사 한 번 보고 왔는데 진짜 유창성만 유독 낮게 나왔어요. 글이랑 정확히 같은 진단이라 신기합니다.",
+      },
+    ];
+
+    const commentList = document.getElementById("commentList");
+    const commentCount = document.getElementById("commentCount");
+
+    function commentHTML(c, isNew) {
+      const id = makeIdentity();
+      const bg = c.bg || id.bg;
+      const initial = c.n.split(" ")[1].charAt(0);
+      return (
+        '<article class="comment' +
+        (isNew ? " is-new" : "") +
+        '">' +
+        '<div class="avatar" style="background:' +
+        bg +
+        '">' +
+        initial +
+        "</div>" +
+        '<div class="comment__body">' +
+        '<div class="comment__top">' +
+        '<span class="comment__name">' +
+        c.n +
+        "</span>" +
+        '<span class="comment__time">' +
+        c.t +
+        "</span>" +
+        "</div>" +
+        '<p class="comment__text">' +
+        c.x +
+        "</p>" +
+        "</div>" +
+        "</article>"
+      );
+    }
+
+    SEED.forEach(function (c, i) {
+      c.bg = AVATAR_BG[i % AVATAR_BG.length];
+      commentList.insertAdjacentHTML("beforeend", commentHTML(c, false));
+    });
+
+    const input = document.getElementById("commentInput");
+    document
+      .getElementById("submitComment")
+      .addEventListener("click", function () {
+        const text = input.value.trim();
+        if (!text) {
+          input.focus();
+          return;
+        }
+        commentList.insertAdjacentHTML(
+          "beforeend",
+          commentHTML({ n: me.name, t: "방금 전", x: text, bg: me.bg }, true),
+        );
+        commentCount.textContent = String(Number(commentCount.textContent) + 1);
+        input.value = "";
+        me = makeIdentity();
+        paintMe();
+      });
+
+    // 링크 복사 피드백
+    const copyBtn = document.getElementById("copyBtn");
+    const copyLabel = document.getElementById("copyLabel");
+    copyBtn.addEventListener("click", function () {
+      copyLabel.textContent = "복사했어요";
+      setTimeout(function () {
+        copyLabel.textContent = "링크 복사";
+      }, 1600);
+    });
+  })();
+</script>

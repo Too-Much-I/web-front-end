@@ -4,7 +4,7 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { ClarityAnalytics } from "@/components/clarity-analytics";
 import { GoogleAnalyticsTag } from "@/components/google-analytics";
-import { SITE_URL } from "@/lib/site-config";
+import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/site-config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: SITE_URL,
     siteName: "토선생",
-    images: [{ url: "/og-image.png", width: 1200, height: 600, alt: TITLE }],
+    images: [{ ...DEFAULT_OG_IMAGE, alt: TITLE }],
     locale: "ko_KR",
     type: "website",
   },
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: TITLE,
     description: DESCRIPTION,
-    images: ["/og-image.png"],
+    images: [DEFAULT_OG_IMAGE.url],
   },
 };
 

@@ -40,6 +40,9 @@ export default function Home() {
           >
             토익 스피킹 가이드
           </Link>
+          <Link href="/blog" className="hover:text-orange-500">
+            블로그
+          </Link>
           <Link href="/contact" className="hover:text-orange-500">
             문의하기
           </Link>
@@ -118,6 +121,9 @@ export default function Home() {
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 text-sm text-zinc-500 sm:flex-row md:text-base lg:max-w-7xl 2xl:max-w-[100rem]">
           <span>© {new Date().getFullYear()} 토선생. All rights reserved.</span>
           <nav className="flex flex-wrap items-center justify-center gap-5">
+            <Link href="/blog" className="hover:text-orange-500">
+              블로그
+            </Link>
             <Link
               href="/guide/toeic-speaking-parts"
               className="hover:text-orange-500"
