@@ -1,8 +1,4 @@
 import { mapBlogPostDetail } from "@/features/blog/map-blog-post";
-import {
-  isBlogMockEnabled,
-  mockGetBlogPost,
-} from "@/features/blog/mock/blog-mock-api";
 import { ApiError, apiFetch } from "@/lib/api/client";
 import type { ApiEnvelope } from "@/types/api";
 import type { BlogPostDetail, RawBlogPostDetail } from "@/types/blog";
@@ -18,10 +14,6 @@ export async function getBlogPost(
   { revalidate }: { revalidate?: number } = {},
 ): Promise<BlogPostDetail | null> {
   try {
-    if (isBlogMockEnabled()) {
-      return mapBlogPostDetail(await mockGetBlogPost(slug));
-    }
-
     const { result } = await apiFetch<ApiEnvelope<RawBlogPostDetail>>(
       `/api/posts/${encodeURIComponent(slug)}`,
       revalidate === undefined ? undefined : { next: { revalidate } },

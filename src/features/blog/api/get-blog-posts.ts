@@ -1,8 +1,5 @@
+import { toApiPage } from "@/features/blog/blog-page-index";
 import { mapBlogPostPage } from "@/features/blog/map-blog-post";
-import {
-  isBlogMockEnabled,
-  mockGetBlogPosts,
-} from "@/features/blog/mock/blog-mock-api";
 import { apiFetch } from "@/lib/api/client";
 import type { ApiEnvelope } from "@/types/api";
 import type { BlogPostPage, RawBlogPostPage } from "@/types/blog";
@@ -11,8 +8,9 @@ import type { BlogPostPage, RawBlogPostPage } from "@/types/blog";
 export const BLOG_PAGE_SIZE = 9;
 
 /**
- * 공개 게시글을 최신순으로 조회한다.
+ * 공개 게시글을 최신순으로 조회한다(GET /api/posts).
  *
+ * `page`는 앱 기준 1-base로 받고, 요청을 만들 때만 백엔드 기준 0-base로 바꾼다.
  * 목록은 ISR로 프리렌더되므로 재검증 주기를 fetch에도 명시한다. 명시하지 않으면
  * Next 15 기본값(no-store)이 적용되어 라우트가 동적 렌더링으로 전환된다.
  */
@@ -25,12 +23,10 @@ export async function getBlogPosts({
   size?: number;
   revalidate?: number;
 } = {}): Promise<BlogPostPage> {
-  if (isBlogMockEnabled()) {
-    return mapBlogPostPage(await mockGetBlogPosts({ page, size }));
-  }
+  const apiPage = toApiPage(page);
 
   const { result } = await apiFetch<ApiEnvelope<RawBlogPostPage>>(
-    `/api/posts?page=${page}&size=${size}`,
+    `/api/posts?page=${apiPage}&size=${size}`,
     revalidate === undefined ? undefined : { next: { revalidate } },
   );
   return mapBlogPostPage(result);

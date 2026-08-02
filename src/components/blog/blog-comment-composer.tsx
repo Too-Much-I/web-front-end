@@ -3,6 +3,7 @@
 import { RefreshCw } from "lucide-react";
 import { useState } from "react";
 
+import { BlogAvatar } from "@/components/blog/blog-avatar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,7 +15,6 @@ import {
   COMMENT_MAX_LENGTH,
   COMMENT_MIN_LENGTH,
 } from "@/features/blog/api/blog-comments";
-import { avatarGradient, avatarInitial } from "@/features/blog/avatar";
 import type { AnonymousIdentity } from "@/types/blog";
 
 /**
@@ -60,13 +60,11 @@ export function BlogCommentComposer({
       <div className="flex items-center gap-2.5">
         {identity ? (
           <>
-            <span
-              aria-hidden
-              className="grid size-9 shrink-0 place-items-center rounded-full text-sm font-bold text-white"
-              style={{ backgroundImage: avatarGradient(identity.avatarSeed) }}
-            >
-              {avatarInitial(identity.nickname)}
-            </span>
+            <BlogAvatar
+              nickname={identity.nickname}
+              avatarSeed={identity.avatarSeed}
+              avatarImageUrl={identity.avatarImageUrl}
+            />
             <span className="text-sm font-bold text-blue-950">
               {identity.nickname}
             </span>

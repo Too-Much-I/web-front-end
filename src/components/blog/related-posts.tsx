@@ -1,14 +1,14 @@
 import Link from "next/link";
 
 import { formatBlogDate, toDateAttribute } from "@/features/blog/blog-format";
-import type { BlogPostSummary } from "@/types/blog";
+import type { RelatedBlogPost } from "@/types/blog";
 
 /**
  * 본문 하단 관련 글(docs/blog.md 12.1).
  *
  * 본문 폭이 좁아 카드 그리드 대신 세로로 쌓는 목록 형태를 쓴다.
  */
-export function RelatedPosts({ posts }: { posts: BlogPostSummary[] }) {
+export function RelatedPosts({ posts }: { posts: RelatedBlogPost[] }) {
   if (posts.length === 0) return null;
 
   return (

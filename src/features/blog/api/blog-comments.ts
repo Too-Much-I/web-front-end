@@ -1,17 +1,17 @@
-import { mapBlogCommentPage } from "@/features/blog/map-blog-comment";
+import { toApiPage } from "@/features/blog/blog-page-index";
 import {
-  isBlogMockEnabled,
-  mockCreateBlogComment,
-  mockGetAnonymousIdentity,
-  mockGetBlogComments,
-  mockRegenerateAnonymousIdentity,
-} from "@/features/blog/mock/blog-mock-api";
+  mapAnonymousIdentity,
+  mapBlogComment,
+  mapBlogCommentPage,
+} from "@/features/blog/map-blog-comment";
 import { apiFetch } from "@/lib/api/client";
 import type { ApiEnvelope } from "@/types/api";
 import type {
   AnonymousIdentity,
+  BlogComment,
   BlogCommentPage,
-  RawAnonymousIdentity,
+  RawAnonymousProfile,
+  RawBlogComment,
   RawBlogCommentPage,
 } from "@/types/blog";
 
@@ -28,22 +28,27 @@ export const COMMENT_MAX_LENGTH = 500;
  */
 const withCredentials: RequestInit = { credentials: "include" };
 
-/** 커서 기반으로 댓글을 최신순 조회한다. */
+/**
+ * 게시글 댓글을 최신순으로 조회한다(GET /api/posts/{slug}/comments).
+ *
+ * 백엔드가 커서가 아니라 page/size 페이지네이션을 쓰므로, `page`는 앱 기준
+ * 1-base로 받고 요청할 때만 0-base로 바꾼다.
+ */
 export async function getBlogComments({
   slug,
-  cursor,
+  page = 1,
   size = COMMENT_PAGE_SIZE,
 }: {
   slug: string;
-  cursor?: string | null;
+  page?: number;
   size?: number;
 }): Promise<BlogCommentPage> {
-  if (isBlogMockEnabled()) {
-    return mapBlogCommentPage(await mockGetBlogComments());
-  }
+  const apiPage = toApiPage(page);
 
-  const params = new URLSearchParams({ size: String(size) });
-  if (cursor) params.set("cursor", cursor);
+  const params = new URLSearchParams({
+    page: String(apiPage),
+    size: String(size),
+  });
 
   const { result } = await apiFetch<ApiEnvelope<RawBlogCommentPage>>(
     `/api/posts/${encodeURIComponent(slug)}/comments?${params}`,
@@ -53,40 +58,27 @@ export async function getBlogComments({
 }
 
 /**
- * 현재 브라우저에 배정된 닉네임과 아바타를 조회한다.
+ * 닉네임과 아바타를 새로 뽑는다(POST /api/comments/nickname/regenerate).
+ * 이미 등록된 댓글의 표시 정보는 바뀌지 않는다.
  *
- * 닉네임·아바타는 클라이언트가 정하지 않고 서버가 익명 쿠키를 기준으로 결정하므로
- * (docs/blog.md 8.5), 작성 폼이 내 표시 정보를 보여주려면 조회 수단이 필요하다.
- * docs/blog.md 15.2의 API 목록에는 재발급(POST)만 있고 조회(GET)가 빠져 있어,
- * 백엔드에 함께 요청해야 하는 엔드포인트다.
+ * 백엔드에 "현재 아이덴티티 조회(GET)"는 없고 재발급만 있다. 그래서 작성 폼이
+ * 처음 자기 표시 정보를 얻을 때도 이 엔드포인트를 쓴다. 응답과 함께 서버가
+ * anon_session 쿠키를 내려주므로, 첫 호출이 곧 발급이기도 하다.
  */
-export async function getAnonymousIdentity(): Promise<AnonymousIdentity> {
-  if (isBlogMockEnabled()) return mockGetAnonymousIdentity();
-
-  const { result } = await apiFetch<ApiEnvelope<RawAnonymousIdentity>>(
-    "/api/comments/nickname",
-    withCredentials,
-  );
-  return { nickname: result.nickname, avatarSeed: result.avatarSeed };
-}
-
-/** 닉네임과 아바타를 새로 뽑는다. 기존 댓글의 표시 정보는 바뀌지 않는다. */
 export async function regenerateAnonymousIdentity(): Promise<AnonymousIdentity> {
-  if (isBlogMockEnabled()) return mockRegenerateAnonymousIdentity();
-
-  const { result } = await apiFetch<ApiEnvelope<RawAnonymousIdentity>>(
+  const { result } = await apiFetch<ApiEnvelope<RawAnonymousProfile>>(
     "/api/comments/nickname/regenerate",
     { ...withCredentials, method: "POST" },
   );
-  return { nickname: result.nickname, avatarSeed: result.avatarSeed };
+  return mapAnonymousIdentity(result);
 }
 
 /**
- * 댓글을 작성한다.
+ * 댓글을 작성한다(POST /api/posts/{slug}/comments).
  *
- * 닉네임·아바타·익명 사용자 ID는 보내지 않는다. 서버가 쿠키로 결정한다.
- * `website`는 사용자에게 보이지 않는 허니팟 필드로, 값이 차 있으면 서버가
- * 자동화 요청으로 판단한다(docs/blog.md 8.8).
+ * 닉네임·아바타·익명 사용자 ID는 보내지 않는다. 서버가 쿠키로 결정하고, 그렇게
+ * 결정된 값이 응답으로 돌아온다. `website`는 사용자에게 보이지 않는 허니팟
+ * 필드로, 값이 차 있으면 서버가 자동화 요청으로 판단한다(docs/blog.md 8.8).
  */
 export async function createBlogComment({
   slug,
@@ -96,10 +88,8 @@ export async function createBlogComment({
   slug: string;
   content: string;
   website: string;
-}): Promise<void> {
-  if (isBlogMockEnabled()) return mockCreateBlogComment({ content });
-
-  await apiFetch<ApiEnvelope<unknown>>(
+}): Promise<BlogComment> {
+  const { result } = await apiFetch<ApiEnvelope<RawBlogComment>>(
     `/api/posts/${encodeURIComponent(slug)}/comments`,
     {
       ...withCredentials,
@@ -107,4 +97,5 @@ export async function createBlogComment({
       body: JSON.stringify({ content, website }),
     },
   );
+  return mapBlogComment(result);
 }

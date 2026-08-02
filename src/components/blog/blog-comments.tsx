@@ -4,14 +4,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { BlogAvatar } from "@/components/blog/blog-avatar";
 import { BlogCommentComposer } from "@/components/blog/blog-comment-composer";
 import {
   createBlogComment,
-  getAnonymousIdentity,
   getBlogComments,
   regenerateAnonymousIdentity,
 } from "@/features/blog/api/blog-comments";
-import { avatarGradient, avatarInitial } from "@/features/blog/avatar";
 import { formatRelativeTime } from "@/features/blog/blog-format";
 import type { AnonymousIdentity, BlogComment } from "@/types/blog";
 
@@ -23,19 +22,24 @@ import type { AnonymousIdentity, BlogComment } from "@/types/blog";
  */
 export function BlogComments({ slug }: { slug: string }) {
   const queryClient = useQueryClient();
-  const [cursor, setCursor] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
   const [loadedPages, setLoadedPages] = useState<BlogComment[]>([]);
 
+  /**
+   * 백엔드에는 아이덴티티 조회 엔드포인트가 없고 재발급만 있다. 그래서 첫 표시
+   * 정보도 재발급으로 받아 온다. staleTime을 무한으로 두어 마운트마다 새로
+   * 뽑히지 않게 한다.
+   */
   const identityQuery = useQuery({
     queryKey: ["blog", "identity"],
-    queryFn: getAnonymousIdentity,
+    queryFn: regenerateAnonymousIdentity,
     staleTime: Infinity,
     retry: false,
   });
 
   const commentsQuery = useQuery({
-    queryKey: ["blog", "comments", slug, cursor],
-    queryFn: () => getBlogComments({ slug, cursor }),
+    queryKey: ["blog", "comments", slug, page],
+    queryFn: () => getBlogComments({ slug, page }),
   });
 
   const regenerate = useMutation({
@@ -52,9 +56,9 @@ export function BlogComments({ slug }: { slug: string }) {
     mutationFn: (payload: { content: string; website: string }) =>
       createBlogComment({ slug, ...payload }),
     onSuccess: async () => {
-      // 커서를 처음으로 되돌려 최신 댓글부터 다시 읽는다.
+      // 첫 페이지로 되돌려 방금 쓴 댓글이 포함된 목록을 다시 읽는다.
       setLoadedPages([]);
-      setCursor(null);
+      setPage(1);
       await queryClient.invalidateQueries({
         queryKey: ["blog", "comments", slug],
       });
@@ -71,18 +75,18 @@ export function BlogComments({ slug }: { slug: string }) {
 
   const currentPage = commentsQuery.data;
   const comments = [...loadedPages, ...(currentPage?.comments ?? [])];
+  const totalCount = currentPage?.totalElements ?? comments.length;
 
   function handleLoadMore() {
-    if (!currentPage?.nextCursor) return;
+    if (!currentPage?.hasNext) return;
     setLoadedPages(comments);
-    setCursor(currentPage.nextCursor);
+    setPage(currentPage.page + 1);
   }
 
   return (
     <section className="mt-14 flex flex-col gap-5">
       <h2 className="text-lg font-bold text-blue-950 sm:text-xl">
-        댓글{" "}
-        <span className="text-orange-600 tabular-nums">{comments.length}</span>
+        댓글 <span className="text-orange-600 tabular-nums">{totalCount}</span>
       </h2>
 
       <BlogCommentComposer
@@ -117,13 +121,11 @@ export function BlogComments({ slug }: { slug: string }) {
             key={comment.id}
             className="flex gap-3 rounded-2xl bg-white px-5 py-4"
           >
-            <span
-              aria-hidden
-              className="grid size-9 shrink-0 place-items-center rounded-full text-sm font-bold text-white"
-              style={{ backgroundImage: avatarGradient(comment.avatarSeed) }}
-            >
-              {avatarInitial(comment.nickname)}
-            </span>
+            <BlogAvatar
+              nickname={comment.nickname}
+              avatarSeed={comment.avatarSeed}
+              avatarImageUrl={comment.avatarImageUrl}
+            />
             <div className="flex min-w-0 flex-col gap-1">
               <div className="flex flex-wrap items-baseline gap-2">
                 <span className="text-sm font-bold text-blue-950">
