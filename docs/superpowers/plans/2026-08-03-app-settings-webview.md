@@ -60,7 +60,9 @@
 
 먼저 한다. 이후 태스크가 만드는 페이지들이 처음부터 분석 스크립트 없이 뜨고, 앱용 개인정보 처리방침의 조문(Task 4)이 이 결과에 의존하기 때문이다.
 
-**근거:** 웹뷰에 웹 분석 SDK를 그대로 두면 같은 사용자가 네이티브 세션과 웹 세션으로 쪼개져 이용자 수가 중복 집계되고 퍼널이 끊긴다. 앱 쪽 분석은 네이티브 SDK 하나로 모으고, 웹뷰 화면의 이벤트는 `window.ReactNativeWebView.postMessage`로 RN에 넘겨 네이티브 SDK로 기록하는 것이 정석이다. 어떤 도구를 쓸지는 앱 레포의 결정이며 이 태스크의 범위가 아니다.
+**근거:** 웹뷰에 웹 분석 SDK를 그대로 두면 같은 사용자가 네이티브 세션과 웹 세션으로 쪼개져 이용자 수가 중복 집계되고 퍼널이 끊긴다. 앱 쪽 분석은 네이티브 SDK 하나로 모으고, 웹뷰 화면의 이벤트는 `window.ReactNativeWebView.postMessage`로 RN에 넘겨 네이티브 SDK로 기록하는 것이 정석이다.
+
+**앱은 Microsoft Clarity를 네이티브 SDK로 붙인다(사용자 결정).** 즉 이 태스크가 웹뷰에서 걷어내는 것은 *웹* Clarity 스크립트이지 Clarity 자체가 아니다. Google Analytics는 앱에 붙이지 않는다. 이 구분이 Task 4의 방침 조문에 그대로 반영된다.
 
 이 변경은 새로 만드는 `/app-settings/*`뿐 아니라 **기존 `app-exam-screen`, `app-question-feedback`에도 함께 적용된다.** 셋 다 같은 이유로 웹 분석에서 빠져야 한다.
 
@@ -661,9 +663,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 
 **출발점:** 웹 방침(`src/app/privacy/page.tsx`)을 옮기되 아래 조문만 고친다. **제4조·제11조·제12조는 웹에서 그대로 옮긴다**(제3자 제공, 보호책임자, 구제방법 — 문구 변경 없음).
 
-**행태정보 조문이 웹과 갈리는 이유:** Task 1에서 `app-*` 라우트의 Microsoft Clarity와 Google Analytics를 걷어냈다. 따라서 이 웹뷰 페이지들은 행태정보를 수집하지 않으며, 앱용 방침의 위탁(제5조)·국외 이전(제6조)·쿠키(제10조) 조문에서 두 도구를 빼야 한다. 방침에 적힌 것과 실제가 어긋나면 안 된다.
-
-> **네이티브 분석 도구를 도입하면 이 조문들을 다시 손봐야 한다.** 앱 레포가 Firebase Analytics·PostHog 등을 붙이는 시점에 제2조(보유 기간)·제3조(처리 항목)·제5조(위탁)·제6조(국외 이전)·제10조(자동 수집 장치)에 해당 사업자와 항목을 추가해야 한다. 이 계획의 범위 밖이며 마지막 절에 다시 적어 두었다.
+**행태정보 조문이 웹과 갈리는 지점:** 앱은 Microsoft Clarity를 **네이티브 SDK**로 붙이고, Google Analytics는 붙이지 않는다. 그래서 앱용 방침에서 Clarity는 위탁(제5조)·국외 이전(제6조)·자동 수집 장치(제10조)에 그대로 남기되, Google Analytics는 모든 조문에서 뺀다. 또한 앱의 Clarity는 쿠키가 아니라 SDK로 동작하므로 제10조의 서술을 쿠키 기준에서 SDK 기준으로 바꾼다.
 
 - [ ] **Step 1: 파일의 머리와 제1조를 쓴다**
 
@@ -723,7 +723,7 @@ export default function AppPrivacyPolicyPage() {
 
 - [ ] **Step 2: 제2조(보유 기간)를 쓴다**
 
-웹 제2조에서 맨 앞에 인증 토큰·푸시 토큰·학습 기록 세 항목을 넣고, "동의 이력(익명 식별자, ...)"은 "익명 식별자" → "인증 토큰"으로 바꾸며, **Clarity·Google Analytics 행태정보 두 항목은 뺀다**(Task 1에서 제외했으므로).
+웹 제2조에서 맨 앞에 인증 토큰·푸시 토큰·학습 기록 세 항목을 넣고, "동의 이력(익명 식별자, ...)"은 "익명 식별자" → "인증 토큰"으로 바꾸며, **Clarity 항목은 앱 기준으로 고쳐 남기고 Google Analytics 항목은 뺀다.**
 
 ```tsx
       <LegalSection title="제2조 (개인정보의 처리 및 보유 기간)">
@@ -767,6 +767,10 @@ export default function AppPrivacyPolicyPage() {
             이메일): 응시권 발송 및 정식 서비스 출시 안내 시까지 보유하며,
             최대 수집일로부터 3개월 이내 파기
           </li>
+          <li>
+            앱 이용 행태정보(Microsoft Clarity): 세션 재생 데이터는 최대 30일,
+            화면 이동·터치 등 집계 데이터는 최대 9개월간 보관(제10조 참조)
+          </li>
         </ul>
       </LegalSection>
 ```
@@ -790,7 +794,8 @@ export default function AppPrivacyPolicyPage() {
           <li>
             앱 설치 및 이용 과정에서 자동으로 생성·수집: 인증 토큰(액세스
             토큰, 리프레시 토큰), 학습 알림 수신에 동의한 경우의 푸시 토큰,
-            접속 IP 주소, 서비스 이용 기록, 기기·운영체제 정보, 앱 버전
+            접속 IP 주소, 서비스 이용 기록, 기기·운영체제 정보, 앱 버전, 앱
+            이용 행태정보(화면 이동 경로, 터치·스크롤 등 화면 조작 기록)
           </li>
         </ol>
         <p>
@@ -806,7 +811,7 @@ export default function AppPrivacyPolicyPage() {
 
 제4조(제3자 제공)는 웹에서 그대로 옮긴다.
 
-제5조(위탁)는 웹의 표에서 **Microsoft Corporation 행 전체를 빼고**, Google LLC 행의 위탁업무에서 **Google Analytics를 뺀다.** 표의 `overflow-x-auto` 래퍼는 반드시 유지한다 — 375px 폭에서 표가 페이지 전체를 가로로 밀어내는 것을 막는다.
+제5조(위탁)는 웹의 표에서 Google LLC 행의 위탁업무에서 **Google Analytics를 빼고 FCM을 넣으며**, Microsoft 행은 **앱 기준으로 문구를 고쳐 남긴다.** APNs를 위한 Apple 행을 추가한다. 표의 `overflow-x-auto` 래퍼는 반드시 유지한다 — 375px 폭에서 표가 페이지 전체를 가로로 밀어내는 것을 막는다.
 
 ```tsx
       <LegalSection title="제5조 (개인정보 처리의 위탁)">
@@ -839,6 +844,12 @@ export default function AppPrivacyPolicyPage() {
                 </td>
               </tr>
               <tr>
+                <td className="px-3 py-2 align-top">Microsoft Corporation</td>
+                <td className="px-3 py-2 align-top">
+                  앱 이용 행태 분석(Microsoft Clarity)
+                </td>
+              </tr>
+              <tr>
                 <td className="px-3 py-2 align-top">
                   Amazon Web Services, Inc.
                 </td>
@@ -857,7 +868,7 @@ export default function AppPrivacyPolicyPage() {
       </LegalSection>
 ```
 
-제6조(국외 이전)는 웹의 표에서 **Microsoft Corporation 행과 Google Analytics 행을 빼고**, Google 스프레드시트 행은 그대로 두되 "익명 식별자" → "인증 토큰"으로 바꾸며, 푸시 알림 행을 추가한다:
+제6조(국외 이전)는 웹의 표에서 **Google Analytics 행을 빼고**, Microsoft 행은 앱 기준 문구로 고쳐 남기며, Google 스프레드시트 행은 "익명 식별자" → "인증 토큰"으로 바꾸고, 푸시 알림 행을 추가한다:
 
 ```tsx
       <LegalSection title="제6조 (개인정보의 국외 이전)">
@@ -874,6 +885,20 @@ export default function AppPrivacyPolicyPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-orange-100">
+              <tr>
+                <td className="px-3 py-2 align-top">
+                  Microsoft Corporation
+                  <br />
+                  (미국 등 Microsoft가 데이터를 처리하는 국가)
+                </td>
+                <td className="px-3 py-2 align-top">
+                  기기 식별자, 화면 이동 경로, 터치·스크롤 등 행태정보
+                </td>
+                <td className="px-3 py-2 align-top">
+                  앱 사용성 분석(Microsoft Clarity) 목적으로 앱 이용 시점에
+                  네트워크를 통해 실시간 전송
+                </td>
+              </tr>
               <tr>
                 <td className="px-3 py-2 align-top">Google LLC (미국)</td>
                 <td className="px-3 py-2 align-top">
@@ -907,6 +932,11 @@ export default function AppPrivacyPolicyPage() {
           다음과 같이 거부할 수 있습니다.
         </p>
         <ul className="list-disc space-y-1 pl-5">
+          <li>
+            Microsoft Clarity(행태정보): 제10조의 거부 방법을 통해 수집을
+            중단할 수 있으며, 중단하더라도 모의고사 응시 등 핵심 기능 이용에는
+            제한이 없습니다.
+          </li>
           <li>
             푸시 알림 서비스(FCM·APNs): 앱의 설정 화면에 있는 학습 알림 설정을
             끄거나 기기의 운영체제 알림 설정에서 알림을 차단하면 푸시 토큰이
@@ -989,22 +1019,33 @@ export default function AppPrivacyPolicyPage() {
 
 - [ ] **Step 6: 제10조~제13조를 쓴다**
 
-제10조는 웹의 쿠키 조문을 **옮기지 않고 아래로 교체한다.** Task 1에서 `app-*` 라우트의 Clarity와 Google Analytics를 걷어냈으므로 웹 조문의 내용이 앱에서는 사실이 아니다. 조문 번호를 유지하기 위해 삭제하지 않고 내용을 바꾼다:
+제10조는 웹의 쿠키 조문을 **옮기지 않고 아래로 교체한다.** 앱의 Clarity는 브라우저 쿠키가 아니라 네이티브 SDK로 동작하고, Google Analytics는 앱에 붙이지 않기 때문이다. 조문 번호는 유지한다:
 
 ```tsx
       <LegalSection title="제10조 (자동 수집 장치의 설치·운영 및 거부)">
         <p>
-          서비스는 앱에서 쿠키 등 자동 수집 장치를 이용한 이용 행태정보를
-          수집하지 않습니다. 앱 내 일부 화면은 웹 문서 형태로 제공되나, 해당
-          화면에도 이용 행태 분석 도구를 적용하지 않습니다.
+          서비스는 앱의 사용성 개선을 위하여 이용 행태 분석 도구인 Microsoft
+          Clarity를 앱에 설치하여 운영합니다. Clarity는 이용자가 앱에서 이동한
+          화면의 경로와 터치·스크롤 등 화면 조작 기록을 수집하며, 이를 세션
+          재생 및 집계 형태로 제공합니다. 수집된 정보는 서비스 개선을 위한
+          사용성 분석 목적으로만 사용됩니다.
         </p>
         <p>
-          서비스가 앱의 개선을 위하여 이용 행태 분석 도구를 도입하는 경우,
-          수집 항목과 보유 기간, 거부 방법을 이 방침에 반영하고 제13조에 따라
-          사전에 고지합니다.
+          서비스는 Clarity를 통해 이름, 연락처 등 이용자를 직접 식별할 수 있는
+          정보를 수집하지 않으며, 답변 음성과 채점 결과 등 학습 내용은 수집
+          대상이 아닙니다.
+        </p>
+        <p>
+          행태정보 수집을 원하지 않는 이용자는 제11조의 연락처로 수집 중단을
+          요청할 수 있으며, 서비스는 지체 없이 조치합니다. 수집을 중단하더라도
+          모의고사 응시 등 서비스의 핵심 기능 이용에는 제한이 없습니다.
+          Microsoft Clarity의 데이터 처리에 관한 자세한 사항은 Microsoft의
+          개인정보처리방침을 통해 확인할 수 있습니다.
         </p>
       </LegalSection>
 ```
+
+> **후속 검토 사항:** 지금 조문은 수집 거부를 이메일 요청으로 받도록 적혀 있다. 설정 화면에 행태정보 수집 여부 토글을 두면 이용자가 직접 끌 수 있어 더 낫다. 앱 레포에서 검토할 항목이며 마지막 절에 적어 두었다.
 
 제11조(보호책임자)와 제12조(구제방법)는 웹에서 그대로 옮긴다.
 
@@ -1052,9 +1093,15 @@ Expected: `OK: 웹 전용 표현 없음` — 앱 방침에 브라우저 기준 �
 
 Run:
 ```bash
-grep -n 'Clarity\|Google Analytics\|Microsoft' src/app/app-settings/privacy/page.tsx || echo "OK: 제외된 분석 도구 언급 없음"
+grep -c 'Microsoft Clarity' src/app/app-settings/privacy/page.tsx
 ```
-Expected: `OK: 제외된 분석 도구 언급 없음` — Task 1에서 두 도구를 걷어냈으므로 방침에 남아 있으면 실제와 어긋난다.
+Expected: `3` 이상 — 앱은 Clarity를 네이티브 SDK로 쓰므로 제2조·제5조·제6조·제10조에 남아 있어야 한다.
+
+Run:
+```bash
+grep -n 'Google Analytics\|googletagmanager' src/app/app-settings/privacy/page.tsx || echo "OK: GA 언급 없음"
+```
+Expected: `OK: GA 언급 없음` — GA는 앱에 붙이지 않으므로 방침에 남아 있으면 실제와 어긋난다.
 
 - [ ] **Step 8: 타입·린트·포맷을 확인하고 육안 확인한다**
 
@@ -1191,7 +1238,7 @@ Run:
 ```bash
 curl -s http://localhost:3000/app-settings/privacy | grep -o '<meta name="robots"[^>]*>'
 ```
-Expected: `<meta name="robots" content="noindex,nofollow"/>`
+Expected: `<meta name="robots" content="noindex, nofollow"/>`
 
 - [ ] **Step 4: 커밋**
 
@@ -1212,7 +1259,8 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 구현이 끝나도 아래는 **하지 않은 상태**로 남는다. 스스로 진행하지 말고 사용자에게 알린다.
 
 - **법률 검토.** 앱용 방침·약관은 웹 버전을 앱 상황에 맞춰 고친 초안이며 법률 자문이 아니다. 공개 전 검토가 필요하다.
-- **앱 분석 도구 결정과 그에 따른 방침 갱신.** 이 계획은 `app-*` 라우트에서 웹 분석을 걷어내기만 한다. 앱 레포가 네이티브 분석 SDK(Firebase Analytics, PostHog 등)를 도입하면 앱용 방침의 제2조(보유 기간)·제3조(처리 항목)·제5조(위탁)·제6조(국외 이전)·제10조(자동 수집 장치)에 해당 사업자와 수집 항목을 추가해야 한다. 제10조는 지금 "행태정보를 수집하지 않는다"고 적혀 있으므로, 도구를 붙이고 방침을 그대로 두면 실제와 어긋난다.
+- **앱에 Clarity 네이티브 SDK 실제 적용.** 앱용 방침은 앱이 Microsoft Clarity를 쓰는 것을 전제로 쓰여 있다. 앱 레포에서 SDK를 붙이지 않으면 방침이 실제보다 넓게 적혀 있는 상태가 된다. 반대로 Clarity 외의 도구를 추가로 붙이면 제2조·제3조·제5조·제6조·제10조에 그 사업자를 추가해야 한다.
+- **행태정보 수집 거부 토글 검토.** 지금 제10조는 수집 거부를 이메일 요청으로 받도록 적혀 있다. 설정 화면에 토글을 두면 이용자가 직접 끌 수 있어 더 낫다.
 - **푸시 제공자 확정.** 제5조 위탁 표와 제6조 국외 이전 표의 FCM·APNs 행은 앱이 중계 서비스(Expo Push 등)를 쓰는 경우 이전받는 자를 추가해야 한다.
 - **시행일 확정.** 두 문서의 `EFFECTIVE_DATE`가 `2026년 8월 3일`로 되어 있다. 실제 앱 출시일로 갱신해야 한다.
 - **RN 설정 화면.** 리스트, 학습 알림 토글, 앱 평가하기, 버전 정보, 모든 학습 기록 삭제는 앱 레포에서 네이티브로 만든다.
