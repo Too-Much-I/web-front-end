@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Jua } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
-import { ClarityAnalytics } from "@/components/clarity-analytics";
-import { GoogleAnalyticsTag } from "@/components/google-analytics";
+import { AnalyticsGate } from "@/components/analytics-gate";
 import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/site-config";
 
 const geistSans = Geist({
@@ -58,8 +57,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${jua.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <ClarityAnalytics />
-        <GoogleAnalyticsTag />
+        <AnalyticsGate />
         <Providers>{children}</Providers>
       </body>
     </html>
