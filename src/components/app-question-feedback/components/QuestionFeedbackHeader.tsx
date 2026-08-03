@@ -1,5 +1,7 @@
 "use client";
 
+import { ChevronLeft } from "lucide-react";
+
 import { feedbackColors } from "@/components/app-exam-screen/theme";
 
 /**
@@ -18,6 +20,7 @@ export function QuestionFeedbackHeader({
   totalRetryCount,
   activeRetryCount,
   onSelectRetry,
+  onBack,
 }: {
   partNumber: number;
   questionNumber: number;
@@ -26,6 +29,7 @@ export function QuestionFeedbackHeader({
   totalRetryCount: number;
   activeRetryCount: number;
   onSelectRetry: (retryCount: number) => void;
+  onBack: () => void;
 }) {
   const progressPercent = (currentStep / totalSteps) * 100;
   const attempts = Array.from({ length: totalRetryCount }, (_, i) => i);
@@ -34,9 +38,22 @@ export function QuestionFeedbackHeader({
     <header className="sticky top-0 z-20 bg-[#fff9f2]/95 pt-[env(safe-area-inset-top)] backdrop-blur-sm">
       <div className="pt-3 pb-3">
         <div className="flex items-center justify-between gap-4">
-          <p className="text-sm" style={{ color: feedbackColors.brand }}>
-            Part {partNumber} · 문제 {questionNumber}번
-          </p>
+          <div className="flex min-w-0 items-center gap-1">
+            <button
+              type="button"
+              aria-label="파트별 피드백으로 돌아가기"
+              onClick={onBack}
+              className="-ml-2 flex size-11 shrink-0 items-center justify-center rounded-full text-blue-950 transition-colors active:bg-orange-100"
+            >
+              <ChevronLeft aria-hidden size={24} />
+            </button>
+            <p
+              className="truncate text-sm"
+              style={{ color: feedbackColors.brand }}
+            >
+              Part {partNumber} · 문제 {questionNumber}번
+            </p>
+          </div>
           <p className="text-sm text-zinc-500" aria-hidden>
             {currentStep} / {totalSteps}
           </p>

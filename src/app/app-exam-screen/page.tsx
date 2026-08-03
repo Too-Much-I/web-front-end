@@ -8,9 +8,19 @@ import { AppExamScreen } from "@/components/app-exam-screen/FeedbackScreen";
 import { ErrorFallbackScreen } from "@/components/error-fallback-screen";
 import { getExamGradingResult } from "@/features/exam/api/exam-grading-result";
 
+const FEEDBACK_STEP_COUNT = 3;
+
+function parseInitialStep(raw: string | null): number {
+  const step = Number(raw);
+  return Number.isInteger(step) && step >= 1 && step <= FEEDBACK_STEP_COUNT
+    ? step - 1
+    : 0;
+}
+
 function AppExamScreenContent() {
   const searchParams = useSearchParams();
   const examId = searchParams.get("examId") ?? "";
+  const initialStep = parseInitialStep(searchParams.get("step"));
   const {
     data: result,
     error,
@@ -49,7 +59,7 @@ function AppExamScreenContent() {
     );
   }
 
-  return <AppExamScreen result={result} />;
+  return <AppExamScreen result={result} initialStep={initialStep} />;
 }
 
 export default function AppExamScreenPage() {

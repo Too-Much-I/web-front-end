@@ -2,6 +2,7 @@
 
 import { ChevronLeft, ChevronRight, Mic } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { AtAGlanceSection } from "@/components/app-exam-screen/components/AtAGlanceSection";
@@ -28,6 +29,7 @@ import type { ExamQuestionDetail } from "@/types/exam";
 
 const DECK_COUNT = 2;
 const DECK_LABELS = ["결과 · 내 답변", "모범답안 · 피드백"] as const;
+const PART_FEEDBACK_STEP = 3;
 
 type DeckDirection = "next" | "previous";
 
@@ -71,6 +73,7 @@ export function QuestionFeedbackScreen({
   isFetching: boolean;
   onSelectRetry: (retryCount: number) => void;
 }) {
+  const router = useRouter();
   const [deck, setDeck] = useState(0);
   const [direction, setDirection] = useState<DeckDirection>("next");
   const [playbackTime, setPlaybackTime] = useState(0);
@@ -138,6 +141,14 @@ export function QuestionFeedbackScreen({
     postToNative(message);
   }
 
+  function returnToPartFeedback() {
+    const params = new URLSearchParams({
+      examId: detail.examId,
+      step: String(PART_FEEDBACK_STEP),
+    });
+    router.replace(`/app-exam-screen?${params.toString()}`);
+  }
+
   return (
     <main
       className="flex min-h-dvh flex-col overflow-x-clip"
@@ -152,6 +163,7 @@ export function QuestionFeedbackScreen({
           totalRetryCount={detail.totalRetryCount}
           activeRetryCount={detail.retryCount}
           onSelectRetry={onSelectRetry}
+          onBack={returnToPartFeedback}
         />
 
         <div

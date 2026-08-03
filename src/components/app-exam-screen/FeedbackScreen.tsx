@@ -46,9 +46,15 @@ function isFeedbackGoBackMessage(
   return (value as { type?: unknown }).type === "FEEDBACK_GO_BACK";
 }
 
-export function AppExamScreen({ result }: { result: ExamGradingResult }) {
+export function AppExamScreen({
+  result,
+  initialStep = 0,
+}: {
+  result: ExamGradingResult;
+  initialStep?: number;
+}) {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(initialStep);
   const [stepDirection, setStepDirection] = useState<StepDirection>("next");
   const [isScoreBoardRevealed, setIsScoreBoardRevealed] = useState(true);
   const swipeStartRef = useRef<{ x: number; y: number } | null>(null);
