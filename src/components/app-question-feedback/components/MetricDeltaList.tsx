@@ -4,8 +4,7 @@ import { feedbackColors } from "@/components/app-exam-screen/theme";
 import {
   METRIC_MAX,
   deltaTone,
-  formatDelta,
-  formatScore,
+  formatDeltaPoint,
   getDeltaScale,
   type MetricGroup,
   type MetricRow,
@@ -27,6 +26,9 @@ const TONE_COLOR = {
  *
  * 첫 회차를 보고 있을 때는 비교 대상이 없다. 이때 전부 "—"만 뜨면 고장난 화면처럼
  * 보이므로, 대신 그 회차의 지표 값 자체를 0부터 채우는 막대로 보여준다.
+ *
+ * 지표 값은 만점 대비 %(MetricRow.percent), 증감은 %p 단위다 — 만점이 파트마다 다른
+ * 내용 적합성(2.5/4점)을 100점짜리 발음 지표와 같은 트랙에 놓기 위한 환산이다.
  */
 export function MetricDeltaList({ groups }: { groups: MetricGroup[] }) {
   const scale = getDeltaScale(groups);
@@ -68,7 +70,7 @@ function MetricDeltaRow({
   showAbsolute: boolean;
 }) {
   return (
-    <div className="grid grid-cols-[5.5rem_1fr_3rem] items-center gap-2">
+    <div className="grid grid-cols-[5.5rem_1fr_3.25rem] items-center gap-2">
       <span
         className="text-[11px] leading-tight font-semibold"
         style={{ color: "rgb(255 255 255 / 62%)" }}
@@ -96,7 +98,7 @@ function MetricDeltaBar({
   showAbsolute: boolean;
 }) {
   // 채점 대상이 아닌 지표는 막대 없이 트랙만 비워 둔다.
-  if (row.value === null) return null;
+  if (row.percent === null) return null;
 
   if (showAbsolute) {
     return (
@@ -108,7 +110,7 @@ function MetricDeltaBar({
         <span
           className="absolute inset-y-1 left-0 rounded"
           style={{
-            width: `${(row.value / METRIC_MAX) * 100}%`,
+            width: `${(row.percent / METRIC_MAX) * 100}%`,
             backgroundColor: feedbackColors.radarFill,
           }}
         />
@@ -118,7 +120,8 @@ function MetricDeltaBar({
 
   if (row.delta === null) return null;
 
-  const rounded = Math.round(row.delta * 10) / 10;
+  // 값 표기(formatDeltaPoint)와 같은 정수 반올림을 써야 "—"인데 막대만 살짝 뻗는 일이 없다.
+  const rounded = Math.round(row.delta);
   const tone = deltaTone(rounded);
   const halfWidth = (Math.abs(rounded) / scale) * MAX_HALF_WIDTH;
 
@@ -154,9 +157,9 @@ function MetricDeltaValue({
   row: MetricRow;
   showAbsolute: boolean;
 }) {
-  if (row.value === null) {
+  if (row.percent === null) {
     return (
-      <span className="text-right text-sm" style={{ color: TONE_COLOR.same }}>
+      <span className="text-right text-xs" style={{ color: TONE_COLOR.same }}>
         미채점
       </span>
     );
@@ -168,14 +171,14 @@ function MetricDeltaValue({
         className="text-right text-sm font-bold tabular-nums"
         style={{ color: feedbackColors.radarFill }}
       >
-        {formatScore(row.value)}
+        {Math.round(row.percent)}%
       </span>
     );
   }
 
   if (row.delta === null) return <span aria-hidden />;
 
-  const tone = deltaTone(row.delta);
+  const tone = deltaTone(Math.round(row.delta));
   return (
     <span
       className={`text-right text-sm tabular-nums ${
@@ -183,7 +186,7 @@ function MetricDeltaValue({
       }`}
       style={{ color: TONE_COLOR[tone] }}
     >
-      {formatDelta(row.delta)}
+      {formatDeltaPoint(row.delta)}
     </span>
   );
 }

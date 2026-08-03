@@ -24,7 +24,13 @@ function retryScores(list: number[]): RawExamRetryScore[] {
   return list.map((score, retryCount) => ({ retryCount, score }));
 }
 
-/** detailedScores는 실제 응답처럼 "한 키짜리 객체들의 배열"로 만든다. */
+/**
+ * detailedScores는 실제 응답처럼 "한 키짜리 객체들의 배열"로 만든다.
+ *
+ * 스케일이 지표마다 다르다는 점까지 실제 응답을 따른다 — pronunciationFluency와
+ * 세부 지표는 0~100이지만 contentRelevance는 파트별 만점(Part 2~4는 2.5, Part 5는 4)이다.
+ * 여기서 편하게 100점 스케일로 적으면 만점 대비 %로 환산하는 화면이 목에서만 멀쩡해 보인다.
+ */
 function feedbackScore(
   retryCount: number,
   pronunciationFluency: number,
@@ -47,14 +53,15 @@ function feedbackScore(
   };
 }
 
+// Part 5라 내용 적합성 만점은 4점. 계속 3점(75%)에 머물러 제자리 표시를 확인한다.
 const Q11_SCORES = [3, 4, 4, 3, 5];
 const Q11_FEEDBACK_SCORES = [
-  feedbackScore(0, 71, 74, 78, 68, 73, 84),
-  feedbackScore(1, 76, 74, 82, 74, 77, 86),
-  feedbackScore(2, 79, 74, 85, 79, 78, 87),
+  feedbackScore(0, 71, 3, 78, 68, 73, 84),
+  feedbackScore(1, 76, 3, 82, 74, 77, 86),
+  feedbackScore(2, 79, 3, 85, 79, 78, 87),
   // 4차: 급하게 말하다 유창성과 억양이 무너진 회차 — 하락 표시를 볼 수 있다.
-  feedbackScore(3, 72, 74, 84, 64, 69, 85),
-  feedbackScore(4, 88, 74, 91, 87, 83, 90),
+  feedbackScore(3, 72, 3, 84, 64, 69, 85),
+  feedbackScore(4, 88, 3, 91, 87, 83, 90),
 ];
 
 const Q2_SCORES = [1, 2, 3];
@@ -65,8 +72,9 @@ const Q2_FEEDBACK_SCORES = [
   feedbackScore(2, 80, null, 82, 80, 77, 93),
 ];
 
+// Part 3라 내용 적합성 만점은 2.5점 — 1.5점이면 60%다.
 const Q6_SCORES = [1];
-const Q6_FEEDBACK_SCORES = [feedbackScore(0, 58, 52, 60, 55, 57, 71)];
+const Q6_FEEDBACK_SCORES = [feedbackScore(0, 58, 1.5, 60, 55, 57, 71)];
 
 const Q1_SCORES = [2];
 const Q1_FEEDBACK_SCORES = [feedbackScore(0, 76, null, 72, 81, 75, 96)];
@@ -374,6 +382,8 @@ function buildRaw(
           ? "지문을 빠짐없이 읽었어요."
           : "근거는 있으나 구체적 예시가 없습니다. 경험 한 가지를 덧붙이면 점수가 오릅니다.",
         detailedScores: scores.detailedScores,
+        // 실제 응답처럼 조회 중인 회차의 값이 retryFeedbackScores와 feedback 양쪽에 담긴다.
+        pronunciationFluencyScore: scores.pronunciationFluencyScore,
         contentRelevanceScore: scores.contentRelevanceScore,
         grammarVocabulary: isReadAloud
           ? "지문을 그대로 읽는 문제라 문법적으로는 문제가 없었어요."

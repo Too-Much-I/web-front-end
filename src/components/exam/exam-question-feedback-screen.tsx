@@ -32,6 +32,10 @@ import {
   getExamPartNumberByQuestionNumber,
   getExamPartQuestionNumbers,
 } from "@/features/exam/part-meta";
+import {
+  DETAILED_SCORE_MAX,
+  getContentRelevanceMax,
+} from "@/features/exam/score-scale";
 import { useReanswerSubmission } from "@/features/exam/use-reanswer-submission";
 import { useRevealOnScroll } from "@/features/exam/use-reveal-on-scroll";
 import { jua } from "@/lib/fonts";
@@ -41,21 +45,14 @@ function clampPercent(ratio: number): number {
   return Math.min(100, Math.max(0, ratio * 100));
 }
 
-/** score가 null이면(미채점) ratio도 null로 흘려보내 ScoreCircleStat이 플레이스홀더를 그리게 한다. */
-function toRatio(score: number | null, max: number): number | null {
-  return score === null ? null : score / max;
+/**
+ * score가 null이면(미채점) ratio도 null로 흘려보내 ScoreCircleStat이 플레이스홀더를 그리게 한다.
+ * 만점을 알 수 없는 지표(파트에 없는 내용 적합성)도 같은 플레이스홀더로 처리한다.
+ */
+function toRatio(score: number | null, max: number | null): number | null {
+  if (score === null || max === null || max <= 0) return null;
+  return score / max;
 }
-
-/** detailedScores(정확도/유창성/완전성/운율)는 100점 만점으로 내려온다. */
-const DETAILED_SCORE_MAX = 100;
-
-/** contentRelevanceScore의 만점은 파트마다 다르다 (Part 1은 채점 대상이 아니라 null로 내려옴). */
-const CONTENT_RELEVANCE_MAX: Record<number, number> = {
-  2: 2.5,
-  3: 2.5,
-  4: 2.5,
-  5: 4,
-};
 
 /**
  * 재시도 회차의 점수가 첫 답변 대비 얼마나 변했는지, 칠판에 분필로 쓴 듯한 문구/색을 정한다.
@@ -672,7 +669,7 @@ export function ExamQuestionFeedbackScreen({
                     label="내용 적합성"
                     ratio={toRatio(
                       detail.feedback.contentRelevanceScore,
-                      CONTENT_RELEVANCE_MAX[detail.partNumber],
+                      getContentRelevanceMax(detail.partNumber),
                     )}
                     size={96}
                     strokeWidth={9}

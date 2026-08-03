@@ -191,6 +191,8 @@ export interface RawExamQuestionFeedback {
   content: string;
   /** Azure Pronunciation Assessment 세부 지표(정확도/유창성/완전성/운율), 0~100점. */
   detailedScores?: RawExamDetailedScoreItem[] | null;
+  /** retryFeedbackScores의 같은 이름 필드와 동일한 지표 — 조회 중인 회차의 값이 여기에도 내려온다. */
+  pronunciationFluencyScore: number | null;
   /** Part 1(낭독)에는 내용 적합성 개념이 없어 null로 내려온다. */
   contentRelevanceScore: number | null;
   grammarVocabulary: string;
@@ -321,6 +323,7 @@ export interface ExamQuestionFeedback {
   fluency: string;
   content: string;
   detailedScores: ExamDetailedScores;
+  pronunciationFluencyScore: number | null;
   contentRelevanceScore: number | null;
   grammarVocabulary: string;
   actionItems: string[];

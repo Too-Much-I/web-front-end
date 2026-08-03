@@ -1,21 +1,27 @@
+import {
+  DETAILED_SCORE_MAX,
+  PRONUNCIATION_FLUENCY_MAX,
+  getContentRelevanceMax,
+  toScorePercent,
+} from "@/features/exam/score-scale";
 import type {
   ExamQuestionDetail,
   ExamRetryFeedbackScore,
   ExamRetryScore,
 } from "@/types/exam";
 
-/** 세부 지표 만점. Azure Pronunciation Assessment 계열 지표라 0~100 스케일이다. */
+/** 모든 지표를 만점 대비 %로 환산해 다루므로 한 줄이 꽉 찬 상태는 항상 100이다. */
 export const METRIC_MAX = 100;
 
-/** 지표 증감 막대가 최대 길이로 뻗는 기준의 하한.
- * 이걸 두지 않으면 전부 1~2점만 움직인 회차에서 +1이 최대 길이 막대가 되어 큰 향상처럼 읽힌다. */
+/** 지표 증감 막대가 최대 길이로 뻗는 기준의 하한(%p).
+ * 이걸 두지 않으면 전부 1~2%p만 움직인 회차에서 +1이 최대 길이 막대가 되어 큰 향상처럼 읽힌다. */
 const MIN_DELTA_SCALE = 10;
 
 export interface MetricRow {
   label: string;
-  /** 채점 대상이 아닌 지표(Part 1의 내용 적합성 등)는 null로 내려온다. */
-  value: number | null;
-  /** 첫 회차 대비 증감. 첫 회차를 보고 있거나 비교 불가면 null. */
+  /** 만점 대비 0~100 비율. 채점 대상이 아닌 지표(Part 1의 내용 적합성 등)는 null. */
+  percent: number | null;
+  /** 첫 회차 대비 증감(%p). 첫 회차를 보고 있거나 비교 불가면 null. */
   delta: number | null;
 }
 
@@ -34,6 +40,17 @@ export function formatDelta(value: number): string {
   const rounded = Math.round(value * 10) / 10;
   if (rounded > 0) return `+${formatScore(rounded)}`;
   if (rounded < 0) return formatScore(rounded);
+  return "—";
+}
+
+/**
+ * 지표 증감 표기. 단위가 %p라 소수까지 적으면 좁은 값 열을 넘치고, 0.4%p 같은 차이는
+ * 어차피 막대로 구분되지 않으므로 정수로 반올림한다. 반올림해서 0이면 "—".
+ */
+export function formatDeltaPoint(value: number): string {
+  const rounded = Math.round(value);
+  if (rounded > 0) return `+${rounded}%p`;
+  if (rounded < 0) return `${rounded}%p`;
   return "—";
 }
 
@@ -81,6 +98,9 @@ function findFeedbackScore(
  *
  * retryFeedbackScores에 해당 회차가 없으면 detail.feedback의 값으로 대신 채운다.
  * 그 경우 비교 대상도 없으므로 delta는 전부 null이 된다.
+ *
+ * 값은 원점수가 아니라 만점 대비 %로 담는다 — 웹 상세 피드백(ScoreCircleStat)과 같은 기준이라
+ * 두 화면의 숫자가 어긋나지 않고, 스케일이 다른 지표를 한 트랙 위에서 비교할 수 있다.
  */
 export function buildMetricGroups(
   detail: ExamQuestionDetail,
@@ -93,21 +113,31 @@ export function buildMetricGroups(
   const currentDetailed =
     current?.detailedScores ?? detail.feedback.detailedScores;
   const currentPronunciationFluency =
-    current?.pronunciationFluencyScore ?? null;
+    current?.pronunciationFluencyScore ??
+    detail.feedback.pronunciationFluencyScore;
   const currentContentRelevance =
     current?.contentRelevanceScore ?? detail.feedback.contentRelevanceScore;
 
+  const contentRelevanceMax = getContentRelevanceMax(detail.partNumber);
+
+  /** 지표마다 만점이 달라(내용 적합성은 2.5/4점) 원점수 대신 만점 대비 %로 환산해 담는다. */
   function toRow(
     label: string,
     value: number | null,
     baseValue: number | null,
+    max: number | null,
   ): MetricRow {
+    const percent = toScorePercent(value, max);
+    const basePercent = toScorePercent(baseValue, max);
     const comparable =
-      !isBaseline && current !== null && value !== null && baseValue !== null;
+      !isBaseline &&
+      current !== null &&
+      percent !== null &&
+      basePercent !== null;
     return {
       label,
-      value,
-      delta: comparable ? value - baseValue : null,
+      percent,
+      delta: comparable ? percent - basePercent : null,
     };
   }
 
@@ -116,16 +146,19 @@ export function buildMetricGroups(
       "발음 정확도",
       currentDetailed.accuracyScore,
       baseline?.detailedScores.accuracyScore ?? null,
+      DETAILED_SCORE_MAX,
     ),
     toRow(
       "유창성",
       currentDetailed.fluencyScore,
       baseline?.detailedScores.fluencyScore ?? null,
+      DETAILED_SCORE_MAX,
     ),
     toRow(
       "억양·강세",
       currentDetailed.prosodyScore,
       baseline?.detailedScores.prosodyScore ?? null,
+      DETAILED_SCORE_MAX,
     ),
   ];
   if (detail.partNumber === 1) {
@@ -134,6 +167,7 @@ export function buildMetricGroups(
         "완전성",
         currentDetailed.completenessScore,
         baseline?.detailedScores.completenessScore ?? null,
+        DETAILED_SCORE_MAX,
       ),
     );
   }
@@ -146,11 +180,13 @@ export function buildMetricGroups(
           "발음·유창성",
           currentPronunciationFluency,
           baseline?.pronunciationFluencyScore ?? null,
+          PRONUNCIATION_FLUENCY_MAX,
         ),
         toRow(
           "내용 적합성",
           currentContentRelevance,
           baseline?.contentRelevanceScore ?? null,
+          contentRelevanceMax,
         ),
       ],
     },

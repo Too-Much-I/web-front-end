@@ -98,8 +98,8 @@ export function RetryScoreBoard({
 
   const hintLines = showMetrics
     ? isFirstAttempt
-      ? ["첫 답변이라 비교할 회차가 없어요", "지금은 지표 점수 그대로예요"]
-      : ["100점 기준", "다시 누르면 회차별 총점으로"]
+      ? ["첫 답변이라 비교할 회차가 없어요", "지금은 지표별 달성률이에요"]
+      : ["만점 대비 %p 변화", "다시 누르면 회차별 총점으로"]
     : hasVisibleLaterScores
       ? ["점선은 이후 회차", "점을 누르면 해당 회차 피드백"]
       : hasUnlistedLaterAttempts

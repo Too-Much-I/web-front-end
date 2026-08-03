@@ -83,6 +83,8 @@ export function mapExamQuestionDetail(
       fluency: question.feedback.fluency,
       content: question.feedback.content,
       detailedScores: mapDetailedScores(question.feedback.detailedScores),
+      pronunciationFluencyScore:
+        question.feedback.pronunciationFluencyScore ?? null,
       contentRelevanceScore: question.feedback.contentRelevanceScore,
       grammarVocabulary: question.feedback.grammarVocabulary,
       actionItems: question.feedback.actionItems ?? [],
