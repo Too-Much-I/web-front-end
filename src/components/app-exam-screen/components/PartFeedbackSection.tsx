@@ -3,10 +3,7 @@ import type { FeedbackPartViewModel } from "@/components/app-exam-screen/feedbac
 
 type PartFeedbackSectionProps = {
   parts: readonly FeedbackPartViewModel[];
-  onOpenQuestion: (
-    partNumber: FeedbackPartViewModel["partNumber"],
-    questionNumber: number,
-  ) => void;
+  onOpenQuestion: (questionNumber: number) => void;
 };
 
 export function PartFeedbackSection({
@@ -17,7 +14,7 @@ export function PartFeedbackSection({
     <section className="mt-10">
       <h2 className="text-2xl text-blue-950">파트별 피드백</h2>
       <p className="mt-2 text-base text-zinc-500">
-        버튼을 누르면 해당 문제의 상세 피드백으로 이어져요.
+        문제 번호를 누르면 해당 문항의 상세 피드백으로 이어져요.
       </p>
       <div className="mt-5 flex flex-col gap-4">
         {parts.map((part) => (

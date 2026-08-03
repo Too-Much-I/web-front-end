@@ -143,9 +143,8 @@ export function AppExamScreen({ result }: { result: ExamGradingResult }) {
     const params = new URLSearchParams({
       examId: result.examId,
       questionNumber: String(questionNumber),
-      source: "app",
     });
-    router.push(`/exam/result/question?${params.toString()}`);
+    router.push(`/app-question-feedback?${params.toString()}`);
   };
 
   return (
@@ -198,12 +197,7 @@ export function AppExamScreen({ result }: { result: ExamGradingResult }) {
           )}
 
           {currentStep === 2 && (
-            <PartFeedbackSection
-              parts={parts}
-              onOpenQuestion={(_partNumber, questionNumber) =>
-                openQuestion(questionNumber)
-              }
-            />
+            <PartFeedbackSection parts={parts} onOpenQuestion={openQuestion} />
           )}
         </div>
 

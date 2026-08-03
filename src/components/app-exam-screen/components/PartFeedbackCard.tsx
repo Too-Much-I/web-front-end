@@ -6,10 +6,7 @@ import { cardShadow, feedbackColors } from "@/components/app-exam-screen/theme";
 
 type PartFeedbackCardProps = {
   part: FeedbackPartViewModel;
-  onOpenQuestion: (
-    partNumber: FeedbackPartViewModel["partNumber"],
-    questionNumber: number,
-  ) => void;
+  onOpenQuestion: (questionNumber: number) => void;
 };
 
 function getStatusColors(status: FeedbackPartViewModel["status"]) {
@@ -38,7 +35,6 @@ export function PartFeedbackCard({
   onOpenQuestion,
 }: PartFeedbackCardProps) {
   const statusColors = getStatusColors(part.status);
-  const firstQuestion = part.questionNumbers[0];
 
   return (
     <article
@@ -94,43 +90,23 @@ export function PartFeedbackCard({
 
       <ul className="mt-4 flex flex-row flex-wrap gap-2 pl-1">
         {part.questionNumbers.map((questionNumber) => (
-          <li
-            key={questionNumber}
-            className="rounded-full px-3 py-1.5 text-sm"
-            style={{
-              color: feedbackColors.part.actionText,
-              backgroundColor: feedbackColors.part.action,
-            }}
-          >
-            Q{questionNumber}
+          <li key={questionNumber}>
+            <button
+              type="button"
+              aria-label={`문제 ${questionNumber}번 피드백 보기`}
+              className="flex min-h-11 items-center gap-1 rounded-full px-3.5 py-2 text-sm transition-transform active:scale-95"
+              style={{
+                color: feedbackColors.part.actionText,
+                backgroundColor: feedbackColors.part.action,
+              }}
+              onClick={() => onOpenQuestion(questionNumber)}
+            >
+              <span>Q{questionNumber}</span>
+              <ChevronRight aria-hidden size={16} />
+            </button>
           </li>
         ))}
       </ul>
-
-      <button
-        type="button"
-        aria-label={`Part ${part.partNumber} 문항별 피드백 보기`}
-        className="mt-3 flex w-full flex-row items-center justify-between rounded-2xl px-4 py-3 disabled:cursor-not-allowed disabled:opacity-50"
-        style={{ backgroundColor: feedbackColors.part.action }}
-        disabled={firstQuestion === undefined}
-        onClick={() => {
-          if (firstQuestion !== undefined) {
-            onOpenQuestion(part.partNumber, firstQuestion);
-          }
-        }}
-      >
-        <span
-          className="text-base"
-          style={{ color: feedbackColors.part.actionText }}
-        >
-          문항별 피드백 보기
-        </span>
-        <ChevronRight
-          aria-hidden
-          size={19}
-          color={feedbackColors.part.actionText}
-        />
-      </button>
     </article>
   );
 }
