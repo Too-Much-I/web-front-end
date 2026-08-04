@@ -7,6 +7,10 @@
  *
  * 조문은 LegalSection을 웹과 그대로 공유한다. 조문 타이포를 고칠 때 한 곳만
  * 고치면 되고, 웹과 앱의 조문 모양이 자동으로 같아진다.
+ *
+ * 다만 줄간격만은 여기서 덮어쓴다. 좁은 기기 폭에서 웹과 같은 leading-relaxed로
+ * 두면 장문의 조문이 답답해 보였다. LegalSection을 고치면 웹 법률 페이지까지
+ * 같이 바뀌므로, 이 레이아웃 안에서만 적용되도록 자손 선택자로 덮어쓴다.
  */
 export function AppDocLayout({
   title,
@@ -20,17 +24,15 @@ export function AppDocLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-col gap-10 px-5 py-8 sm:px-6 md:px-8 lg:px-10">
-      <div className="flex flex-col gap-2">
+    <main className="mx-auto flex w-full max-w-2xl flex-col gap-12 px-6 py-10 sm:px-8 sm:py-12 md:px-10 lg:px-12 [&_li]:leading-[1.85] [&_p]:leading-[1.85]">
+      <div className="flex flex-col gap-3">
         <h1 className="text-2xl font-bold text-blue-950 sm:text-3xl lg:text-4xl">
           {title}
         </h1>
         <p className="text-sm text-zinc-500 sm:text-base">
           {effectiveDateLabel}
         </p>
-        <p className="text-sm leading-relaxed text-zinc-600 sm:text-base">
-          {intro}
-        </p>
+        <p className="text-sm text-zinc-600 sm:text-base">{intro}</p>
       </div>
 
       {children}
