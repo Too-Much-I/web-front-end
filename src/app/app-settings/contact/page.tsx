@@ -11,7 +11,7 @@ const GMAIL_COMPOSE_URL = `https://mail.google.com/mail/?view=cm&fs=1&tf=1&to=${
 
 export default function AppContactPage() {
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-2xl flex-col items-center justify-center gap-6 px-6 py-12 text-center">
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-6 px-6 py-12 text-center">
       <div className="relative h-40 w-40 sm:h-48 sm:w-48">
         <Image
           src="/mascots/mail.png"
@@ -38,13 +38,17 @@ export default function AppContactPage() {
 
       {/*
         이 두 링크는 웹뷰 안에서 열리면 안 된다. RN의
-        onShouldStartLoadWithRequest가 mail.google.com과 mailto: 스킴을
+        onShouldStartLoadWithRequest가 외부 origin과 mailto: 스킴을
         Linking.openURL로 넘긴다. docs/app-settings-webview.md 참고.
+
+        웹 /contact와 달리 target="_blank"를 쓰지 않는다. 웹뷰에는 새 탭이
+        없어서 "새 창을 열어라"가 앱으로 넘어가는데, Android는
+        setSupportMultipleWindows가 기본 true라 그 요청이
+        onShouldStartLoadWithRequest를 건너뛴다. 앱이 별도 처리를 하지 않으면
+        링크를 눌러도 아무 일도 일어나지 않는다.
       */}
       <a
         href={GMAIL_COMPOSE_URL}
-        target="_blank"
-        rel="noopener noreferrer"
         className="inline-flex h-12 items-center justify-center rounded-full bg-orange-500 px-8 text-base font-semibold text-white hover:bg-orange-600"
       >
         메일 보내기

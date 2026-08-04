@@ -17,32 +17,56 @@ RN 앱의 설정 화면이 웹뷰로 띄우는 페이지와 그 전제를 적는
 
 **1. 화면 헤더는 RN이 그린다.** 웹 페이지에는 뒤로가기 버튼도 타이틀바도 없다.
 웹은 상단 safe-area를 다루지 않고 하단 inset만 처리한다
-(`src/app/app-settings/layout.tsx`).
+(`src/app/app-settings/layout.tsx`). 웹 쪽에서 이 세그먼트에만
+`viewportFit: "cover"`를 선언해 두었으므로 앱이 따로 할 일은 없다.
 
-**2. 외부 링크는 웹뷰 밖으로 넘긴다.** 문의하기의 `mailto:`와 Gmail 작성 링크가
-웹뷰 안에서 열리면 앱이 메일 화면에 갇힌다.
+**2. 외부 링크는 웹뷰 밖으로 넘긴다.** 문의하기의 `mailto:`와 Gmail 작성 링크,
+방침의 기관 링크가 웹뷰 안에서 열리면 앱이 그 화면에 갇힌다.
+
+**문자열 접두사로 내부/외부를 가르면 안 된다.** `url.startsWith(WEB_BASE_URL)`는
+`https://to-teacher.com.attacker.tld`나 `https://to-teacher.com@attacker.tld`를
+내부로 오인해서 공격자 페이지를 웹뷰 안에서 열어 준다. URL을 파싱해 `origin`을
+정확히 비교한다.
 
 ```tsx
+const WEB_ORIGIN = new URL(WEB_BASE_URL).origin;
+
 <WebView
   source={{ uri: `${WEB_BASE_URL}/app-settings/contact` }}
+  // target="_blank"를 웹에서 쓰지 않지만, 혹시 들어와도 이 훅을 타도록 끈다.
+  setSupportMultipleWindows={false}
   onShouldStartLoadWithRequest={(request) => {
-    const isExternal =
-      !request.url.startsWith(WEB_BASE_URL) ||
-      request.url.startsWith("mailto:");
-    if (isExternal) {
-      Linking.openURL(request.url);
+    let url: URL;
+    try {
+      url = new URL(request.url);
+    } catch {
+      return false; // 파싱조차 안 되는 URL은 열지 않는다
+    }
+
+    if (url.protocol === "https:" || url.protocol === "http:") {
+      if (url.origin === WEB_ORIGIN) return true;
+      Linking.openURL(request.url); // 기관 링크 등 외부 사이트
       return false;
     }
-    return true;
+
+    if (url.protocol === "mailto:") {
+      Linking.openURL(request.url);
+    }
+    return false; // 그 밖의 스킴은 열지 않는다
   }}
-/>
+/>;
 ```
 
-**3. 이 페이지들은 앱 밖으로 나가는 내부 링크를 두지 않는다.** 웹 쪽 제약이며
-아래로 확인할 수 있다.
+**3. 이 페이지들은 앱 밖으로 나가는 내부 링크를 두지 않고, `target="_blank"`도
+쓰지 않는다.** 웹뷰에는 새 탭이 없다. Android는 `setSupportMultipleWindows`가
+기본 true라 `target="_blank"` 링크가 위 훅을 건너뛰고 "새 창 만들기"로 빠지며,
+앱이 그걸 처리하지 않으면 링크를 눌러도 아무 일도 일어나지 않는다. 웹 쪽에서
+속성을 뺐고, 앱 쪽에서도 위처럼 꺼 두면 이중으로 막힌다.
+
+웹 쪽 제약은 아래로 확인할 수 있다.
 
 ```bash
-grep -rn 'next/link\|href="/"' src/app/app-settings/
+grep -rn 'next/link\|href="/"\|target="_blank"' src/app/app-settings/
 ```
 
 ## 웹 쪽 제약

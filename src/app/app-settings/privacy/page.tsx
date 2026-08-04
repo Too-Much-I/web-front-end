@@ -63,9 +63,9 @@ export default function AppPrivacyPolicyPage() {
             삭제하는 경우 기기에 저장된 토큰은 즉시 파기
           </li>
           <li>
-            기기에 저장되는 학습 기록(응시 이력, 채점 결과, 피드백): 이용자가
-            「모든 학습 기록 삭제」를 실행하거나 앱을 기기에서 삭제할 때까지
-            보관
+            학습 기록(응시 이력, 채점 결과, 피드백): 이용자가 「모든 학습 기록
+            삭제」를 실행하거나 삭제를 요청할 때까지 기기와 서버에 보관하며,
+            삭제 시 양쪽에서 모두 지체 없이 파기
           </li>
           <li>
             학습 알림 발송을 위한 푸시 토큰: 알림 수신 동의 철회 시 또는 앱 삭제
@@ -92,6 +92,10 @@ export default function AppPrivacyPolicyPage() {
           <li>
             앱 이용 행태정보(Microsoft Clarity): 세션 재생 데이터는 최대 30일,
             화면 이동·터치 등 집계 데이터는 최대 9개월간 보관(제10조 참조)
+          </li>
+          <li>
+            접속 IP 주소, 서비스 이용 기록, 기기·운영체제 정보, 앱 버전: 서비스
+            운영 및 장애 대응 목적으로 수집일로부터 3개월간 보관 후 파기
           </li>
         </ul>
       </LegalSection>
@@ -276,9 +280,9 @@ export default function AppPrivacyPolicyPage() {
           </li>
           <li>
             이용자는 별도의 요청 없이도 앱의 설정 화면에서 「모든 학습 기록
-            삭제」를 통해 기기에 저장된 학습 기록과 인증 토큰을 직접 삭제할 수
-            있으며, 학습 알림 설정을 통해 알림 수신 동의를 직접 철회할 수
-            있습니다.
+            삭제」를 통해 기기와 서버에 저장된 학습 기록 및 기기에 저장된 인증
+            토큰을 직접 삭제할 수 있으며, 학습 알림 설정을 통해 알림 수신 동의를
+            직접 철회할 수 있습니다.
           </li>
           <li>
             서비스는 만 14세 미만 아동을 대상으로 하지 않으며, 만 14세 미만
@@ -304,8 +308,12 @@ export default function AppPrivacyPolicyPage() {
             형태로 개인정보를 수집하지 않습니다.
           </li>
           <li>
-            기기 내 파기: 기기에 저장된 학습 기록과 인증 토큰은 이용자가 「모든
-            학습 기록 삭제」를 실행하거나 앱을 삭제할 때 기기에서 삭제됩니다.
+            학습 기록의 파기: 이용자가 「모든 학습 기록 삭제」를 실행하면 기기에
+            저장된 학습 기록과 인증 토큰이 삭제되고, 서버에 저장된 학습 기록도
+            함께 파기됩니다. 앱을 기기에서 삭제하는 경우에는 기기에 저장된
+            정보만 삭제되므로, 서버에 저장된 학습 기록까지 파기하려면 앱을
+            삭제하기 전에 「모든 학습 기록 삭제」를 실행하거나 제11조의 연락처로
+            삭제를 요청해야 합니다.
           </li>
         </ol>
       </LegalSection>
@@ -394,10 +402,9 @@ export default function AppPrivacyPolicyPage() {
         <ul className="list-disc space-y-1 pl-5">
           <li>
             개인정보 분쟁조정위원회: (국번없이) 1833-6972 (
+            {/* 웹 방침과 달리 target="_blank"를 쓰지 않는다. 이유는 문의하기 페이지 주석 참고. */}
             <a
               href="https://www.kopico.go.kr"
-              target="_blank"
-              rel="noopener noreferrer"
               className="text-orange-500 hover:underline"
             >
               kopico.go.kr
@@ -408,8 +415,6 @@ export default function AppPrivacyPolicyPage() {
             개인정보침해신고센터: (국번없이) 118 (
             <a
               href="https://privacy.kisa.or.kr"
-              target="_blank"
-              rel="noopener noreferrer"
               className="text-orange-500 hover:underline"
             >
               privacy.kisa.or.kr
