@@ -14,8 +14,8 @@ import {
   createRadarAxes,
 } from "@/components/app-exam-screen/feedback-view-model";
 import { feedbackColors } from "@/components/app-exam-screen/theme";
-import type { ExamGradingResult } from "@/types/exam";
 import { postToNative } from "@/lib/native-bridge";
+import type { ExamGradingResult } from "@/types/exam";
 
 const FEEDBACK_STEP_COUNT = 3;
 const SWIPE_DISTANCE_PX = 56;
