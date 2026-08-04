@@ -1,9 +1,26 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+import { postToNative } from "@/lib/native-bridge";
+
+type GoHomeRequestedMessage = {
+  type: "GO_HOME_REQUESTED";
+};
+
+const HOME_BUTTON_CLASSNAME =
+  "flex h-11 items-center rounded-full border border-orange-200 bg-white px-6 text-base font-semibold text-orange-600 transition-colors hover:bg-orange-50 lg:h-12 lg:px-7 lg:text-lg";
 
 /**
  * 서버 응답을 받지 못했을 때(채점 결과/피드백 조회 실패, 채점 에러 등) 쓰는 공용 폴백 화면.
  * 404 페이지(src/app/not-found.tsx)와 같은 디자인 언어를 공유한다.
+ *
+ * "홈으로 돌아가기"는 /app-* 웹뷰 라우트(app-exam-screen, app-question-feedback)에서
+ * 열렸을 때는 "/"로 이동하지 않는다 — 웹뷰 안에서 그대로 열리면 사용자가 앱 안에 웹
+ * 마케팅 홈이 뜬 채로 갇힌다. 대신 네이티브에 GO_HOME_REQUESTED를 보내고 실제 이동은
+ * 앱이 처리한다.
  */
 export function ErrorFallbackScreen({
   title = "잠깐 문제가 생겼어요",
@@ -14,6 +31,14 @@ export function ErrorFallbackScreen({
   description: string;
   onRetry?: () => void;
 }) {
+  const pathname = usePathname();
+  const isAppWebview = pathname.startsWith("/app-");
+
+  function requestGoHome() {
+    const message: GoHomeRequestedMessage = { type: "GO_HOME_REQUESTED" };
+    postToNative(message);
+  }
+
   return (
     <div
       role="alert"
@@ -54,12 +79,19 @@ export function ErrorFallbackScreen({
             다시 시도하기
           </button>
         )}
-        <Link
-          href="/"
-          className="flex h-11 items-center rounded-full border border-orange-200 bg-white px-6 text-base font-semibold text-orange-600 transition-colors hover:bg-orange-50 lg:h-12 lg:px-7 lg:text-lg"
-        >
-          홈으로 돌아가기
-        </Link>
+        {isAppWebview ? (
+          <button
+            type="button"
+            onClick={requestGoHome}
+            className={HOME_BUTTON_CLASSNAME}
+          >
+            홈으로 돌아가기
+          </button>
+        ) : (
+          <Link href="/" className={HOME_BUTTON_CLASSNAME}>
+            홈으로 돌아가기
+          </Link>
+        )}
       </div>
     </div>
   );
