@@ -25,6 +25,7 @@ import { ExamMarkedTranscript } from "@/components/exam/exam-marked-transcript";
 import { ExamPriorityPanel } from "@/components/exam/exam-priority-panel";
 import { ExamPronunciationTranscript } from "@/components/exam/exam-pronunciation-transcript";
 import { ExamQuestionPrompt } from "@/components/exam/exam-question-prompt";
+import { postToNative } from "@/lib/native-bridge";
 import type { ExamQuestionDetail } from "@/types/exam";
 
 const DECK_COUNT = 2;
@@ -51,10 +52,6 @@ type DeckNavigationStateMessage = {
 function isGoBackMessage(value: unknown): boolean {
   if (!value || typeof value !== "object") return false;
   return (value as { type?: unknown }).type === "FEEDBACK_GO_BACK";
-}
-
-function postToNative(message: object) {
-  window.ReactNativeWebView?.postMessage(JSON.stringify(message));
 }
 
 /**

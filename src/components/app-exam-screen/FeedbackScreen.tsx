@@ -14,6 +14,7 @@ import {
   createRadarAxes,
 } from "@/components/app-exam-screen/feedback-view-model";
 import { feedbackColors } from "@/components/app-exam-screen/theme";
+import { postToNative } from "@/lib/native-bridge";
 import type { ExamGradingResult } from "@/types/exam";
 
 const FEEDBACK_STEP_COUNT = 3;
@@ -30,14 +31,6 @@ type FeedbackNavigationStateMessage = {
 type FeedbackGoBackMessage = {
   type: "FEEDBACK_GO_BACK";
 };
-
-declare global {
-  interface Window {
-    ReactNativeWebView?: {
-      postMessage(message: string): void;
-    };
-  }
-}
 
 function isFeedbackGoBackMessage(
   value: unknown,
@@ -73,7 +66,7 @@ export function AppExamScreen({
       type: "FEEDBACK_NAVIGATION_STATE",
       canGoBackWithinFeedback: currentStep > 0,
     };
-    window.ReactNativeWebView?.postMessage(JSON.stringify(message));
+    postToNative(message);
   }, [currentStep]);
 
   useEffect(() => {
