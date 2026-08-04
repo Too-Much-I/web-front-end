@@ -26,6 +26,7 @@ import { ExamPriorityPanel } from "@/components/exam/exam-priority-panel";
 import { ExamPronunciationTranscript } from "@/components/exam/exam-pronunciation-transcript";
 import { ExamQuestionPrompt } from "@/components/exam/exam-question-prompt";
 import type { ExamQuestionDetail } from "@/types/exam";
+import { postToNative } from "@/lib/native-bridge";
 
 const DECK_COUNT = 2;
 const DECK_LABELS = ["결과 · 내 답변", "모범답안 · 피드백"] as const;
@@ -51,10 +52,6 @@ type DeckNavigationStateMessage = {
 function isGoBackMessage(value: unknown): boolean {
   if (!value || typeof value !== "object") return false;
   return (value as { type?: unknown }).type === "FEEDBACK_GO_BACK";
-}
-
-function postToNative(message: object) {
-  window.ReactNativeWebView?.postMessage(JSON.stringify(message));
 }
 
 /**
