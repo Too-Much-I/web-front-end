@@ -36,15 +36,6 @@ export default function AppPrivacyPolicyPage() {
             음성 답변 녹음 파일을 활용한 AI 자동 채점 및 채점 결과·피드백 제공
           </li>
           <li>음성 데이터 수집·이용 등 서비스 이용 동의 이력의 관리</li>
-          <li>
-            학습 알림 발송: 이용자가 수신에 동의한 경우 오늘의 문제 안내 및 학습
-            리마인드 알림 발송
-          </li>
-          <li>
-            만족도 조사 응답 분석 및 서비스 개선(별도 동의를 받아 수집한
-            연락처는 응시권 발송 및 정식 서비스 출시 등 서비스 소식 안내
-            목적으로 활용)
-          </li>
           <li>서비스 이용 통계 분석 및 사용성 개선</li>
           <li>문의 응대 및 민원 처리</li>
         </ol>
@@ -68,10 +59,6 @@ export default function AppPrivacyPolicyPage() {
             삭제 시 양쪽에서 모두 지체 없이 파기
           </li>
           <li>
-            학습 알림 발송을 위한 푸시 토큰: 알림 수신 동의 철회 시 또는 앱 삭제
-            시 지체 없이 파기
-          </li>
-          <li>
             음성 답변 녹음 파일: AI 채점 및 결과 제공 등 수집 목적 달성 후 30일
             이내 파기
           </li>
@@ -79,15 +66,6 @@ export default function AppPrivacyPolicyPage() {
             동의 이력(인증 토큰, 동의 항목·버전·일시·방법): 동의 철회 또는 삭제
             요청 시 지체 없이 파기하며, 별도 요청이 없는 경우 최종 동의일로부터
             3년간 보관 후 파기
-          </li>
-          <li>
-            만족도 조사 응답: 조사 목적 달성 후 지체 없이 파기하되, 통계·연구
-            목적으로는 개인을 식별할 수 없는 형태로 가공하여 보관할 수 있음
-          </li>
-          <li>
-            만족도 조사 시 별도 동의를 받아 수집한 연락처(전화번호 또는 이메일):
-            응시권 발송 및 정식 서비스 출시 안내 시까지 보유하며, 최대
-            수집일로부터 3개월 이내 파기
           </li>
           <li>
             앱 이용 행태정보(Microsoft Clarity): 세션 재생 데이터는 최대 30일,
@@ -106,16 +84,10 @@ export default function AppPrivacyPolicyPage() {
             모의고사 응시 시 수집: 음성 답변 녹음 파일, 동의 항목·일시·방법·버전
           </li>
           <li>
-            만족도 조사 시 수집(선택): 만족도 점수, 이전 취득 등급, 지불 의향,
-            의견, 연락처(전화번호 또는 이메일 — 응시권 발송 목적으로 수집·이용에
-            대한 별도 동의를 받은 경우에 한하여 수집) 및 해당 동의 이력(동의
-            여부·문구 버전·일시)
-          </li>
-          <li>
             앱 설치 및 이용 과정에서 자동으로 생성·수집: 인증 토큰(액세스 토큰,
-            리프레시 토큰), 학습 알림 수신에 동의한 경우의 푸시 토큰, 접속 IP
-            주소, 서비스 이용 기록, 기기·운영체제 정보, 앱 버전, 앱 이용
-            행태정보(화면 이동 경로, 터치·스크롤 등 화면 조작 기록)
+            리프레시 토큰), 접속 IP 주소, 서비스 이용 기록, 기기·운영체제 정보,
+            앱 버전, 앱 이용 행태정보(화면 이동 경로, 터치·스크롤 등 화면 조작
+            기록)
           </li>
         </ol>
         <p>
@@ -151,17 +123,9 @@ export default function AppPrivacyPolicyPage() {
             </thead>
             <tbody className="divide-y divide-orange-100">
               <tr>
-                <td className="px-3 py-2 align-top">Google LLC</td>
+                <td className="px-3 py-2 align-top">MongoDB, Inc.</td>
                 <td className="px-3 py-2 align-top">
-                  동의 이력 및 만족도 조사 응답의 저장·관리(Google
-                  스프레드시트), Android 기기로의 학습 알림 발송(Firebase Cloud
-                  Messaging)
-                </td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2 align-top">Apple Inc.</td>
-                <td className="px-3 py-2 align-top">
-                  iOS 기기로의 학습 알림 발송(Apple Push Notification service)
+                  인증 토큰, 동의 이력의 저장·관리(MongoDB Atlas, 국내 리전)
                 </td>
               </tr>
               <tr>
@@ -216,54 +180,23 @@ export default function AppPrivacyPolicyPage() {
                   네트워크를 통해 실시간 전송
                 </td>
               </tr>
-              <tr>
-                <td className="px-3 py-2 align-top">Google LLC (미국)</td>
-                <td className="px-3 py-2 align-top">
-                  인증 토큰, 동의 이력, 만족도 조사 응답
-                </td>
-                <td className="px-3 py-2 align-top">
-                  Google 스프레드시트 저장·관리 목적으로 응답 제출 시점에 전송
-                </td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2 align-top">
-                  Google LLC (미국), Apple Inc. (미국)
-                </td>
-                <td className="px-3 py-2 align-top">푸시 토큰, 알림 내용</td>
-                <td className="px-3 py-2 align-top">
-                  학습 알림 발송 목적으로 각 운영체제의 푸시 알림
-                  서비스(Android는 Firebase Cloud Messaging, iOS는 Apple Push
-                  Notification service)를 통해 알림 발송 시점에 전송
-                </td>
-              </tr>
             </tbody>
           </table>
         </div>
         <p>
-          음성 답변 녹음 파일 자체는 국내 리전(AWS ap-northeast-2)에 위치한
-          클라우드 스토리지에 저장되며, 국외로 이전되지 않습니다.
+          음성 답변 녹음 파일(AWS ap-northeast-2)과 인증 토큰·동의 이력(MongoDB
+          Atlas)은 모두 국내 리전에 위치한 서버에 저장되며, 국외로 이전되지
+          않습니다.
         </p>
         <p>
-          위 국외 이전에 대해 거부하고자 하는 경우, 각 항목의 성격에 따라 다음과
-          같이 거부할 수 있습니다.
+          위 국외 이전에 대해 거부하고자 하는 경우, 다음과 같이 거부할 수
+          있습니다.
         </p>
         <ul className="list-disc space-y-1 pl-5">
           <li>
             Microsoft Clarity(행태정보): 제10조의 거부 방법을 통해 수집을 중단할
             수 있으며, 중단하더라도 모의고사 응시 등 핵심 기능 이용에는 제한이
             없습니다.
-          </li>
-          <li>
-            푸시 알림 서비스(FCM·APNs): 앱의 설정 화면에 있는 학습 알림 설정을
-            끄거나 기기의 운영체제 알림 설정에서 알림을 차단하면 푸시 토큰이
-            전송되지 않으며, 차단하더라도 모의고사 응시 등 핵심 기능 이용에는
-            제한이 없습니다.
-          </li>
-          <li>
-            Google 스프레드시트(만족도 조사 응답): 만족도 조사는 선택적으로
-            참여하는 절차이며, 설문에 응답을 제출하지 않으면 해당 정보가 국외로
-            이전되지 않습니다. 이미 제출한 응답의 삭제를 원하는 경우 제11조의
-            연락처로 요청할 수 있습니다.
           </li>
         </ul>
       </LegalSection>
@@ -281,8 +214,7 @@ export default function AppPrivacyPolicyPage() {
           <li>
             이용자는 별도의 요청 없이도 앱의 설정 화면에서 「모든 학습 기록
             삭제」를 통해 기기와 서버에 저장된 학습 기록 및 기기에 저장된 인증
-            토큰을 직접 삭제할 수 있으며, 학습 알림 설정을 통해 알림 수신 동의를
-            직접 철회할 수 있습니다.
+            토큰을 직접 삭제할 수 있습니다.
           </li>
           <li>
             서비스는 만 14세 미만 아동을 대상으로 하지 않으며, 만 14세 미만
@@ -325,9 +257,8 @@ export default function AppPrivacyPolicyPage() {
             서비스를 제공하여 불필요한 개인정보 수집을 최소화합니다.
           </li>
           <li>
-            접근 권한의 관리: 개인정보가 저장되는 외부 저장소(Google
-            스프레드시트) 접근 자격증명은 서버에서만 보관하며 클라이언트에
-            노출하지 않습니다.
+            접근 권한의 관리: 개인정보가 저장되는 외부 저장소(MongoDB Atlas)
+            접근 자격증명은 서버에서만 보관하며 클라이언트에 노출하지 않습니다.
           </li>
           <li>
             접근 통제: 동일 IP에서의 반복적인 대량 요청을 제한하는 접근 빈도

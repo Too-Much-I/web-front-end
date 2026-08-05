@@ -86,9 +86,8 @@ export default function AppTermsOfServicePage() {
             피드백을 제공합니다.
           </li>
           <li>
-            서비스는 현재 검증(Proof of Concept) 단계로 운영되며, 문제 유형,
-            채점 기준, 화면 구성 등 서비스의 내용은 사전 고지 후 변경될 수
-            있습니다.
+            문제 유형, 채점 기준, 화면 구성 등 서비스의 내용은 사전 고지 후
+            변경될 수 있습니다.
           </li>
           <li>
             서비스는 무료로 제공되며, 추후 유료 서비스를 도입하는 경우 그 내용과
@@ -110,30 +109,13 @@ export default function AppTermsOfServicePage() {
             일시 중단될 수 있습니다.
           </li>
           <li>
-            서비스는 검증 단계 특성상 서비스 내용의 전부 또는 일부를 사전 공지
-            후 종료할 수 있습니다.
+            서비스는 운영상 필요에 따라 서비스 내용의 전부 또는 일부를 사전
+            공지 후 종료할 수 있습니다.
           </li>
         </ol>
       </LegalSection>
 
-      <LegalSection title="제6조 (학습 알림)">
-        <ol className="list-decimal space-y-1 pl-5">
-          <li>
-            서비스는 이용자가 동의한 경우 오늘의 문제 안내, 학습 리마인드 등
-            학습 알림을 푸시 알림으로 발송합니다.
-          </li>
-          <li>
-            학습 알림 수신은 선택 사항이며, 수신에 동의하지 않더라도 모의고사
-            응시 등 서비스의 핵심 기능 이용에는 제한이 없습니다.
-          </li>
-          <li>
-            이용자는 앱의 설정 화면에 있는 학습 알림 설정 또는 기기의 운영체제
-            알림 설정을 통해 언제든지 수신 동의를 철회할 수 있습니다.
-          </li>
-        </ol>
-      </LegalSection>
-
-      <LegalSection title="제7조 (학습 기록의 저장과 삭제)">
+      <LegalSection title="제6조 (학습 기록의 저장과 삭제)">
         <ol className="list-decimal space-y-1 pl-5">
           <li>
             서비스는 이용자에게 학습 이력을 제공하기 위하여 응시 이력, 채점 결과
@@ -148,13 +130,13 @@ export default function AppTermsOfServicePage() {
             앱을 기기에서 삭제하는 경우 기기에 저장된 학습 기록과 인증 토큰은
             함께 삭제됩니다. 다만 서버에 저장된 학습 기록은 앱 삭제만으로는
             파기되지 않으므로, 서버 기록까지 삭제하려면 앱을 삭제하기 전에
-            「모든 학습 기록 삭제」를 실행하거나 제15조의 문의처로 삭제를
+            「모든 학습 기록 삭제」를 실행하거나 제14조의 문의처로 삭제를
             요청해야 합니다.
           </li>
         </ol>
       </LegalSection>
 
-      <LegalSection title="제8조 (이용자의 의무)">
+      <LegalSection title="제7조 (이용자의 의무)">
         <p>이용자는 다음 각 호에 해당하는 행위를 해서는 안 됩니다.</p>
         <ol className="list-decimal space-y-1 pl-5">
           <li>타인의 인증 토큰을 도용하거나 부정하게 사용하는 행위</li>
@@ -174,7 +156,7 @@ export default function AppTermsOfServicePage() {
         </ol>
       </LegalSection>
 
-      <LegalSection title="제9조 (서비스의 의무)">
+      <LegalSection title="제8조 (서비스의 의무)">
         <ol className="list-decimal space-y-1 pl-5">
           <li>
             서비스는 관련 법령과 이 약관이 금지하거나 미풍양속에 반하는 행위를
@@ -188,7 +170,7 @@ export default function AppTermsOfServicePage() {
         </ol>
       </LegalSection>
 
-      <LegalSection title="제10조 (지식재산권)">
+      <LegalSection title="제9조 (지식재산권)">
         <ol className="list-decimal space-y-1 pl-5">
           <li>
             서비스가 제공하는 문제, 화면 구성, 채점 로직, AI 피드백 문구 등에
@@ -208,7 +190,7 @@ export default function AppTermsOfServicePage() {
         </ol>
       </LegalSection>
 
-      <LegalSection title="제11조 (AI 채점 결과의 성격)">
+      <LegalSection title="제10조 (AI 채점 결과의 성격)">
         <p>
           서비스가 제공하는 채점 결과 및 피드백은 AI가 공식 채점 기준을 참고하여
           산출한 연습용 참고 자료이며, 한국토익위원회(YBM) 등이 발급하는 공식
@@ -219,7 +201,7 @@ export default function AppTermsOfServicePage() {
         </p>
       </LegalSection>
 
-      <LegalSection title="제12조 (책임의 제한)">
+      <LegalSection title="제11조 (책임의 제한)">
         <ol className="list-decimal space-y-1 pl-5">
           <li>
             서비스는 천재지변, 통신 장애 등 불가항력으로 인하여 서비스를 제공할
@@ -230,15 +212,15 @@ export default function AppTermsOfServicePage() {
             책임을 지지 않습니다.
           </li>
           <li>
-            서비스는 무료로 제공되는 검증 단계 서비스로서, 서비스가 제공하는 AI
-            채점 결과의 정확성이나 특정 목적에의 적합성을 보증하지 않으며,
-            이용자가 채점 결과를 신뢰하여 취한 조치로 발생한 손해에 대해서는
-            서비스의 고의 또는 중대한 과실이 없는 한 책임을 지지 않습니다.
+            서비스는 무료로 제공되는 서비스로서, 서비스가 제공하는 AI 채점
+            결과의 정확성이나 특정 목적에의 적합성을 보증하지 않으며, 이용자가
+            채점 결과를 신뢰하여 취한 조치로 발생한 손해에 대해서는 서비스의
+            고의 또는 중대한 과실이 없는 한 책임을 지지 않습니다.
           </li>
         </ol>
       </LegalSection>
 
-      <LegalSection title="제13조 (미성년자의 서비스 이용)">
+      <LegalSection title="제12조 (미성년자의 서비스 이용)">
         <p>
           서비스는 만 14세 미만 아동을 대상으로 하지 않습니다. 만 14세 이상
           미성년자가 서비스를 이용하는 경우 법정대리인의 동의를 얻어야 하며,
@@ -246,7 +228,7 @@ export default function AppTermsOfServicePage() {
         </p>
       </LegalSection>
 
-      <LegalSection title="제14조 (준거법 및 관할법원)">
+      <LegalSection title="제13조 (준거법 및 관할법원)">
         <ol className="list-decimal space-y-1 pl-5">
           <li>
             서비스와 이용자 간에 발생한 분쟁에 관하여는 대한민국 법을
@@ -259,7 +241,7 @@ export default function AppTermsOfServicePage() {
         </ol>
       </LegalSection>
 
-      <LegalSection title="제15조 (문의처)">
+      <LegalSection title="제14조 (문의처)">
         <p>
           이 약관 및 서비스 이용에 관한 문의는 아래 이메일로 접수해 주시기
           바랍니다.
