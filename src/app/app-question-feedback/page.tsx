@@ -2,7 +2,7 @@
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 
 import { QuestionFeedbackScreen } from "@/components/app-question-feedback/QuestionFeedbackScreen";
 import { ErrorFallbackScreen } from "@/components/error-fallback-screen";
@@ -11,6 +11,16 @@ import {
   MOCK_QUESTION_NUMBERS,
   getMockQuestionFeedback,
 } from "@/features/exam/mock-question-retry-feedback";
+import { postToNative } from "@/lib/native-bridge";
+
+/**
+ * 앱 웹뷰에 "실제 화면을 그릴 데이터가 준비됐다"고 알린다.
+ * 네이티브는 이 메시지를 받을 때까지 자체 스켈레톤을 유지한다 —
+ * WebView의 문서 로드 완료(renderLoading)는 데이터 로딩 완료와 시점이 다르다.
+ */
+type FeedbackDataReadyMessage = {
+  type: "FEEDBACK_DATA_READY";
+};
 
 function parseRetryCount(raw: string | null): number {
   const parsed = Number(raw);
@@ -80,6 +90,12 @@ function AppQuestionFeedbackContent() {
     // 회차를 바꾸는 동안 화면이 빈 상태로 깜빡이지 않도록 이전 회차를 그대로 두고 덮어쓴다.
     placeholderData: keepPreviousData,
   });
+
+  useEffect(() => {
+    if (!detail) return;
+    const message: FeedbackDataReadyMessage = { type: "FEEDBACK_DATA_READY" };
+    postToNative(message);
+  }, [detail]);
 
   if (!hasValidParams) {
     return (

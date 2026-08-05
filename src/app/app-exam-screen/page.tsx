@@ -2,13 +2,23 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 
 import { AppExamScreen } from "@/components/app-exam-screen/FeedbackScreen";
 import { ErrorFallbackScreen } from "@/components/error-fallback-screen";
 import { getExamGradingResult } from "@/features/exam/api/exam-grading-result";
+import { postToNative } from "@/lib/native-bridge";
 
 const FEEDBACK_STEP_COUNT = 3;
+
+/**
+ * 앱 웹뷰에 "실제 화면을 그릴 데이터가 준비됐다"고 알린다.
+ * 네이티브는 이 메시지를 받을 때까지 자체 스켈레톤을 유지한다 —
+ * WebView의 문서 로드 완료(renderLoading)는 데이터 로딩 완료와 시점이 다르다.
+ */
+type FeedbackDataReadyMessage = {
+  type: "FEEDBACK_DATA_READY";
+};
 
 function parseInitialStep(raw: string | null): number {
   const step = Number(raw);
@@ -33,6 +43,12 @@ function AppExamScreenContent() {
     staleTime: Infinity,
     gcTime: Infinity,
   });
+
+  useEffect(() => {
+    if (!result) return;
+    const message: FeedbackDataReadyMessage = { type: "FEEDBACK_DATA_READY" };
+    postToNative(message);
+  }, [result]);
 
   if (!examId) {
     return (
