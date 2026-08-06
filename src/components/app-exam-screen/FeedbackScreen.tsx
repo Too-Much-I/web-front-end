@@ -32,6 +32,10 @@ type FeedbackGoBackMessage = {
   type: "FEEDBACK_GO_BACK";
 };
 
+type FeedbackHistoryRequestedMessage = {
+  type: "FEEDBACK_HISTORY_REQUESTED";
+};
+
 function isFeedbackGoBackMessage(
   value: unknown,
 ): value is FeedbackGoBackMessage {
@@ -146,6 +150,13 @@ export function AppExamScreen({
     router.push(`/app-question-feedback?${params.toString()}`);
   };
 
+  const requestFeedbackHistory = () => {
+    const message: FeedbackHistoryRequestedMessage = {
+      type: "FEEDBACK_HISTORY_REQUESTED",
+    };
+    postToNative(message);
+  };
+
   return (
     <main
       className="flex min-h-dvh flex-col overflow-x-clip"
@@ -155,6 +166,7 @@ export function AppExamScreen({
         <FeedbackHeader
           currentStep={currentStep + 1}
           totalSteps={FEEDBACK_STEP_COUNT}
+          onBack={requestFeedbackHistory}
         />
 
         <div
