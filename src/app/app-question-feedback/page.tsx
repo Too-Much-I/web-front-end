@@ -1,6 +1,10 @@
 "use client";
 
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
 
@@ -12,6 +16,9 @@ import {
   getMockQuestionFeedback,
 } from "@/features/exam/mock-question-retry-feedback";
 import { postToNative } from "@/lib/native-bridge";
+import { subscribeToNativeDataRefresh } from "@/lib/native-data-bridge";
+
+const QUESTION_FEEDBACK_QUERY_KEY = "exam-question-feedback";
 
 /**
  * 앱 웹뷰에 "실제 화면을 그릴 데이터가 준비됐다"고 알린다.
@@ -29,6 +36,7 @@ function parseRetryCount(raw: string | null): number {
 
 function AppQuestionFeedbackContent() {
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
   /**
    * ?mock=1이면 서버 대신 픽스처를 쓴다.
    * 회차 그래프와 지표 증감을 서버 없이 확인하기 위한 경로다.
@@ -73,7 +81,7 @@ function AppQuestionFeedbackContent() {
     refetch,
   } = useQuery({
     queryKey: [
-      "exam-question-feedback",
+      QUESTION_FEEDBACK_QUERY_KEY,
       examId,
       questionNumber,
       retryCount,
@@ -96,6 +104,27 @@ function AppQuestionFeedbackContent() {
     const message: FeedbackDataReadyMessage = { type: "FEEDBACK_DATA_READY" };
     postToNative(message);
   }, [detail]);
+
+  /**
+   * 앱이 보내는 갱신 신호를 받아 캐시를 무효화한다.
+   *
+   * 답변 오디오 URL이 presigned라 시간이 지나면 만료되는데, 앱이 만료 전에 이 신호를 보낸다.
+   * 문서를 다시 로드하지 않으므로 스크롤 위치와 지금 보고 있는 회차가 그대로 유지되고,
+   * react-query가 이전 데이터를 둔 채 뒤에서 다시 받아 화면도 깜빡이지 않는다.
+   *
+   * `refetch()`가 아니라 `invalidateQueries`인 이유는 회차 칩 때문이다. 회차마다 캐시가
+   * 따로 쌓이는데 `refetch()`는 지금 보는 회차만 다시 받는다. 다른 회차로 돌아가는 순간
+   * 만료된 URL이 그대로 나오지 않도록 이 화면의 캐시를 전부 무효화한다.
+   */
+  useEffect(
+    () =>
+      subscribeToNativeDataRefresh(() => {
+        void queryClient.invalidateQueries({
+          queryKey: [QUESTION_FEEDBACK_QUERY_KEY],
+        });
+      }),
+    [queryClient],
+  );
 
   if (!hasValidParams) {
     return (
