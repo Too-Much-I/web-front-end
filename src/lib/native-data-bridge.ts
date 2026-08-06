@@ -25,6 +25,9 @@ type PendingRequest = {
 
 declare global {
   interface Window {
+    __nativeCapabilities?: {
+      nativeDataRequestVersion?: number;
+    };
     __nativeDataBridge?: {
       deliver(rawPayload: string): void;
       refresh(): void;
@@ -109,9 +112,13 @@ export function subscribeToNativeDataRefresh(listener: () => void): () => void {
   };
 }
 
-/** 앱 웹뷰 안에서 열렸는지 판별한다. 브라우저 단독 접근이면 false다. */
+/** 앱 웹뷰가 현재 버전의 네이티브 데이터 요청을 지원하는지 판별한다. */
 export function isNativeBridgeAvailable(): boolean {
-  return typeof window !== "undefined" && Boolean(window.ReactNativeWebView);
+  return (
+    typeof window !== "undefined" &&
+    Boolean(window.ReactNativeWebView) &&
+    window.__nativeCapabilities?.nativeDataRequestVersion === 1
+  );
 }
 
 /** 네이티브에 데이터를 요청하고 서버 원본 result를 받는다. */
