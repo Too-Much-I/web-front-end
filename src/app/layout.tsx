@@ -46,6 +46,30 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * 앱 웹뷰가 넘긴 rem 스케일을 첫 페인트 전에 반영한다.
+ *
+ * layout은 searchParams를 받지 못하고, 웹뷰 진입 페이지 두 개
+ * (app-exam-screen, app-question-feedback)는 "use client" + useSearchParams라
+ * 하이드레이션 이후에야 값이 잡힌다. 그 경로로 적용하면 글자 크기가 한 번 튄다.
+ * body 첫 자식의 인라인 스크립트는 파싱 중 동기 실행되므로 깜빡임이 없다
+ * (next-themes가 테마 적용에 쓰는 것과 같은 패턴이다).
+ *
+ * 기준이 16인 이유는 브라우저 기본 루트 font-size가 16px이기 때문이다.
+ * 앱의 기준(14)과 숫자는 다르지만 각자 1.0에서 "현재와 동일"이라는 성질은 같다.
+ *
+ * 클램프 범위는 app-front-end의 src/theme/rem-scale.ts와 같아야 한다.
+ * 쿼리는 신뢰할 수 없는 입력이므로 웹에서도 독립적으로 자른다.
+ *
+ * scale이 없으면 아무것도 하지 않으므로 일반 웹 방문자는 영향받지 않는다.
+ */
+const REM_SCALE_SCRIPT = `(function(){try{
+var s=parseFloat(new URLSearchParams(location.search).get('scale'));
+if(!isFinite(s))return;
+s=Math.min(1.35,Math.max(0.92,s));
+document.documentElement.style.fontSize=(16*s)+'px';
+}catch(e){}})()`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -57,6 +81,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${jua.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        <script dangerouslySetInnerHTML={{ __html: REM_SCALE_SCRIPT }} />
         <AnalyticsGate />
         <Providers>{children}</Providers>
       </body>
