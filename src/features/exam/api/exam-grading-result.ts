@@ -1,7 +1,7 @@
 import { mapExamGradingResult } from "@/features/exam/map-exam-grading-result";
 import { apiFetch } from "@/lib/api/client";
 import {
-  isNativeBridgeAvailable,
+  isNativeDataRequestAvailable,
   requestFromNative,
 } from "@/lib/native-data-bridge";
 import type { ApiEnvelope } from "@/types/api";
@@ -16,7 +16,7 @@ import type { ExamGradingResult, RawExamSummaryResult } from "@/types/exam";
 export async function getExamGradingResult(
   examId: string,
 ): Promise<ExamGradingResult> {
-  if (isNativeBridgeAvailable()) {
+  if (isNativeDataRequestAvailable()) {
     const result = await requestFromNative<RawExamSummaryResult>(
       "EXAM_SUMMARY",
       {
