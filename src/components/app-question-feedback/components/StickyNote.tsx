@@ -11,7 +11,7 @@ import { feedbackColors } from "@/components/app-exam-screen/theme";
  */
 export function StickyNote({ children }: { children: ReactNode }) {
   return (
-    <div className="relative rotate-[-0.6deg] motion-reduce:rotate-0">
+    <div className="relative">
       {/* 종이 아랫단이 바닥에서 살짝 들린 것처럼 보이게 하는 말림 그림자. */}
       <span
         aria-hidden
