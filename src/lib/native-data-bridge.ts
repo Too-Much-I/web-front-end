@@ -26,6 +26,8 @@ type PendingRequest = {
 declare global {
   interface Window {
     __nativeCapabilities?: {
+      feedbackBridgeVersion?: number;
+      /** 앱/웹 독립 배포 중 데이터 요청 호환성을 위한 이전 필드. */
       nativeDataRequestVersion?: number;
     };
     __nativeDataBridge?: {
@@ -112,12 +114,22 @@ export function subscribeToNativeDataRefresh(listener: () => void): () => void {
   };
 }
 
-/** 앱 웹뷰가 현재 버전의 네이티브 데이터 요청을 지원하는지 판별한다. */
-export function isNativeBridgeAvailable(): boolean {
+/** 앱 웹뷰가 현재 버전의 피드백 브리지 계약을 지원하는지 판별한다. */
+export function isFeedbackBridgeAvailable(): boolean {
   return (
     typeof window !== "undefined" &&
     Boolean(window.ReactNativeWebView) &&
-    window.__nativeCapabilities?.nativeDataRequestVersion === 1
+    window.__nativeCapabilities?.feedbackBridgeVersion === 1
+  );
+}
+
+/** 이름 전환 전에 배포된 앱에서도 인증 데이터 요청은 계속 사용할 수 있게 한다. */
+export function isNativeDataRequestAvailable(): boolean {
+  return (
+    isFeedbackBridgeAvailable() ||
+    (typeof window !== "undefined" &&
+      Boolean(window.ReactNativeWebView) &&
+      window.__nativeCapabilities?.nativeDataRequestVersion === 1)
   );
 }
 
@@ -128,7 +140,7 @@ export function requestFromNative<T>(
 ): Promise<T> {
   installBridge();
 
-  if (!isNativeBridgeAvailable()) {
+  if (!isNativeDataRequestAvailable()) {
     return Promise.reject(
       new Error("앱 웹뷰 안에서만 데이터를 받을 수 있어요."),
     );

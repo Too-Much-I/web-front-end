@@ -1,7 +1,7 @@
 import { mapExamQuestionDetail } from "@/features/exam/map-exam-question-feedback";
 import { apiFetch } from "@/lib/api/client";
 import {
-  isNativeBridgeAvailable,
+  isNativeDataRequestAvailable,
   requestFromNative,
 } from "@/lib/native-data-bridge";
 import type { ApiEnvelope } from "@/types/api";
@@ -22,7 +22,7 @@ export async function getExamQuestionFeedback(
   questionNumber: number,
   retryCount: number,
 ): Promise<ExamQuestionDetail> {
-  if (isNativeBridgeAvailable()) {
+  if (isNativeDataRequestAvailable()) {
     const result = await requestFromNative<RawExamQuestionDetailResult>(
       "QUESTION_FEEDBACK",
       { examId, questionNumber, retryCount },

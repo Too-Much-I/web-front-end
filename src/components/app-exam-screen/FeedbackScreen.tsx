@@ -2,7 +2,13 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import { AtAGlanceSection } from "@/components/app-exam-screen/components/AtAGlanceSection";
 import { FeedbackHeader } from "@/components/app-exam-screen/components/FeedbackHeader";
@@ -15,6 +21,7 @@ import {
 } from "@/components/app-exam-screen/feedback-view-model";
 import { feedbackColors } from "@/components/app-exam-screen/theme";
 import { postToNative } from "@/lib/native-bridge";
+import { isFeedbackBridgeAvailable } from "@/lib/native-data-bridge";
 import type { ExamGradingResult } from "@/types/exam";
 
 const FEEDBACK_STEP_COUNT = 3;
@@ -36,6 +43,15 @@ type FeedbackHistoryRequestedMessage = {
   type: "FEEDBACK_HISTORY_REQUESTED";
 };
 
+/** capability는 문서 실행 전에 한 번 주입되고 이 페이지가 떠 있는 동안 바뀌지 않는다. */
+function subscribeToFeedbackBridgeAvailability(): () => void {
+  return () => undefined;
+}
+
+function getServerFeedbackBridgeAvailability(): false {
+  return false;
+}
+
 function isFeedbackGoBackMessage(
   value: unknown,
 ): value is FeedbackGoBackMessage {
@@ -54,6 +70,11 @@ export function AppExamScreen({
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [stepDirection, setStepDirection] = useState<StepDirection>("next");
   const [isScoreBoardRevealed, setIsScoreBoardRevealed] = useState(true);
+  const supportsFeedbackBridge = useSyncExternalStore(
+    subscribeToFeedbackBridgeAvailability,
+    isFeedbackBridgeAvailable,
+    getServerFeedbackBridgeAvailability,
+  );
   const swipeStartRef = useRef<{ x: number; y: number } | null>(null);
   const suppressNextClickRef = useRef(false);
   const parts = useMemo(() => createFeedbackParts(result), [result]);
@@ -166,7 +187,7 @@ export function AppExamScreen({
         <FeedbackHeader
           currentStep={currentStep + 1}
           totalSteps={FEEDBACK_STEP_COUNT}
-          onBack={requestFeedbackHistory}
+          onBack={supportsFeedbackBridge ? requestFeedbackHistory : undefined}
         />
 
         <div
