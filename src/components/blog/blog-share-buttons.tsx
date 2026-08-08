@@ -4,6 +4,10 @@ import { Check, Link2, Share2 } from "lucide-react";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 
+import { withUtm, type UtmMedium, type UtmSource } from "@/lib/share-url";
+
+const SHARE_CAMPAIGN = "blog_share";
+
 /**
  * 글 공유 버튼.
  *
@@ -11,6 +15,11 @@ import { toast } from "sonner";
  * Kakao JavaScript SDK와 앱 키가 있어야 해서 여기에 없다. 대신 모바일에서는
  * 네이티브 공유 시트(Web Share API)가 카카오톡을 포함해 설치된 앱 전부를
  * 띄워주므로, 지원되는 환경에서만 "공유" 버튼을 추가로 보여준다.
+ *
+ * 공유 버튼별로 UTM을 다르게 붙인다. 블로그 글은 외부 확산이 목적이라 유입 경로를
+ * 남기는 게 맞고, 특히 네이티브 공유로 넘어가는 카카오톡/메시지는 referrer가 없어서
+ * UTM이 없으면 유입이 통째로 Direct에 묻힌다. canonical이 걸려 있으므로(app/blog/[slug])
+ * 쿼리가 붙어도 색인은 중복되지 않는다.
  */
 export function BlogShareButtons({
   url,
@@ -39,9 +48,14 @@ export function BlogShareButtons({
     return () => clearTimeout(timer);
   }, [isCopied]);
 
+  /** 버튼마다 어디로 나간 링크인지 구분되도록 source를 다르게 붙인다. */
+  function shareUrl(source: UtmSource, medium: UtmMedium) {
+    return withUtm(url, { source, medium, campaign: SHARE_CAMPAIGN });
+  }
+
   async function handleCopy() {
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(shareUrl("copy_link", "referral"));
       setIsCopied(true);
     } catch {
       toast.error("링크를 복사하지 못했어요. 주소창의 URL을 복사해 주세요.");
@@ -54,13 +68,12 @@ export function BlogShareButtons({
 
   async function handleNativeShare() {
     try {
-      await navigator.share({ title, url });
+      await navigator.share({ title, url: shareUrl("native_share", "social") });
     } catch {
       // 사용자가 공유 시트를 닫은 경우도 여기로 온다. 알릴 필요가 없다.
     }
   }
 
-  const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
 
   return (
@@ -82,7 +95,7 @@ export function BlogShareButtons({
         type="button"
         onClick={() =>
           openShareWindow(
-            `https://x.com/intent/post?text=${encodedTitle}&url=${encodedUrl}`,
+            `https://x.com/intent/post?text=${encodedTitle}&url=${encodeURIComponent(shareUrl("x", "social"))}`,
           )
         }
         className={BUTTON}
@@ -95,7 +108,7 @@ export function BlogShareButtons({
         type="button"
         onClick={() =>
           openShareWindow(
-            `https://share.naver.com/web/shareView?url=${encodedUrl}&title=${encodedTitle}`,
+            `https://share.naver.com/web/shareView?url=${encodeURIComponent(shareUrl("naver", "social"))}&title=${encodedTitle}`,
           )
         }
         className={BUTTON}
@@ -109,7 +122,7 @@ export function BlogShareButtons({
         type="button"
         onClick={() =>
           openShareWindow(
-            `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+            `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl("facebook", "social"))}`,
           )
         }
         className={BUTTON}
