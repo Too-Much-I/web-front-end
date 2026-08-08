@@ -30,6 +30,7 @@ import {
   getTargetGradeOption,
   type TargetGradeOption,
 } from "@/features/exam/target-grade";
+import { trackEvent } from "@/lib/analytics";
 import { jua } from "@/lib/fonts";
 import { useCountUp } from "@/lib/use-count-up";
 import type { ExamGradingResult } from "@/types/exam";
@@ -105,6 +106,11 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
 
   // 모바일 등 지원 환경에서는 OS 공유 시트를 띄우고, 미지원 환경에서는 링크를 복사한다.
   // 링크에 examId가 담기므로 받은 사람은 이 리포트를 그대로 볼 수 있다.
+  //
+  // 여기에는 일부러 UTM을 붙이지 않는다. 이 링크는 남에게 뿌리는 용도보다 본인이 나중에
+  // 다시 보려고 저장하는 쪽에 가까운데, UTM이 붙은 링크로 재방문하면 그 세션의 소스/매체가
+  // 덮어써져서 본인의 재방문이 외부 유입으로 잡힌다. 유입이 아니라 "공유할 만큼 만족했는가"가
+  // 궁금한 것이므로 result_share 이벤트로만 남긴다.
   async function handleShare() {
     const shareText = `토선생 AI 토익스피킹 모의고사에서 예상 ${result.totalScore}점(${result.levelEstimate})을 받았어요. 내 점수도 확인해보세요!`;
     const shareUrl = window.location.href;
@@ -116,6 +122,7 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
           text: shareText,
           url: shareUrl,
         });
+        trackEvent("result_share", { share_method: "native" });
       } catch {
         // 사용자가 공유 시트를 그냥 닫은 경우 — 아무것도 하지 않는다.
       }
@@ -124,6 +131,7 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
 
     try {
       await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+      trackEvent("result_share", { share_method: "clipboard" });
       toast.success("결과 링크를 복사했어요. 원하는 곳에 붙여넣어 공유하세요!");
     } catch {
       toast.error("링크 복사에 실패했어요.");
