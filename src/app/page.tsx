@@ -8,6 +8,17 @@ import { HeroVideo } from "@/components/hero-video";
 import { PhoneDemo } from "@/components/phone-demo";
 import { ScrollToSectionLink } from "@/components/scroll-to-section-link";
 
+/**
+ * canonical만 정의하고 나머지는 루트 레이아웃 값을 그대로 물려받는다.
+ *
+ * 공유 버튼이 붙이는 UTM 파라미터(src/lib/share-url.ts) 때문에 홈은 `?utm_source=...`가
+ * 달린 주소로 외부에 돌아다닌다. canonical이 없으면 검색엔진이 이를 별개 URL로 볼 수 있어
+ * 평가가 원본과 나뉜다.
+ */
+export const metadata = {
+  alternates: { canonical: "/" },
+};
+
 export default function Home() {
   return (
     <div className="flex flex-1 flex-col bg-orange-50/40">

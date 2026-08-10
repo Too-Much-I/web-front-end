@@ -8,6 +8,7 @@ import { BlogShareButtons } from "@/components/blog/blog-share-buttons";
 import { ReadingProgressBar } from "@/components/blog/reading-progress-bar";
 import { RelatedPosts } from "@/components/blog/related-posts";
 import { ExamStartButton } from "@/components/exam/exam-start-button";
+import { JsonLd } from "@/components/json-ld";
 import { getBlogPost } from "@/features/blog/api/get-blog-post";
 import { getBlogPosts } from "@/features/blog/api/get-blog-posts";
 import { BLOG_REVALIDATE_SECONDS } from "@/features/blog/blog-cache";
@@ -19,7 +20,6 @@ import {
 import {
   blogBreadcrumbJsonLd,
   blogPostingJsonLd,
-  serializeJsonLd,
 } from "@/features/blog/blog-json-ld";
 import { renderMarkdown, stripMarkdown } from "@/features/blog/render-markdown";
 import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/site-config";
@@ -99,18 +99,8 @@ export default async function BlogPostPage({
     <>
       <ReadingProgressBar />
 
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: serializeJsonLd(blogPostingJsonLd(post)),
-        }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: serializeJsonLd(blogBreadcrumbJsonLd(post)),
-        }}
-      />
+      <JsonLd data={blogPostingJsonLd(post)} />
+      <JsonLd data={blogBreadcrumbJsonLd(post)} />
 
       <BlogPageLayout variant="article">
         <article>

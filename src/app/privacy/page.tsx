@@ -1,7 +1,11 @@
-import { LegalPageLayout, LegalSection } from "@/components/legal/legal-page-layout";
+import {
+  LegalPageLayout,
+  LegalSection,
+} from "@/components/legal/legal-page-layout";
 
 export const metadata = {
   title: "개인정보처리방침 | 토선생",
+  alternates: { canonical: "/privacy" },
 };
 
 const CONTACT_EMAIL = "tosunsaeng093@gmail.com";
@@ -45,9 +49,8 @@ export default function PrivacyPolicyPage() {
       <LegalSection title="제2조 (개인정보의 처리 및 보유 기간)">
         <p>
           서비스는 법령에 따른 개인정보 보유·이용기간 또는 정보주체로부터
-          개인정보를 수집 시에 동의받은 개인정보 보유·이용기간 내에서
-          개인정보를 처리·보유합니다. 각 개인정보 처리 항목별 보유 기간은
-          다음과 같습니다.
+          개인정보를 수집 시에 동의받은 개인정보 보유·이용기간 내에서 개인정보를
+          처리·보유합니다. 각 개인정보 처리 항목별 보유 기간은 다음과 같습니다.
         </p>
         <ul className="list-disc space-y-1 pl-5">
           <li>
@@ -60,14 +63,13 @@ export default function PrivacyPolicyPage() {
             동의일로부터 3년간 보관 후 파기
           </li>
           <li>
-            만족도 조사 응답: 조사 목적 달성 후 지체 없이 파기하되,
-            통계·연구 목적으로는 개인을 식별할 수 없는 형태로 가공하여
-            보관할 수 있음
+            만족도 조사 응답: 조사 목적 달성 후 지체 없이 파기하되, 통계·연구
+            목적으로는 개인을 식별할 수 없는 형태로 가공하여 보관할 수 있음
           </li>
           <li>
-            만족도 조사 시 별도 동의를 받아 수집한 연락처(전화번호 또는
-            이메일): 응시권 발송 및 정식 서비스 출시 안내 시까지 보유하며,
-            최대 수집일로부터 3개월 이내 파기
+            만족도 조사 시 별도 동의를 받아 수집한 연락처(전화번호 또는 이메일):
+            응시권 발송 및 정식 서비스 출시 안내 시까지 보유하며, 최대
+            수집일로부터 3개월 이내 파기
           </li>
           <li>
             쿠키 등 자동 수집된 행태정보(Microsoft Clarity): 세션 재생 데이터는
@@ -85,18 +87,18 @@ export default function PrivacyPolicyPage() {
       <LegalSection title="제3조 (처리하는 개인정보의 항목)">
         <ol className="list-decimal space-y-1 pl-5">
           <li>
-            모의고사 응시 시 수집: 음성 답변 녹음 파일, 브라우저가 자동
-            생성하는 익명 식별자, 동의 항목·일시·방법·버전
+            모의고사 응시 시 수집: 음성 답변 녹음 파일, 브라우저가 자동 생성하는
+            익명 식별자, 동의 항목·일시·방법·버전
           </li>
           <li>
-            만족도 조사 시 수집(선택): 만족도 점수, 이전 취득 등급, 지불
-            의향, 의견, 연락처(전화번호 또는 이메일 — 응시권 발송 목적으로
-            수집·이용에 대한 별도 동의를 받은 경우에 한하여 수집) 및 해당
-            동의 이력(동의 여부·문구 버전·일시)
+            만족도 조사 시 수집(선택): 만족도 점수, 이전 취득 등급, 지불 의향,
+            의견, 연락처(전화번호 또는 이메일 — 응시권 발송 목적으로 수집·이용에
+            대한 별도 동의를 받은 경우에 한하여 수집) 및 해당 동의 이력(동의
+            여부·문구 버전·일시)
           </li>
           <li>
-            서비스 이용 과정에서 자동으로 생성·수집: 접속 IP 주소, 쿠키,
-            서비스 이용 기록, 기기·브라우저 정보
+            서비스 이용 과정에서 자동으로 생성·수집: 접속 IP 주소, 쿠키, 서비스
+            이용 기록, 기기·브라우저 정보
           </li>
         </ol>
       </LegalSection>
@@ -104,9 +106,9 @@ export default function PrivacyPolicyPage() {
       <LegalSection title="제4조 (개인정보의 제3자 제공)">
         <p>
           서비스는 정보주체의 개인정보를 제1조에서 명시한 목적 범위 내에서만
-          처리하며, 원칙적으로 정보주체의 동의 없이는 개인정보를 외부에
-          제공하지 않습니다. 다만 정보주체의 별도 동의가 있거나 법령에 특별한
-          규정이 있는 경우는 예외로 합니다.
+          처리하며, 원칙적으로 정보주체의 동의 없이는 개인정보를 외부에 제공하지
+          않습니다. 다만 정보주체의 별도 동의가 있거나 법령에 특별한 규정이 있는
+          경우는 예외로 합니다.
         </p>
       </LegalSection>
 
@@ -152,8 +154,8 @@ export default function PrivacyPolicyPage() {
         </div>
         <p>
           음성 답변 채점을 위한 백엔드 서버는 서비스 운영팀이 직접 운영하며,
-          별도의 외부 채점 업체에 위탁하지 않습니다. 다만 음성 답변 녹음
-          파일의 저장을 위해 위 표와 같이 클라우드 스토리지를 이용합니다.
+          별도의 외부 채점 업체에 위탁하지 않습니다. 다만 음성 답변 녹음 파일의
+          저장을 위해 위 표와 같이 클라우드 스토리지를 이용합니다.
         </p>
       </LegalSection>
 
@@ -181,8 +183,8 @@ export default function PrivacyPolicyPage() {
                   쿠키 식별자, 페이지 이동 경로, 클릭·스크롤 등 행태정보
                 </td>
                 <td className="px-3 py-2 align-top">
-                  웹사이트 사용성 분석(Microsoft Clarity) 목적으로 서비스
-                  이용 시점에 네트워크를 통해 실시간 전송
+                  웹사이트 사용성 분석(Microsoft Clarity) 목적으로 서비스 이용
+                  시점에 네트워크를 통해 실시간 전송
                 </td>
               </tr>
               <tr>
@@ -191,8 +193,7 @@ export default function PrivacyPolicyPage() {
                   익명 식별자, 동의 이력, 만족도 조사 응답
                 </td>
                 <td className="px-3 py-2 align-top">
-                  Google 스프레드시트 저장·관리 목적으로 응답 제출 시점에
-                  전송
+                  Google 스프레드시트 저장·관리 목적으로 응답 제출 시점에 전송
                 </td>
               </tr>
               <tr>
@@ -206,8 +207,8 @@ export default function PrivacyPolicyPage() {
                   행태정보
                 </td>
                 <td className="px-3 py-2 align-top">
-                  웹사이트 이용 통계 분석(Google Analytics) 목적으로 서비스
-                  이용 시점에 네트워크를 통해 실시간 전송
+                  웹사이트 이용 통계 분석(Google Analytics) 목적으로 서비스 이용
+                  시점에 네트워크를 통해 실시간 전송
                 </td>
               </tr>
             </tbody>
@@ -218,8 +219,8 @@ export default function PrivacyPolicyPage() {
           클라우드 스토리지에 저장되며, 국외로 이전되지 않습니다.
         </p>
         <p>
-          위 국외 이전에 대해 거부하고자 하는 경우, 각 항목의 성격에 따라
-          다음과 같이 거부할 수 있습니다.
+          위 국외 이전에 대해 거부하고자 하는 경우, 각 항목의 성격에 따라 다음과
+          같이 거부할 수 있습니다.
         </p>
         <ul className="list-disc space-y-1 pl-5">
           <li>
@@ -229,9 +230,9 @@ export default function PrivacyPolicyPage() {
           </li>
           <li>
             Google 스프레드시트(만족도 조사 응답): 만족도 조사는 선택적으로
-            참여하는 절차이며, 설문에 응답을 제출하지 않으면 해당 정보가
-            국외로 이전되지 않습니다. 이미 제출한 응답의 삭제를 원하는 경우
-            제11조의 연락처로 요청할 수 있습니다.
+            참여하는 절차이며, 설문에 응답을 제출하지 않으면 해당 정보가 국외로
+            이전되지 않습니다. 이미 제출한 응답의 삭제를 원하는 경우 제11조의
+            연락처로 요청할 수 있습니다.
           </li>
         </ul>
       </LegalSection>
@@ -252,8 +253,8 @@ export default function PrivacyPolicyPage() {
             않습니다.
           </li>
           <li>
-            AI 자동 채점 결과에 대하여 정보주체는 채점에 반영된 기준과
-            절차에 대한 설명을 요구할 수 있습니다.
+            AI 자동 채점 결과에 대하여 정보주체는 채점에 반영된 기준과 절차에
+            대한 설명을 요구할 수 있습니다.
           </li>
         </ol>
       </LegalSection>
@@ -266,8 +267,8 @@ export default function PrivacyPolicyPage() {
           </li>
           <li>
             파기 방법: 전자적 파일 형태로 저장된 개인정보는 복구 및 재생이
-            불가능한 기술적 방법을 사용하여 영구 삭제합니다. 서비스는 종이
-            문서 형태로 개인정보를 수집하지 않습니다.
+            불가능한 기술적 방법을 사용하여 영구 삭제합니다. 서비스는 종이 문서
+            형태로 개인정보를 수집하지 않습니다.
           </li>
         </ol>
       </LegalSection>
@@ -287,22 +288,23 @@ export default function PrivacyPolicyPage() {
             접근 통제: 동일 IP에서의 반복적인 대량 요청을 제한하는 접근 빈도
             제어를 적용합니다.
           </li>
-          <li>통신 구간 암호화: 이용자와 서비스 간 통신 구간은 암호화(HTTPS)됩니다.</li>
+          <li>
+            통신 구간 암호화: 이용자와 서비스 간 통신 구간은
+            암호화(HTTPS)됩니다.
+          </li>
         </ol>
       </LegalSection>
 
       <LegalSection title="제10조 (쿠키 등 자동 수집 장치의 설치·운영 및 거부)">
         <p>
-          서비스는 이용 행태 분석 도구인 Microsoft Clarity와 Google
-          Analytics를 통해 쿠키를 설치·운영합니다. 쿠키는 웹사이트 이용
-          편의를 위해 이용 정보를 저장하고 수시로 불러오는 기능을 하며,
-          서비스 개선을 위한 사용성 분석 및 이용 통계 분석 목적으로만
-          사용됩니다.
+          서비스는 이용 행태 분석 도구인 Microsoft Clarity와 Google Analytics를
+          통해 쿠키를 설치·운영합니다. 쿠키는 웹사이트 이용 편의를 위해 이용
+          정보를 저장하고 수시로 불러오는 기능을 하며, 서비스 개선을 위한 사용성
+          분석 및 이용 통계 분석 목적으로만 사용됩니다.
         </p>
         <p>
-          이용자는 브라우저 설정을 통해 쿠키 저장을 거부하거나 삭제할 수
-          있으며, Google Analytics의 경우 Google이 제공하는 차단 브라우저
-          부가기능(
+          이용자는 브라우저 설정을 통해 쿠키 저장을 거부하거나 삭제할 수 있으며,
+          Google Analytics의 경우 Google이 제공하는 차단 브라우저 부가기능(
           <a
             href="https://tools.google.com/dlpage/gaoptout"
             target="_blank"
@@ -311,19 +313,19 @@ export default function PrivacyPolicyPage() {
           >
             tools.google.com/dlpage/gaoptout
           </a>
-          )을 통해서도 수집을 거부할 수 있습니다. 다만 쿠키 저장을
-          거부하더라도 모의고사 응시 등 서비스의 핵심 기능 이용에는 제한이
-          없습니다. Microsoft Clarity 및 Google Analytics의 데이터 처리에
-          관한 자세한 사항은 각각 Microsoft와 Google의 개인정보처리방침을
-          통해 확인할 수 있습니다.
+          )을 통해서도 수집을 거부할 수 있습니다. 다만 쿠키 저장을 거부하더라도
+          모의고사 응시 등 서비스의 핵심 기능 이용에는 제한이 없습니다.
+          Microsoft Clarity 및 Google Analytics의 데이터 처리에 관한 자세한
+          사항은 각각 Microsoft와 Google의 개인정보처리방침을 통해 확인할 수
+          있습니다.
         </p>
       </LegalSection>
 
       <LegalSection title="제11조 (개인정보 보호책임자)">
         <p>
           서비스는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 개인정보
-          처리와 관련한 정보주체의 불만처리 및 피해구제 등을 위하여 아래와
-          같이 개인정보 보호책임자 및 담당부서를 지정하고 있습니다.
+          처리와 관련한 정보주체의 불만처리 및 피해구제 등을 위하여 아래와 같이
+          개인정보 보호책임자 및 담당부서를 지정하고 있습니다.
         </p>
         <div className="rounded-lg border border-orange-200/60 bg-white px-4 py-3">
           <p className="font-semibold text-blue-950">개인정보 보호책임자</p>
@@ -341,8 +343,7 @@ export default function PrivacyPolicyPage() {
         <p>
           정보주체는 서비스를 이용하며 발생한 모든 개인정보 보호 관련 문의,
           불만처리, 피해구제 등에 관한 사항을 위 연락처로 문의할 수 있으며,
-          서비스는 정보주체의 문의에 대해 지체 없이 답변 및 처리해드릴
-          것입니다.
+          서비스는 정보주체의 문의에 대해 지체 없이 답변 및 처리해드릴 것입니다.
         </p>
       </LegalSection>
 
@@ -385,10 +386,10 @@ export default function PrivacyPolicyPage() {
 
       <LegalSection title="제13조 (개인정보 처리방침의 변경)">
         <p>
-          이 개인정보처리방침은 {EFFECTIVE_DATE}부터 적용됩니다. 법령·정책
-          또는 서비스 내용의 변화에 따라 내용의 추가·삭제 및 수정이 있을
-          시에는 변경사항의 시행 최소 7일 전부터 서비스 내 공지사항을 통하여
-          고지할 것입니다.
+          이 개인정보처리방침은 {EFFECTIVE_DATE}부터 적용됩니다. 법령·정책 또는
+          서비스 내용의 변화에 따라 내용의 추가·삭제 및 수정이 있을 시에는
+          변경사항의 시행 최소 7일 전부터 서비스 내 공지사항을 통하여 고지할
+          것입니다.
         </p>
       </LegalSection>
     </LegalPageLayout>

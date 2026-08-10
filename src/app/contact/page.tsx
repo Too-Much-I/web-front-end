@@ -3,6 +3,7 @@ import Link from "next/link";
 
 export const metadata = {
   title: "문의하기 | 토선생",
+  alternates: { canonical: "/contact" },
 };
 
 const CONTACT_EMAIL = "tosunsaeng093@gmail.com";
@@ -24,7 +25,10 @@ export default function ContactPage() {
           />
           <span className="text-lg font-bold text-orange-500">토선생</span>
         </Link>
-        <Link href="/" className="text-sm font-medium text-zinc-600 hover:text-orange-500">
+        <Link
+          href="/"
+          className="text-sm font-medium text-zinc-600 hover:text-orange-500"
+        >
           홈으로
         </Link>
       </header>
