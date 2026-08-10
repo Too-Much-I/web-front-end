@@ -4,17 +4,23 @@ import { BlogInfinitePostList } from "@/components/blog/blog-infinite-post-list"
 import { BlogListUnavailable } from "@/components/blog/blog-list-unavailable";
 import { BlogPageLayout } from "@/components/blog/blog-page-layout";
 import { BlogSearchField } from "@/components/blog/blog-search-field";
+import { JsonLd } from "@/components/json-ld";
 import { getBlogPostsSafe } from "@/features/blog/api/get-blog-posts";
 import { BLOG_REVALIDATE_SECONDS } from "@/features/blog/blog-cache";
+import {
+  BLOG_DESCRIPTION,
+  BLOG_NAME,
+  blogJsonLd,
+} from "@/features/blog/blog-json-ld";
 import { DEFAULT_OG_IMAGE } from "@/lib/site-config";
 
 /** 새 글과 예약 발행이 재배포 없이 반영되도록 ISR로 둔다. */
 // 세그먼트 설정은 정적으로 분석되므로 리터럴이어야 한다(BLOG_REVALIDATE_SECONDS와 동일 값).
 export const revalidate = 300;
 
-const TITLE = "토익 스피킹 학습 블로그";
-const DESCRIPTION =
-  "토익 스피킹 등급 기준부터 파트별 답변 전략까지, 실제 채점 데이터를 보며 정리한 학습 노트를 모았습니다.";
+// 메타·본문·구조화 데이터가 같은 문구를 쓰도록 blog-json-ld에서만 정의한다.
+const TITLE = BLOG_NAME;
+const DESCRIPTION = BLOG_DESCRIPTION;
 
 export const metadata: Metadata = {
   title: `${TITLE} | 토선생`,
@@ -47,6 +53,9 @@ export default async function BlogListPage() {
 
   return (
     <BlogPageLayout>
+      {/* 목록을 못 받아온 상태에서 빈 blogPost로 "글이 없는 블로그"라고 말하지 않는다. */}
+      {firstPage ? <JsonLd data={blogJsonLd(firstPage.posts)} /> : null}
+
       <section className="flex flex-col gap-3 pt-10 pb-7">
         <p className="text-sm font-bold text-orange-600 sm:text-base">
           토선생 블로그
