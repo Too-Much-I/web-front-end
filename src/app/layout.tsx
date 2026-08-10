@@ -3,7 +3,13 @@ import { Geist, Geist_Mono, Jua } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { AnalyticsGate } from "@/components/analytics-gate";
-import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/site-config";
+import { JsonLd } from "@/components/json-ld";
+import { ORGANIZATION_JSON_LD, WEBSITE_JSON_LD } from "@/lib/json-ld";
+import {
+  DEFAULT_OG_IMAGE,
+  SITE_DESCRIPTION,
+  SITE_URL,
+} from "@/lib/site-config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,8 +28,8 @@ const jua = Jua({
 });
 
 const TITLE = "토선생 - 토익 스피킹 AI 모의고사 채점";
-const DESCRIPTION =
-  "토선생은 실제 토익 스피킹 시험과 동일한 유형의 문제로 모의고사를 보고, AI가 발음·유창성·문법·어휘를 공식 채점 기준으로 분석해 즉시 피드백을 주는 서비스예요.";
+// 구조화 데이터의 Organization 설명과 같은 문구를 써야 해서 site-config에서 가져온다.
+const DESCRIPTION = SITE_DESCRIPTION;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -82,6 +88,13 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col">
         <script dangerouslySetInnerHTML={{ __html: REM_SCALE_SCRIPT }} />
+        {/*
+          모든 페이지에 싣는다. 하위 페이지의 구조화 데이터가 `@id`로 조직을 참조하는데,
+          소비자는 한 페이지 안의 블록들만 하나의 그래프로 합치므로 참조가 항상 같은
+          문서에서 풀려야 한다.
+        */}
+        <JsonLd data={ORGANIZATION_JSON_LD} />
+        <JsonLd data={WEBSITE_JSON_LD} />
         <AnalyticsGate />
         <Providers>{children}</Providers>
       </body>

@@ -1,3 +1,4 @@
+import { JsonLd } from "@/components/json-ld";
 import {
   Accordion,
   AccordionContent,
@@ -47,10 +48,7 @@ export function FaqSection() {
       id="faq"
       className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-6 py-20 sm:py-28 lg:max-w-4xl xl:max-w-5xl"
     >
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={jsonLd} />
       <h2 className="text-center text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl lg:text-4xl">
         자주 묻는 질문
       </h2>
