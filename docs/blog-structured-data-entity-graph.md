@@ -17,7 +17,7 @@
 
 ## `@id` 규약
 
-```
+```text
 Organization  https://to-teacher.com/#organization
 WebSite       https://to-teacher.com/#website
 Blog          https://to-teacher.com/blog#blog
@@ -38,7 +38,7 @@ URI를 만든다.
 
 ## 그래프 구조
 
-```
+```text
 BlogPosting ──isPartOf──> Blog ──isPartOf──> WebSite ──publisher──> Organization
      │                      │                                            ^
      └──────publisher───────┴────────────────────────────────────────────┘
@@ -96,9 +96,43 @@ BlogPosting ──isPartOf──> Blog ──isPartOf──> WebSite ──publi
 python3 -c "
 import re, json
 html = open('.next/server/app/blog.html', encoding='utf-8').read()
-for m in re.findall(r'<script type=\"application/ld\+json\">(.*?)</script>', html, re.S):
-    d = json.loads(m)
+
+def walk(value):
+    if isinstance(value, dict):
+        yield value
+        for child in value.values():
+            yield from walk(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from walk(child)
+
+documents = [
+    json.loads(match)
+    for match in re.findall(
+        r'<script type=\"application/ld\+json\">(.*?)</script>', html, re.S
+    )
+]
+nodes = [node for document in documents for node in walk(document)]
+defined_ids = {
+    node['@id']
+    for node in nodes
+    if isinstance(node.get('@id'), str) and len(node) > 1
+}
+referenced_ids = {
+    reference['@id']
+    for node in nodes
+    for key in ('isPartOf', 'publisher')
+    for reference in walk(node.get(key))
+    if isinstance(reference.get('@id'), str)
+}
+
+for d in documents:
     print(d.get('@type'), d.get('@id'), d.get('isPartOf'))
+
+missing_ids = sorted(referenced_ids - defined_ids)
+if missing_ids:
+    print('Unresolved JSON-LD @id references:', *missing_ids, sep='\n- ')
+    raise SystemExit(1)
 "
 ```
 

@@ -12,8 +12,16 @@ function toSingleLine(value: string): string {
   return value.replace(/\s+/g, " ").trim();
 }
 
+/** Markdown 링크 레이블을 한 줄로 만들고 문법 문자를 이스케이프한다. */
+function escapeMarkdownLabel(value: string): string {
+  return toSingleLine(value)
+    .replaceAll("\\", "\\\\")
+    .replaceAll("[", "\\[")
+    .replaceAll("]", "\\]");
+}
+
 function link(label: string, path: string, note?: string): string {
-  const line = `- [${label}](${SITE_URL}${path})`;
+  const line = `- [${escapeMarkdownLabel(label)}](${SITE_URL}${path})`;
   return note ? `${line}: ${toSingleLine(note)}` : line;
 }
 
