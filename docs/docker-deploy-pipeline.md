@@ -16,19 +16,21 @@
 
 이 프로젝트의 env는 성격이 완전히 다른 두 그룹으로 나뉜다([CLAUDE.md](../CLAUDE.md) 참고).
 
-| | `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_CLARITY_PROJECT_ID` | `GOOGLE_SERVICE_ACCOUNT_*`, `GOOGLE_CONSENT_SHEET_*`, `GOOGLE_SURVEY_SHEET_*` |
-|---|---|---|
-| 필요 시점 | **빌드타임** — Next.js가 `next build` 때 클라이언트 번들에 값을 그대로 인라인한다 | **런타임** — API 라우트가 요청 시점에 `process.env`로 읽는다 |
-| 이 파이프라인에서 넣는 곳 | `docker/build-push-action`의 `build-args`로 GitHub Actions 시크릿에서 전달 → Dockerfile `ARG`/`ENV` → `pnpm build` | **Dockerfile/이 파이프라인 어디에도 넣지 않음.** EC2의 docker-compose `environment:`/`.env`에서 컨테이너 실행 시점에만 주입 |
+| | `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_CLARITY_PROJECT_ID` | `SENTRY_AUTH_TOKEN` | `GOOGLE_SERVICE_ACCOUNT_*`, `GOOGLE_CONSENT_SHEET_*`, `GOOGLE_SURVEY_SHEET_*` |
+|---|---|---|---|
+| 필요 시점 | **빌드타임** — Next.js가 `next build` 때 클라이언트 번들에 값을 그대로 인라인한다 | **빌드타임 한정** — Sentry 빌드 플러그인이 source map을 업로드할 때만 사용한다 | **런타임** — API 라우트가 요청 시점에 `process.env`로 읽는다 |
+| 이 파이프라인에서 넣는 곳 | `docker/build-push-action`의 `build-args`로 GitHub Actions 시크릿에서 전달 → Dockerfile `ARG`/`ENV` → `pnpm build` | GitHub Actions repository secret을 BuildKit secret으로 전달 → `pnpm build` 명령에서만 노출 | **Dockerfile/이 파이프라인 어디에도 넣지 않음.** EC2의 docker-compose `environment:`/`.env`에서 컨테이너 실행 시점에만 주입 |
 
 서버 전용 시크릿을 빌드 단계에서 다루지 않는 이유는, `docker build --build-arg`나 `RUN` 레이어에 올라간 값은 `docker history`/이미지 레이어로 그대로 복원 가능해서다. 이미지 자체는 Docker Hub의 `msde76/tosunsaeng-frontend:latest`로 공개(또는 팀 공유)되므로, 그 안에 서비스 계정 private key 같은 값이 박혀 있으면 이미지를 받는 모든 사람이 시크릿을 갖게 된다.
+
+`SENTRY_AUTH_TOKEN`은 빌드에 필요하지만 이미지에 남아서는 안 되므로 build-arg가 아니라 BuildKit secret mount를 사용한다. 이 값은 source map 업로드가 실행되는 단일 `RUN` 동안만 `/run/secrets/sentry_auth_token`으로 노출되고 최종 이미지와 빌드 레이어에는 포함되지 않는다.
 
 ## 3. Dockerfile 구조
 
 [Dockerfile](../Dockerfile)은 pnpm 기반 3-stage 빌드다.
 
 - **deps**: `package.json`/`pnpm-lock.yaml`/`pnpm-workspace.yaml`만 먼저 복사해 `pnpm install --frozen-lockfile`. 소스 코드보다 의존성 파일 변경이 훨씬 드물기 때문에, 이 순서로 레이어를 나눠야 소스만 바뀐 재빌드에서 `pnpm install` 레이어가 캐시로 재사용된다.
-- **builder**: deps의 `node_modules`와 전체 소스를 복사하고, `ARG`로 받은 `NEXT_PUBLIC_*` 두 값만 `ENV`로 노출한 뒤 `pnpm build`. `GOOGLE_*`는 이 stage에도 등장하지 않는다.
+- **builder**: deps의 `node_modules`와 전체 소스를 복사하고, `ARG`로 받은 `NEXT_PUBLIC_*` 공개 값을 `ENV`로 노출한다. `pnpm build` 실행 중에만 BuildKit secret의 `SENTRY_AUTH_TOKEN`을 주입해 source map을 업로드하며, `GOOGLE_*`는 이 stage에도 등장하지 않는다.
 - **runner**: non-root 유저(`nextjs`)를 만들고, builder에서 `public/`, `.next/standalone`, `.next/static`만 복사해 `node server.js`로 띄운다.
 
 `next.config.ts`에 `output: "standalone"`을 추가한 이유가 runner stage와 직결된다. 이 옵션 없이는 `.next/`에 실행에 필요한 전체 `node_modules`가 그대로 필요해 런타임 이미지가 커지는데, standalone 산출물은 실제로 쓰는 의존성만 추려 `.next/standalone`에 넣어준다. 다만 standalone 산출물은 `public/`과 `.next/static`(정적 자산)을 자동으로 포함하지 않으므로, runner stage에서 이 둘을 별도로 복사해야 한다 — 빠뜨리면 이미지는 빌드되지만 컨테이너가 이미지·CSS 등을 못 찾는다.
@@ -50,9 +52,10 @@ Error [ERR_UNKNOWN_BUILTIN_MODULE]: No such built-in module: node:sqlite
 - **삭제**: `npm ci && npm run build`(dist 폴더 가정) 단계. 실제 빌드는 Dockerfile의 builder stage 안에서 일어나므로 이 단계는 그대로 두면 중복 실행이고, 애초에 이 프로젝트 산출물 구조와도 맞지 않았다.
 - **추가**: pnpm 설치 + `pnpm lint` + `npx tsc --noEmit`을 이미지 빌드 **전에** 실행. Docker 빌드 자체는 몇 분씩 걸리므로, 코드 문제(lint/타입 오류)는 그보다 훨씬 빠른 이 단계에서 먼저 걸러내는 게 낫다고 판단했다.
 - **추가**: `docker/build-push-action`의 `build-args`로 `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_CLARITY_PROJECT_ID`를 GitHub Actions 시크릿에서 전달(2절 참고).
+- **추가**: repository secret `SENTRY_AUTH_TOKEN`의 존재 여부를 먼저 검사하고, Docker builder에는 BuildKit secret으로만 전달해 source map 업로드 뒤 이미지에 남기지 않는다.
 - **유지**: Buildx 세팅, Docker Hub 로그인, SSH로 EC2에 접속해 `docker compose pull/up frontend`하는 배포 단계는 원본 구조 그대로 뒀다.
 
-이 워크플로우가 실제로 통과하려면 저장소 Settings → Secrets에 `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_CLARITY_PROJECT_ID`를 추가해야 한다(기존 `DOCKERHUB_USERNAME`/`DOCKERHUB_TOKEN`/`EC2_SSH_KEY`는 팀원 초안이 이미 참조하고 있어 있다고 가정했다).
+이 워크플로우가 실제로 통과하려면 저장소 Settings → Secrets에 `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_CLARITY_PROJECT_ID`, `SENTRY_AUTH_TOKEN`을 추가해야 한다(기존 `DOCKERHUB_USERNAME`/`DOCKERHUB_TOKEN`/`EC2_SSH_KEY`는 팀원 초안이 이미 참조하고 있어 있다고 가정했다).
 
 ## 6. 이미지 버전 태깅 (git 태그 push 트리거)
 

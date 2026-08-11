@@ -19,7 +19,8 @@ ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_CLARITY_PROJECT_ID=$NEXT_PUBLIC_CLARITY_PROJECT_ID
 ENV NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
 
-RUN pnpm build
+RUN --mount=type=secret,id=sentry_auth_token,required=true \
+  SENTRY_AUTH_TOKEN="$(cat /run/secrets/sentry_auth_token)" pnpm build
 
 FROM node:22-alpine AS runner
 WORKDIR /app

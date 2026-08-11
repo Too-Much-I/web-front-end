@@ -46,6 +46,15 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+    - name: Validate Sentry auth token
+      env:
+        SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      run: |
+        if [ -z "$SENTRY_AUTH_TOKEN" ]; then
+          echo "::error::SENTRY_AUTH_TOKEN repository secret is not configured."
+          exit 1
+        fi
+
     # main push는 latest만, v* 태그 push는 latest에 더해 그 버전 태그도 함께 붙인다.
     # 버전 태그는 롤백 시 "몇 주 전 latest"가 아니라 특정 시점의 이미지를 정확히 가리키기 위한 것.
     - name: Determine image tags
@@ -73,6 +82,8 @@ jobs:
           NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
           NEXT_PUBLIC_CLARITY_PROJECT_ID=${{ secrets.NEXT_PUBLIC_CLARITY_PROJECT_ID }}
           NEXT_PUBLIC_GA_MEASUREMENT_ID=${{ secrets.NEXT_PUBLIC_GA_MEASUREMENT_ID }}
+        secrets: |
+          sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
