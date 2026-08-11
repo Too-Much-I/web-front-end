@@ -15,6 +15,8 @@ import { postToNative } from "@/lib/native-bridge";
 import type { AppExamSummaryData } from "@/types/exam";
 
 const FEEDBACK_STEP_COUNT = 3;
+const appExamSummaryQueryKey = (examId: string) =>
+  ["app-exam-summary", examId] as const;
 
 /**
  * 앱 웹뷰에 "실제 화면을 그릴 데이터가 준비됐다"고 알린다.
@@ -43,7 +45,7 @@ function AppExamScreenContent() {
     isPending,
     refetch,
   } = useQuery({
-    queryKey: ["exam-grading-result", examId],
+    queryKey: appExamSummaryQueryKey(examId),
     queryFn: () => getAppExamSummary(examId),
     enabled: Boolean(examId),
     staleTime: Infinity,
@@ -52,7 +54,7 @@ function AppExamScreenContent() {
   const applyPushedSummary = useCallback(
     (rawSummary: unknown) => {
       const nextData = createAppExamSummary(rawSummary, examId);
-      queryClient.setQueryData(["exam-grading-result", examId], nextData);
+      queryClient.setQueryData(appExamSummaryQueryKey(examId), nextData);
       return nextData;
     },
     [examId, queryClient],

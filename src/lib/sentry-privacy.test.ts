@@ -29,6 +29,14 @@ describe("Sentry privacy scrubber", () => {
         data: { feedback: "민감한 피드백" },
       },
       user: { email: "user@example.com" },
+      message: "examId=exam-123 Bearer secret",
+      transaction: "/api/v1/exams/exam-123/summary",
+      fingerprint: ["examId=exam-123", "Bearer secret"],
+      tags: {
+        examId: "exam-123",
+        authorization: "Bearer secret",
+        stage: "retry-polling",
+      },
       extra: { examId: "exam-123", requestId: "request-1" },
     };
 
@@ -39,6 +47,17 @@ describe("Sentry privacy scrubber", () => {
     expect(scrubbed?.request?.cookies).toBeUndefined();
     expect(scrubbed?.request?.data).toBeUndefined();
     expect(scrubbed?.user).toBeUndefined();
+    expect(scrubbed?.message).toBe("examId=[Filtered] Bearer [Filtered]");
+    expect(scrubbed?.transaction).toBe("/api/v1/exams/[Filtered]/summary");
+    expect(scrubbed?.fingerprint).toEqual([
+      "examId=[Filtered]",
+      "Bearer [Filtered]",
+    ]);
+    expect(scrubbed?.tags).toEqual({
+      examId: "[Filtered]",
+      authorization: "[Filtered]",
+      stage: "retry-polling",
+    });
     expect(scrubbed?.extra).toEqual({
       examId: "[Filtered]",
       requestId: "request-1",

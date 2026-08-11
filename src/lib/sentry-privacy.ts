@@ -6,7 +6,7 @@ const SENSITIVE_KEY_PATTERN =
 
 export function redactIdentifiersInText(value: string): string {
   return value
-    .replace(/([?&]examId=)[^&#\s]*/gi, `$1${FILTERED}`)
+    .replace(/((?:[?&]|\b)examId=)[^&#\s]*/gi, `$1${FILTERED}`)
     .replace(/(\/api\/v1\/exams\/)[^/?#\s]+/gi, `$1${FILTERED}`)
     .replace(/("examId"\s*:\s*")[^"]*(")/gi, `$1${FILTERED}$2`)
     .replace(/(Bearer\s+)[A-Za-z0-9._~+/=-]+/gi, `$1${FILTERED}`);
@@ -61,6 +61,20 @@ export function scrubSentryEvent(event: ErrorEvent): ErrorEvent | null {
 
   return {
     ...event,
+    message:
+      typeof event.message === "string"
+        ? redactIdentifiersInText(event.message)
+        : event.message,
+    transaction:
+      typeof event.transaction === "string"
+        ? redactIdentifiersInText(event.transaction)
+        : event.transaction,
+    fingerprint: event.fingerprint?.map((value) =>
+      redactIdentifiersInText(value),
+    ),
+    tags: event.tags
+      ? (scrubValue(event.tags) as ErrorEvent["tags"])
+      : event.tags,
     request,
     user: undefined,
     breadcrumbs: event.breadcrumbs?.map((breadcrumb) =>

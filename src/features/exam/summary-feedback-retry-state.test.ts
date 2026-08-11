@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { transitionSummaryFeedbackRetryState } from "@/features/exam/summary-feedback-retry-state";
+import {
+  getSummaryFeedbackRetryDeadlineDelay,
+  SUMMARY_FEEDBACK_RETRY_WEB_DEADLINE_MS,
+  transitionSummaryFeedbackRetryState,
+} from "@/features/exam/summary-feedback-retry-state";
 
 describe("transitionSummaryFeedbackRetryState", () => {
   it("요청 접수부터 완료까지 순서대로 전이한다", () => {
@@ -35,5 +39,19 @@ describe("transitionSummaryFeedbackRetryState", () => {
     expect(transitionSummaryFeedbackRetryState("retry-failed", "request")).toBe(
       "retry-failed",
     );
+  });
+
+  it("앱 polling보다 긴 웹 안전 마감 시간의 남은 시간을 계산한다", () => {
+    const startedAt = 1_000;
+
+    expect(getSummaryFeedbackRetryDeadlineDelay(startedAt, startedAt)).toBe(
+      SUMMARY_FEEDBACK_RETRY_WEB_DEADLINE_MS,
+    );
+    expect(
+      getSummaryFeedbackRetryDeadlineDelay(
+        startedAt,
+        startedAt + SUMMARY_FEEDBACK_RETRY_WEB_DEADLINE_MS + 1,
+      ),
+    ).toBe(0);
   });
 });

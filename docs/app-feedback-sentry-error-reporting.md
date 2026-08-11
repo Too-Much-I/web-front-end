@@ -96,6 +96,7 @@
   - 앱이 완전한 원본을 push하고 웹의 검사도 통과했을 때만 `complete`로 전환하며 React Query 캐시를 새 결과로 교체한다.
   - 데이터 교체 시 `FeedbackScreen`을 remount하지 않아 현재 단계와 탐색 위치를 유지한다.
   - 앱은 시작 후 3분 timeout을 관리하고, 접수 실패·summary 조회 실패·timeout을 웹에 push해 부분 결과를 유지한 채 `retry-failed`로 전환한다.
+  - 웹은 API를 polling하지 않으며, 앱 이벤트 유실에 대비해 요청 시작 후 3분 30초에 로딩 UI만 실패 상태로 종료한다.
   - 웹 문서가 다시 열리면 같은 requestId를 앱에 보내고, 앱은 시험별 single-flight 작업의 접수 또는 terminal 결과를 재생한다.
   - 재생성은 세션당 한 번만 허용하고 실패 후에는 재생성 버튼을 제거한 상태로 실패 안내를 유지한다.
 

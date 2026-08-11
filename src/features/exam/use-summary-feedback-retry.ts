@@ -11,6 +11,7 @@ import {
 import { isExamSummaryComplete } from "@/features/exam/exam-summary-completeness";
 import { reportSummaryFeedbackIssue } from "@/features/exam/report-summary-feedback-error";
 import {
+  getSummaryFeedbackRetryDeadlineDelay,
   transitionSummaryFeedbackRetryState,
   type SummaryFeedbackRetryState,
 } from "@/features/exam/summary-feedback-retry-state";
@@ -309,6 +310,7 @@ export function useSummaryFeedbackRetry({
 
     let cancelled = false;
     let terminalHandled = false;
+    let deadlineTimerId: ReturnType<typeof setTimeout> | undefined;
 
     const unsubscribe = subscribeToSummaryFeedbackRetry(requestId, (event) => {
       if (cancelled) return;
@@ -339,6 +341,17 @@ export function useSummaryFeedbackRetry({
       );
     });
 
+    if (!terminalHandled) {
+      const deadlineDelay = getSummaryFeedbackRetryDeadlineDelay(
+        startedAtRef.current || Date.now(),
+        Date.now(),
+      );
+      deadlineTimerId = setTimeout(() => {
+        if (cancelled || terminalHandled) return;
+        failRetry("poll-timeout", summaryDataRef.current, "retry-polling");
+      }, deadlineDelay);
+    }
+
     if (resumeNeededRef.current) {
       resumeNeededRef.current = false;
       void requestSummaryFeedbackRetry(examId, requestId).catch(
@@ -356,6 +369,7 @@ export function useSummaryFeedbackRetry({
 
     return () => {
       cancelled = true;
+      if (deadlineTimerId !== undefined) clearTimeout(deadlineTimerId);
       unsubscribe();
     };
   }, [applyPushedSummary, examId, failRetry, state]);
