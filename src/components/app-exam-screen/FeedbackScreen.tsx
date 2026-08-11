@@ -15,14 +15,17 @@ import { FeedbackHeader } from "@/components/app-exam-screen/components/Feedback
 import { PartFeedbackSection } from "@/components/app-exam-screen/components/PartFeedbackSection";
 import { PartScoreBoard } from "@/components/app-exam-screen/components/PartScoreBoard";
 import { ScoreSummaryCard } from "@/components/app-exam-screen/components/ScoreSummaryCard";
+import { SummaryFeedbackRecoveryBar } from "@/components/app-exam-screen/components/SummaryFeedbackRecoveryBar";
+import { SummaryFeedbackRecoveryDialog } from "@/components/app-exam-screen/components/SummaryFeedbackRecoveryDialog";
 import {
   createFeedbackParts,
   createRadarAxes,
 } from "@/components/app-exam-screen/feedback-view-model";
 import { feedbackColors } from "@/components/app-exam-screen/theme";
+import type { SummaryFeedbackRecovery } from "@/features/exam/use-summary-feedback-retry";
 import { postToNative } from "@/lib/native-bridge";
 import { isFeedbackBridgeAvailable } from "@/lib/native-data-bridge";
-import type { ExamGradingResult } from "@/types/exam";
+import type { ExamGradingResult, ExamSummaryCompleteness } from "@/types/exam";
 
 const FEEDBACK_STEP_COUNT = 3;
 const SWIPE_DISTANCE_PX = 56;
@@ -61,15 +64,20 @@ function isFeedbackGoBackMessage(
 
 export function AppExamScreen({
   result,
+  completeness,
+  recovery,
   initialStep = 0,
 }: {
   result: ExamGradingResult;
+  completeness: ExamSummaryCompleteness;
+  recovery: SummaryFeedbackRecovery;
   initialStep?: number;
 }) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [stepDirection, setStepDirection] = useState<StepDirection>("next");
   const [isScoreBoardRevealed, setIsScoreBoardRevealed] = useState(true);
+  const [footerHeight, setFooterHeight] = useState(128);
   const supportsFeedbackBridge = useSyncExternalStore(
     subscribeToFeedbackBridgeAvailability,
     isFeedbackBridgeAvailable,
@@ -77,7 +85,16 @@ export function AppExamScreen({
   );
   const swipeStartRef = useRef<{ x: number; y: number } | null>(null);
   const suppressNextClickRef = useRef(false);
-  const parts = useMemo(() => createFeedbackParts(result), [result]);
+  const footerRef = useRef<HTMLElement>(null);
+  const missingFields = completeness.missingFields;
+  const missingFieldSet = useMemo(
+    () => new Set(missingFields),
+    [missingFields],
+  );
+  const parts = useMemo(
+    () => createFeedbackParts(result, missingFields),
+    [missingFields, result],
+  );
   const radarAxes = useMemo(() => createRadarAxes(parts), [parts]);
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === FEEDBACK_STEP_COUNT - 1;
@@ -85,6 +102,19 @@ export function AppExamScreen({
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [currentStep]);
+
+  useEffect(() => {
+    const footer = footerRef.current;
+    if (!footer) return;
+
+    const updateHeight = () =>
+      setFooterHeight(footer.getBoundingClientRect().height);
+    updateHeight();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const message: FeedbackNavigationStateMessage = {
@@ -192,11 +222,12 @@ export function AppExamScreen({
 
         <div
           key={currentStep}
-          className={`flex-1 overflow-x-clip pb-32 motion-reduce:animate-none ${
+          className={`flex-1 overflow-x-clip motion-reduce:animate-none ${
             stepDirection === "next"
               ? "animate-[app-feedback-step-next_220ms_ease-out]"
               : "animate-[app-feedback-step-previous_220ms_ease-out]"
           }`}
+          style={{ paddingBottom: footerHeight + 24 }}
           onPointerDown={handlePointerDown}
           onPointerUp={handlePointerUp}
           onPointerCancel={() => {
@@ -212,10 +243,12 @@ export function AppExamScreen({
               >
                 종합 결과 분석
               </h1>
-              <ScoreSummaryCard result={result} />
+              <ScoreSummaryCard result={result} missingFields={missingFields} />
               <AtAGlanceSection
                 strengths={result.strengths}
                 weaknesses={result.weaknesses}
+                missingStrengths={missingFieldSet.has("strengths")}
+                missingWeaknesses={missingFieldSet.has("weaknesses")}
               />
             </section>
           )}
@@ -233,36 +266,48 @@ export function AppExamScreen({
           )}
         </div>
 
-        <nav
-          aria-label="피드백 단계 이동"
+        <footer
+          ref={footerRef}
           className="fixed inset-x-0 bottom-0 z-20 border-t border-orange-100 bg-[#fff9f2]/95 backdrop-blur-sm"
         >
-          <div
-            className="mx-auto flex w-full max-w-3xl gap-3 px-5 pt-4"
-            style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
-          >
-            <button
-              type="button"
-              disabled={isFirstStep}
-              onClick={() => moveToStep("previous")}
-              className="flex min-h-12 flex-1 items-center justify-center gap-1 rounded-2xl border border-orange-200 bg-white px-4 py-3 text-base text-orange-700 disabled:cursor-not-allowed disabled:opacity-40"
+          <div className="mx-auto w-full max-w-3xl">
+            <SummaryFeedbackRecoveryBar recovery={recovery} />
+            <nav
+              aria-label="피드백 단계 이동"
+              className="flex gap-3 border-t border-orange-100 px-5 pt-4"
+              style={{
+                paddingBottom: "max(1rem, env(safe-area-inset-bottom))",
+              }}
             >
-              <ChevronLeft aria-hidden size={19} />
-              이전
-            </button>
-            <button
-              type="button"
-              disabled={isLastStep}
-              onClick={() => moveToStep("next")}
-              className="flex min-h-12 flex-1 items-center justify-center gap-1 rounded-2xl px-4 py-3 text-base text-white disabled:cursor-not-allowed disabled:opacity-40"
-              style={{ backgroundColor: feedbackColors.brand }}
-            >
-              다음
-              <ChevronRight aria-hidden size={19} />
-            </button>
+              <button
+                type="button"
+                disabled={isFirstStep}
+                onClick={() => moveToStep("previous")}
+                className="flex min-h-12 flex-1 items-center justify-center gap-1 rounded-2xl border border-orange-200 bg-white px-4 py-3 text-base text-orange-700 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronLeft aria-hidden size={19} />
+                이전
+              </button>
+              <button
+                type="button"
+                disabled={isLastStep}
+                onClick={() => moveToStep("next")}
+                className="flex min-h-12 flex-1 items-center justify-center gap-1 rounded-2xl px-4 py-3 text-base text-white disabled:cursor-not-allowed disabled:opacity-40"
+                style={{ backgroundColor: feedbackColors.brand }}
+              >
+                다음
+                <ChevronRight aria-hidden size={19} />
+              </button>
+            </nav>
           </div>
-        </nav>
+        </footer>
       </div>
+      <SummaryFeedbackRecoveryDialog
+        open={recovery.isInitialPromptOpen}
+        supportsRetry={recovery.supportsRetry}
+        onRetry={recovery.requestRetry}
+        onDismiss={recovery.dismissInitialPrompt}
+      />
     </main>
   );
 }

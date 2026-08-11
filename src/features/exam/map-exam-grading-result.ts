@@ -7,16 +7,24 @@ import type {
 /** TOEIC Speaking 만점 기준 */
 const TOEIC_SPEAKING_MAX_SCORE = 200;
 
-function mapPartFeedback(raw: RawExamPartFeedback) {
-  return ([1, 2, 3, 4, 5] as const)
-    .map((partNumber) => ({
-      partNumber,
-      feedback: raw[`part${partNumber}` as keyof RawExamPartFeedback],
-    }))
-    .filter((part) => Boolean(part.feedback));
+function mapPartFeedback(
+  raw: RawExamPartFeedback,
+  preserveEmptyParts: boolean,
+) {
+  const parts = ([1, 2, 3, 4, 5] as const).map((partNumber) => ({
+    partNumber,
+    feedback: raw[`part${partNumber}` as keyof RawExamPartFeedback],
+  }));
+
+  return preserveEmptyParts
+    ? parts
+    : parts.filter((part) => Boolean(part.feedback));
 }
 
-export function mapExamGradingResult(raw: RawExamSummaryResult): ExamGradingResult {
+export function mapExamGradingResult(
+  raw: RawExamSummaryResult,
+  { preserveEmptyParts = false }: { preserveEmptyParts?: boolean } = {},
+): ExamGradingResult {
   return {
     examId: raw.examId,
     totalScore: raw.totalScore,
@@ -25,7 +33,7 @@ export function mapExamGradingResult(raw: RawExamSummaryResult): ExamGradingResu
     totalSolvedQuestions: raw.totalSolvedQuestions,
     summary: raw.summary,
     overallFeedback: raw.overallFeedback,
-    partFeedback: mapPartFeedback(raw.partFeedback),
+    partFeedback: mapPartFeedback(raw.partFeedback, preserveEmptyParts),
     strengths: raw.strengths ?? [],
     weaknesses: raw.weaknesses ?? [],
     recommendedPractice: raw.recommendedPractice ?? [],

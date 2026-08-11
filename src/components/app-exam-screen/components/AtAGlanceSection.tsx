@@ -5,14 +5,18 @@ import { cardShadow, feedbackColors } from "@/components/app-exam-screen/theme";
 type AtAGlanceSectionProps = {
   strengths: readonly string[];
   weaknesses: readonly string[];
+  missingStrengths?: boolean;
+  missingWeaknesses?: boolean;
 };
 
 function InsightCard({
   kind,
   items,
+  isMissing = false,
 }: {
   kind: "strength" | "weakness";
   items: readonly string[];
+  isMissing?: boolean;
 }) {
   const isStrength = kind === "strength";
   const accent = isStrength
@@ -40,18 +44,24 @@ function InsightCard({
         </h3>
       </div>
       <ul className="mt-4 flex flex-col gap-3">
-        {items.map((item) => (
-          <li key={item} className="flex flex-row items-start gap-2">
-            <span
-              aria-hidden
-              className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full"
-              style={{ backgroundColor: accent }}
-            />
-            <span className="min-w-0 flex-1 text-sm leading-6 text-zinc-500">
-              {item}
-            </span>
+        {isMissing && (
+          <li className="text-sm leading-6 text-zinc-500">
+            종합 피드백을 준비하지 못했어요.
           </li>
-        ))}
+        )}
+        {!isMissing &&
+          items.map((item) => (
+            <li key={item} className="flex flex-row items-start gap-2">
+              <span
+                aria-hidden
+                className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full"
+                style={{ backgroundColor: accent }}
+              />
+              <span className="min-w-0 flex-1 text-sm leading-6 text-zinc-500">
+                {item}
+              </span>
+            </li>
+          ))}
       </ul>
     </article>
   );
@@ -60,6 +70,8 @@ function InsightCard({
 export function AtAGlanceSection({
   strengths,
   weaknesses,
+  missingStrengths = false,
+  missingWeaknesses = false,
 }: AtAGlanceSectionProps) {
   return (
     <section className="mt-8">
@@ -68,8 +80,16 @@ export function AtAGlanceSection({
         <h2 className="text-xl">한눈에 보기</h2>
       </div>
       <div className="flex flex-row flex-wrap items-stretch gap-3">
-        <InsightCard kind="strength" items={strengths} />
-        <InsightCard kind="weakness" items={weaknesses} />
+        <InsightCard
+          kind="strength"
+          items={strengths}
+          isMissing={missingStrengths}
+        />
+        <InsightCard
+          kind="weakness"
+          items={weaknesses}
+          isMissing={missingWeaknesses}
+        />
       </div>
     </section>
   );

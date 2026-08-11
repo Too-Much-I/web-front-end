@@ -149,6 +149,44 @@ export interface ExamGradingResult {
   partScores: ExamPartScores;
 }
 
+export type ExamSummaryPartNumber = 1 | 2 | 3 | 4 | 5;
+
+export type ExamSummaryMissingField =
+  | "totalSolvedQuestions"
+  | "totalScore"
+  | "levelEstimate"
+  | "summary"
+  | "overallFeedback"
+  | "strengths"
+  | "weaknesses"
+  | "recommendedPractice"
+  | `partFeedback.part${ExamSummaryPartNumber}`
+  | `partScores.part${ExamSummaryPartNumber}`;
+
+export interface ExamSummaryCompleteness {
+  missingFields: ExamSummaryMissingField[];
+  missingParts: {
+    feedback: ExamSummaryPartNumber[];
+    scores: ExamSummaryPartNumber[];
+  };
+  presence: {
+    hasSummary: boolean;
+    hasOverallFeedback: boolean;
+    hasStrengths: boolean;
+    hasWeaknesses: boolean;
+    hasRecommendedPractice: boolean;
+  };
+  totalSolvedQuestions: number | null;
+}
+
+export type ExamSummaryDataSource = "native-bridge" | "direct-api";
+
+export interface AppExamSummaryData {
+  result: ExamGradingResult;
+  completeness: ExamSummaryCompleteness;
+  dataSource: ExamSummaryDataSource;
+}
+
 /** 문장/구간 단위 첨삭 항목. correctionItems, offTopicItems가 이 모양을 공유한다. */
 export interface RawExamCorrectionItem {
   type: string;

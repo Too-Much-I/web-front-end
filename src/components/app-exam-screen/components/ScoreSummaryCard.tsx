@@ -8,15 +8,29 @@ import { cardShadow, feedbackColors } from "@/components/app-exam-screen/theme";
 import { TypedText } from "@/components/exam/typed-text";
 import { getLevelAbbreviation } from "@/features/exam/target-grade";
 import { useCountUp } from "@/lib/use-count-up";
-import type { ExamGradingResult } from "@/types/exam";
+import type { ExamGradingResult, ExamSummaryMissingField } from "@/types/exam";
 
-export function ScoreSummaryCard({ result }: { result: ExamGradingResult }) {
-  const displayScore = useCountUp(result.totalScore);
+export function ScoreSummaryCard({
+  result,
+  missingFields = [],
+}: {
+  result: ExamGradingResult;
+  missingFields?: readonly ExamSummaryMissingField[];
+}) {
+  const missingFieldSet = new Set(missingFields);
+  const isScoreMissing = missingFieldSet.has("totalScore");
+  const isLevelMissing = missingFieldSet.has("levelEstimate");
+  const isSummaryMissing = missingFieldSet.has("summary");
+  const displayScore = useCountUp(result.totalScore, {
+    enabled: !isScoreMissing,
+  });
   const displayPercent = Math.min(
     100,
     Math.max(0, (displayScore / result.maxScore) * 100),
   );
-  const levelAbbreviation = getLevelAbbreviation(result.levelEstimate);
+  const levelAbbreviation = isLevelMissing
+    ? "—"
+    : getLevelAbbreviation(result.levelEstimate);
   const scoreMascot = selectScoreMascot(result.totalScore, result.maxScore);
 
   return (
@@ -47,7 +61,7 @@ export function ScoreSummaryCard({ result }: { result: ExamGradingResult }) {
           <div className="min-w-0 flex-1">
             <p className="flex flex-row flex-nowrap items-end gap-2 whitespace-nowrap">
               <strong className="shrink-0 text-3xl font-normal text-white">
-                {displayScore}
+                {isScoreMissing ? "—" : displayScore}
               </strong>
               <span
                 className="shrink-0 pb-1 text-lg"
@@ -81,39 +95,51 @@ export function ScoreSummaryCard({ result }: { result: ExamGradingResult }) {
 
         <div
           role="progressbar"
-          aria-label={`예상 점수 ${result.totalScore}점, 만점 ${result.maxScore}점`}
+          aria-label={
+            isScoreMissing
+              ? "예상 점수를 준비하지 못했어요"
+              : `예상 점수 ${result.totalScore}점, 만점 ${result.maxScore}점`
+          }
           aria-valuemin={0}
           aria-valuemax={result.maxScore}
-          aria-valuenow={result.totalScore}
+          aria-valuenow={isScoreMissing ? undefined : result.totalScore}
           className="mt-5 h-3 overflow-hidden rounded-full"
           style={{ backgroundColor: feedbackColors.scoreTrack }}
         >
           <div
             className="h-full rounded-full"
             style={{
-              width: `${displayPercent}%`,
+              width: `${isScoreMissing ? 0 : displayPercent}%`,
               backgroundColor: feedbackColors.radarFill,
             }}
           />
         </div>
 
         <div className="mt-5">
-          <TypedText
-            text={result.summary}
-            className="text-base leading-7 text-white"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none relative mt-2 h-8 w-16"
-          >
-            <Image
-              alt=""
-              src={scoreMascot}
-              width={256}
-              height={256}
-              className="absolute -bottom-14 -left-5 z-10 h-24 w-16 max-w-none object-contain"
+          {isSummaryMissing ? (
+            <p className="text-base leading-7 text-white/75">
+              종합 요약을 준비하지 못했어요.
+            </p>
+          ) : (
+            <TypedText
+              text={result.summary}
+              className="text-base leading-7 text-white"
             />
-          </div>
+          )}
+          {!isScoreMissing && (
+            <div
+              aria-hidden
+              className="pointer-events-none relative mt-2 h-8 w-16"
+            >
+              <Image
+                alt=""
+                src={scoreMascot}
+                width={256}
+                height={256}
+                className="absolute -bottom-14 -left-5 z-10 h-24 w-16 max-w-none object-contain"
+              />
+            </div>
+          )}
         </div>
       </div>
     </section>
