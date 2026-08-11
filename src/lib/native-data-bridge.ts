@@ -29,6 +29,8 @@ declare global {
       feedbackBridgeVersion?: number;
       /** 앱/웹 독립 배포 중 데이터 요청 호환성을 위한 이전 필드. */
       nativeDataRequestVersion?: number;
+      /** 종합 피드백 재생성 요청을 지원하는 앱에서만 노출한다. */
+      summaryFeedbackRetryVersion?: number;
     };
     __nativeDataBridge?: {
       deliver(rawPayload: string): void;

@@ -1,15 +1,22 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect } from "react";
+import { Suspense, useCallback, useEffect } from "react";
 
 import { AppExamScreen } from "@/components/app-exam-screen/FeedbackScreen";
 import { ErrorFallbackScreen } from "@/components/error-fallback-screen";
-import { getExamGradingResult } from "@/features/exam/api/exam-grading-result";
+import {
+  createAppExamSummary,
+  getAppExamSummary,
+} from "@/features/exam/api/exam-grading-result";
+import { useSummaryFeedbackRetry } from "@/features/exam/use-summary-feedback-retry";
 import { postToNative } from "@/lib/native-bridge";
+import type { AppExamSummaryData } from "@/types/exam";
 
 const FEEDBACK_STEP_COUNT = 3;
+const appExamSummaryQueryKey = (examId: string) =>
+  ["app-exam-summary", examId] as const;
 
 /**
  * 앱 웹뷰에 "실제 화면을 그릴 데이터가 준비됐다"고 알린다.
@@ -29,26 +36,35 @@ function parseInitialStep(raw: string | null): number {
 
 function AppExamScreenContent() {
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
   const examId = searchParams.get("examId") ?? "";
   const initialStep = parseInitialStep(searchParams.get("step"));
   const {
-    data: result,
+    data: summaryData,
     error,
     isPending,
     refetch,
   } = useQuery({
-    queryKey: ["exam-grading-result", examId],
-    queryFn: () => getExamGradingResult(examId),
+    queryKey: appExamSummaryQueryKey(examId),
+    queryFn: () => getAppExamSummary(examId),
     enabled: Boolean(examId),
     staleTime: Infinity,
     gcTime: Infinity,
   });
+  const applyPushedSummary = useCallback(
+    (rawSummary: unknown) => {
+      const nextData = createAppExamSummary(rawSummary, examId);
+      queryClient.setQueryData(appExamSummaryQueryKey(examId), nextData);
+      return nextData;
+    },
+    [examId, queryClient],
+  );
 
   useEffect(() => {
-    if (!result) return;
+    if (!summaryData) return;
     const message: FeedbackDataReadyMessage = { type: "FEEDBACK_DATA_READY" };
     postToNative(message);
-  }, [result]);
+  }, [summaryData]);
 
   if (!examId) {
     return (
@@ -67,7 +83,7 @@ function AppExamScreenContent() {
     );
   }
 
-  if (isPending || !result) {
+  if (isPending || !summaryData) {
     return (
       <p className="flex min-h-dvh items-center justify-center text-sm text-zinc-500">
         불러오는 중이에요...
@@ -75,7 +91,41 @@ function AppExamScreenContent() {
     );
   }
 
-  return <AppExamScreen result={result} initialStep={initialStep} />;
+  return (
+    <LoadedAppExamScreen
+      examId={examId}
+      summaryData={summaryData}
+      initialStep={initialStep}
+      applyPushedSummary={applyPushedSummary}
+    />
+  );
+}
+
+function LoadedAppExamScreen({
+  examId,
+  summaryData,
+  initialStep,
+  applyPushedSummary,
+}: {
+  examId: string;
+  summaryData: AppExamSummaryData;
+  initialStep: number;
+  applyPushedSummary: (rawSummary: unknown) => AppExamSummaryData;
+}) {
+  const recovery = useSummaryFeedbackRetry({
+    examId,
+    summaryData,
+    applyPushedSummary,
+  });
+
+  return (
+    <AppExamScreen
+      result={summaryData.result}
+      completeness={summaryData.completeness}
+      recovery={recovery}
+      initialStep={initialStep}
+    />
+  );
 }
 
 export default function AppExamScreenPage() {

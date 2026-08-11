@@ -488,3 +488,23 @@
   font-weight: 700;
   color: var(--color-blue-950);
 }
+
+@keyframes summary-feedback-loading {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(360%);
+  }
+}
+
+.summary-feedback-loading-bar {
+  animation: summary-feedback-loading 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .summary-feedback-loading-bar {
+    width: 100%;
+    animation: none;
+  }
+}

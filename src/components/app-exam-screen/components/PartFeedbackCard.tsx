@@ -83,7 +83,9 @@ export function PartFeedbackCard({
             className="mt-3 text-base leading-7"
             style={{ color: feedbackColors.part.body }}
           >
-            {part.feedback}
+            {part.isFeedbackMissing
+              ? "종합 피드백을 준비하지 못했어요. 아래에서 재생성을 선택할 수 있어요."
+              : part.feedback}
           </p>
         </div>
       </div>

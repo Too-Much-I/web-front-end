@@ -3,7 +3,7 @@ import {
   getExamPartQuestionNumbers,
 } from "@/features/exam/part-meta";
 import { feedbackMascots } from "@/components/app-exam-screen/assets";
-import type { ExamGradingResult } from "@/types/exam";
+import type { ExamGradingResult, ExamSummaryMissingField } from "@/types/exam";
 
 export const FEEDBACK_PART_NUMBERS = [1, 2, 3, 4, 5] as const;
 
@@ -20,6 +20,7 @@ export type FeedbackPartViewModel = {
   status: FeedbackPartStatus;
   statusLabel: string;
   feedback: string;
+  isFeedbackMissing: boolean;
   questionNumbers: number[];
   mascot: string;
 };
@@ -124,15 +125,18 @@ export function selectScoreMascot(
 
 export function createFeedbackParts(
   result: ExamGradingResult,
+  missingFields: readonly ExamSummaryMissingField[] = [],
 ): FeedbackPartViewModel[] {
+  const missingFieldSet = new Set(missingFields);
   return FEEDBACK_PART_NUMBERS.map((partNumber) => {
     const presentation = PART_PRESENTATION[partNumber];
     const rawScore = getPartScore(result, partNumber);
     const ratio = normalizeScore(rawScore, presentation.maxScore);
     const score = ratio === null || rawScore === undefined ? null : rawScore;
     const { status, statusLabel } = getPartStatus(ratio);
-    const questionNumbers = getExamPartQuestionNumbers(partNumber).filter(
-      (questionNumber) => questionNumber <= result.totalSolvedQuestions,
+    const questionNumbers = getExamPartQuestionNumbers(partNumber);
+    const isFeedbackMissing = missingFieldSet.has(
+      `partFeedback.part${partNumber}`,
     );
 
     return {
@@ -145,7 +149,8 @@ export function createFeedbackParts(
       statusLabel,
       feedback:
         result.partFeedback.find((item) => item.partNumber === partNumber)
-          ?.feedback ?? "아직 제공된 피드백이 없어요.",
+          ?.feedback ?? "",
+      isFeedbackMissing,
       questionNumbers,
       mascot: presentation.mascot,
     };
