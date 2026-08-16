@@ -9,7 +9,23 @@ export const metadata = {
 };
 
 const CONTACT_EMAIL = "tosunsaeng093@gmail.com";
-const EFFECTIVE_DATE = "2026년 7월 10일";
+// 2026-08-16: 제5·6조에 채점 파이프라인(Azure AI Speech·OpenAI)을 반영해 본문이
+// 바뀌었다. 제13조가 "변경사항의 시행 최소 7일 전 고지"를 약속하므로 시행일을
+// 고지 시점 + 7일 이후로 잡는다. 공지 일정이 확정되면 그 날짜로 맞춘다.
+const EFFECTIVE_DATE = "2026년 8월 24일";
+
+// 채점 파이프라인(2026년 8월 기준). 제5·6조는 이 구성을 그대로 옮긴 것이므로
+// 파이프라인이 바뀌면 두 조를 함께 고쳐야 한다. 같은 사실을 가리키는 문서가
+// 셋이므로(웹 동의 문구 `src/features/consent/consent-content.ts`, 앱 방침
+// `src/app/app-settings/privacy/page.tsx`) 한쪽만 고치지 않는다.
+//
+//   1. Azure AI Speech (STT + Pronunciation Assessment) — 전 문항 음성의
+//      발음·유창성 분석. 운영 리전이 koreacentral이라 국외 이전이 아니다.
+//      제5조(위탁)에만 적고 제6조(국외 이전)에서는 뺀다.
+//   2. OpenAI Audio Transcriptions API (gpt-transcribe) — Q3~Q11 음성을
+//      텍스트로 변환. 미국으로 이전된다.
+//   3. OpenAI Responses API — 전사문으로 채점·피드백 생성. 음성이 아니라
+//      텍스트가 나가므로 제3조 처리 항목에 "전사문"을 따로 적었다.
 
 export default function PrivacyPolicyPage() {
   return (
@@ -55,7 +71,12 @@ export default function PrivacyPolicyPage() {
         <ul className="list-disc space-y-1 pl-5">
           <li>
             음성 답변 녹음 파일: AI 채점 및 결과 제공 등 수집 목적 달성 후 30일
-            이내 파기
+            이내 파기. 채점 과정에서 제5조의 사업자에게 전송된 음성은 해당
+            사업자가 위탁받은 처리를 마친 뒤 각 사업자의 정책에 따라 삭제
+          </li>
+          <li>
+            전사문(답변 음성을 변환한 텍스트): 채점 결과 제공 등 목적 달성 후
+            30일 이내 파기
           </li>
           <li>
             동의 이력(익명 식별자, 동의 항목·버전·일시·방법): 동의 철회 또는
@@ -89,6 +110,10 @@ export default function PrivacyPolicyPage() {
           <li>
             모의고사 응시 시 수집: 음성 답변 녹음 파일, 브라우저가 자동 생성하는
             익명 식별자, 동의 항목·일시·방법·버전
+          </li>
+          <li>
+            채점 과정에서 생성: 답변 음성을 텍스트로 변환한 전사문, 채점 결과 및
+            피드백
           </li>
           <li>
             만족도 조사 시 수집(선택): 만족도 점수, 이전 취득 등급, 지불 의향,
@@ -149,13 +174,47 @@ export default function PrivacyPolicyPage() {
                   음성 답변 녹음 파일의 저장(클라우드 스토리지, 국내 리전)
                 </td>
               </tr>
+              <tr>
+                <td className="px-3 py-2 align-top">Microsoft Corporation</td>
+                <td className="px-3 py-2 align-top">
+                  전 문항 답변 음성의 음성 인식 및 발음·유창성 분석(Azure AI
+                  Speech, 국내 리전)
+                </td>
+              </tr>
+              <tr>
+                <td className="px-3 py-2 align-top">OpenAI, L.L.C.</td>
+                <td className="px-3 py-2 align-top">
+                  3번~11번 문항 답변 음성의 텍스트 변환, 변환된 전사문을 이용한
+                  채점 및 피드백 생성
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
         <p>
-          음성 답변 채점을 위한 백엔드 서버는 서비스 운영팀이 직접 운영하며,
-          별도의 외부 채점 업체에 위탁하지 않습니다. 다만 음성 답변 녹음 파일의
-          저장을 위해 위 표와 같이 클라우드 스토리지를 이용합니다.
+          채점 절차를 총괄하고 이용자에게 제공할 최종 결과를 구성하는 백엔드
+          서버는 서비스 운영팀이 직접 운영합니다. 다만 채점의 개별 단계는 위
+          표의 사업자가 제공하는 인공지능 서비스를 이용하여 아래 순서로
+          수행합니다.
+        </p>
+        <ol className="list-decimal space-y-1 pl-5">
+          <li>
+            전 문항의 답변 음성을 Azure AI Speech로 보내 발음과 유창성을
+            분석합니다. 이 처리는 국내 리전(koreacentral)에서 이루어집니다.
+          </li>
+          <li>
+            3번~11번 문항의 답변 음성을 OpenAI의 음성 인식 서비스로 보내
+            텍스트로 변환합니다.
+          </li>
+          <li>
+            변환된 전사문을 OpenAI의 언어모델 서비스로 보내 채점 결과와 피드백
+            문구를 생성합니다. 이 단계에는 음성이 아니라 텍스트만 전송됩니다.
+          </li>
+        </ol>
+        <p>
+          서비스는 이들 사업자와 개인정보 처리 목적을 채점 수행으로 한정하는
+          계약을 체결하며, 전송된 음성과 전사문이 해당 사업자의 인공지능 모델
+          학습에 이용되지 않도록 요구합니다.
         </p>
       </LegalSection>
 
@@ -173,6 +232,23 @@ export default function PrivacyPolicyPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-orange-100">
+              <tr>
+                <td className="px-3 py-2 align-top">
+                  OpenAI, L.L.C. (미국)
+                  <br />
+                  privacy@openai.com
+                </td>
+                <td className="px-3 py-2 align-top">
+                  3번~11번 문항의 답변 음성 녹음 파일, 답변 음성을 변환한 전사문
+                </td>
+                <td className="px-3 py-2 align-top">
+                  답변 음성의 텍스트 변환 및 전사문을 이용한 채점 결과·피드백
+                  생성 목적으로, 모의고사 채점이 진행되는 시점에 네트워크를 통해
+                  전송. 채점 처리 완료 후 OpenAI의 정책에 따라 삭제되며,
+                  서비스는 전송된 음성과 전사문이 OpenAI의 인공지능 모델 학습에
+                  이용되지 않도록 요구합니다.
+                </td>
+              </tr>
               <tr>
                 <td className="px-3 py-2 align-top">
                   Microsoft Corporation
@@ -215,14 +291,23 @@ export default function PrivacyPolicyPage() {
           </table>
         </div>
         <p>
-          음성 답변 녹음 파일 자체는 국내 리전(AWS ap-northeast-2)에 위치한
-          클라우드 스토리지에 저장되며, 국외로 이전되지 않습니다.
+          발음·유창성 분석에 이용하는 Azure AI Speech는 국내
+          리전(koreacentral)에서 운영되므로 해당 처리에는 국외 이전이 발생하지
+          않습니다. 서비스가 보관하는 답변 음성 녹음 파일의 원본도 국내 리전(AWS
+          ap-northeast-2)에 위치한 클라우드 스토리지에 저장되며 국외로 이전되지
+          않습니다.
         </p>
         <p>
           위 국외 이전에 대해 거부하고자 하는 경우, 각 항목의 성격에 따라 다음과
           같이 거부할 수 있습니다.
         </p>
         <ul className="list-disc space-y-1 pl-5">
+          <li>
+            OpenAI(답변 음성 및 전사문): 제11조의 연락처로 거부 의사를 밝힐 수
+            있습니다. 다만 음성의 텍스트 변환과 채점·피드백 생성은 서비스의 핵심
+            기능을 구성하는 단계이므로, 거부하는 경우 3번~11번 문항에 대한 채점
+            결과와 피드백을 제공받을 수 없습니다.
+          </li>
           <li>
             Microsoft Clarity·Google Analytics(행태정보): 제10조의 쿠키 거부
             방법을 통해 수집을 차단할 수 있으며, 차단하더라도 모의고사 응시 등

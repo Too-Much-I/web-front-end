@@ -4,8 +4,9 @@
  *
  * 2026-08-16: 채점 파이프라인이 확정되어 위탁·국외이전 항목을 채웠다. 전 문항은 Azure AI
  * Speech(koreacentral, 국내)로 발음·유창성을 분석하고, 3~11번 문항은 OpenAI(미국)로 보내
- * 텍스트로 변환한 뒤 그 전사문으로 채점·피드백을 생성한다. 앱 개인정보처리방침
- * (`src/app/app-settings/privacy/page.tsx`)의 제5·6조와 같은 사실을 가리켜야 하므로 한쪽만
+ * 텍스트로 변환한 뒤 그 전사문으로 채점·피드백을 생성한다. 웹 개인정보처리방침
+ * (`src/app/privacy/page.tsx`)과 앱 개인정보처리방침
+ * (`src/app/app-settings/privacy/page.tsx`)의 제5·6조가 같은 사실을 가리켜야 하므로 한쪽만
  * 고치지 않는다.
  */
 export const VOICE_CONSENT_VERSION = "2026-08-16";
