@@ -348,7 +348,7 @@ export default function AppPrivacyPolicyPage() {
           recipient="Amplitude, Inc."
           contact="privacy@amplitude.com"
           country="미국"
-          items="설치 식별자, 화면 이동 기록, 주요 기능 이용 기록(모의고사 시작·완료, 채점 완료, 피드백 조회, 재답변 제출 등이 일어난 시점과 순서), 기기·운영체제 정보, 앱 버전"
+          items="Amplitude가 자동으로 생성하는 기기 식별자, 화면 이동 기록, 주요 기능 이용 기록(모의고사 시작·완료, 채점 완료, 피드백 조회, 재답변 제출 등이 일어난 시점과 순서), 기기·운영체제 정보, 앱 버전"
           purpose="앱 기능 이용 통계 분석 및 사용성 개선"
           method="앱 이용 시점에 네트워크를 통해 실시간 전송"
           period={`수집일로부터 ${AMPLITUDE_RETENTION}`}
@@ -523,9 +523,11 @@ export default function AppPrivacyPolicyPage() {
         <p>
           Amplitude는 Clarity와 달리 화면을 녹화하지 않습니다. 어떤 기능이 언제
           일어났는지만 기록하므로, 문항 내용과 이용자가 입력하거나 녹음한 답변,
-          채점 결과·피드백 문구는 Amplitude로 전송되지 않습니다. 서비스는 응시
-          식별자를 전송하지 않고, 접속 IP 주소와 광고 식별자(Android 광고 ID,
-          iOS IDFA)를 수집하지 않도록 설정하여 운영합니다.
+          채점 결과·피드백 문구는 Amplitude로 전송되지 않습니다. 서비스는 앱이
+          보관하는 설치 식별자와 응시 식별자를 Amplitude로 전송하지 않으며,
+          Amplitude가 자체적으로 생성하는 기기 식별자만 통계 집계에 쓰입니다.
+          접속 IP 주소와 광고 식별자(Android 광고 ID, iOS IDFA)도 수집하지
+          않도록 설정하여 운영합니다.
         </p>
 
         <p className="font-semibold text-blue-950">3. 오류 진단 도구(Sentry)</p>
