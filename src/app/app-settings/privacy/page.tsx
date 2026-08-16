@@ -13,6 +13,11 @@ const PRIVACY_OFFICER_NAME = "송성환";
 // 시행일도 따로 관리한다.
 const EFFECTIVE_DATE = "2026년 8월 15일";
 
+// Amplitude 프로젝트 콘솔의 데이터 보존(retention) 설정과 반드시 같은 값이어야 한다.
+// 개인정보 보호법 제28조의8 제2항은 국외 이전 시 "이전받는 자의 보유·이용 기간"을
+// 특정해 고지하도록 요구하므로, 콘솔에서 보존 기간을 바꾸면 이 상수도 함께 고쳐야 한다.
+const AMPLITUDE_RETENTION = "24개월";
+
 // 채점 파이프라인(2026년 8월 기준). 제5·6조는 이 구성을 그대로 옮긴 것이므로
 // 파이프라인이 바뀌면 두 조를 함께 고쳐야 한다.
 //
@@ -156,6 +161,11 @@ export default function AppPrivacyPolicyPage() {
             화면 이동·터치 등 집계 데이터는 최대 9개월간 보관(제10조 참조)
           </li>
           <li>
+            앱 기능 이용 통계(Amplitude): 화면 이동 기록과 모의고사 시작·완료 등
+            주요 기능의 이용 시점 기록을 수집일로부터 {AMPLITUDE_RETENTION}간
+            보관 후 파기(제10조 참조)
+          </li>
+          <li>
             접속 IP 주소, 서비스 이용 기록, 기기·운영체제 정보, 앱 버전: 서비스
             운영 및 장애 대응 목적으로 수집일로부터 3개월간 보관 후 파기
           </li>
@@ -181,8 +191,9 @@ export default function AppPrivacyPolicyPage() {
             시점에 무작위로 생성하는 임의의 문자열), 인증 토큰(액세스 토큰,
             리프레시 토큰), 접속 IP 주소, 서비스 이용 기록, 기기·운영체제 정보,
             앱 버전, 앱 이용 행태정보(화면 이동 경로, 터치·스크롤 등 화면 조작
-            기록), 오류 진단 기록(오류 코드 및 발생 위치, 오류 발생 직전의 화면
-            이동 기록)
+            기록), 주요 기능 이용 기록(모의고사 시작·완료, 채점 완료, 피드백
+            조회, 재답변 제출 등이 일어난 시점과 순서), 오류 진단 기록(오류 코드
+            및 발생 위치, 오류 발생 직전의 화면 이동 기록)
           </li>
         </ol>
         <p>
@@ -238,6 +249,12 @@ export default function AppPrivacyPolicyPage() {
                 <td className="px-3 py-2 align-top">Microsoft Corporation</td>
                 <td className="px-3 py-2 align-top">
                   앱 이용 행태 분석(Microsoft Clarity)
+                </td>
+              </tr>
+              <tr>
+                <td className="px-3 py-2 align-top">Amplitude, Inc.</td>
+                <td className="px-3 py-2 align-top">
+                  앱 기능 이용 통계 분석(Amplitude)
                 </td>
               </tr>
               <tr>
@@ -328,6 +345,16 @@ export default function AppPrivacyPolicyPage() {
         />
 
         <CrossBorderTransfer
+          recipient="Amplitude, Inc."
+          contact="privacy@amplitude.com"
+          country="미국"
+          items="설치 식별자, 화면 이동 기록, 주요 기능 이용 기록(모의고사 시작·완료, 채점 완료, 피드백 조회, 재답변 제출 등이 일어난 시점과 순서), 기기·운영체제 정보, 앱 버전"
+          purpose="앱 기능 이용 통계 분석 및 사용성 개선"
+          method="앱 이용 시점에 네트워크를 통해 실시간 전송"
+          period={`수집일로부터 ${AMPLITUDE_RETENTION}`}
+        />
+
+        <CrossBorderTransfer
           recipient="Functional Software, Inc. (Sentry)"
           contact="compliance@sentry.io"
           country="미국"
@@ -358,6 +385,11 @@ export default function AppPrivacyPolicyPage() {
           </li>
           <li>
             Microsoft Clarity(행태정보): 제10조의 거부 방법을 통해 수집을 중단할
+            수 있으며, 중단하더라도 모의고사 응시 등 핵심 기능 이용에는 제한이
+            없습니다.
+          </li>
+          <li>
+            Amplitude(기능 이용 통계): 제10조의 거부 방법을 통해 수집을 중단할
             수 있으며, 중단하더라도 모의고사 응시 등 핵심 기능 이용에는 제한이
             없습니다.
           </li>
@@ -457,8 +489,8 @@ export default function AppPrivacyPolicyPage() {
 
       <LegalSection title="제10조 (자동 수집 장치의 설치·운영 및 거부)">
         <p>
-          서비스는 앱의 사용성 개선과 안정적인 운영을 위하여 아래 두 가지 자동
-          수집 도구를 앱에 설치하여 운영합니다. 두 도구가 수집한 정보는 각각의
+          서비스는 앱의 사용성 개선과 안정적인 운영을 위하여 아래 세 가지 자동
+          수집 도구를 앱에 설치하여 운영합니다. 세 도구가 수집한 정보는 각각의
           목적 범위 내에서만 이용하며, 광고나 마케팅 목적으로는 이용하지
           않습니다.
         </p>
@@ -479,7 +511,24 @@ export default function AppPrivacyPolicyPage() {
           이용자가 녹음한 답변 음성 파일은 Clarity로 전송되지 않습니다.
         </p>
 
-        <p className="font-semibold text-blue-950">2. 오류 진단 도구(Sentry)</p>
+        <p className="font-semibold text-blue-950">
+          2. 기능 이용 통계 분석 도구(Amplitude)
+        </p>
+        <p>
+          Amplitude는 이용자가 이동한 화면의 이름과, 모의고사 시작·완료, 채점
+          완료, 피드백 조회, 재답변 제출 등 주요 기능이 일어난 시점과 순서를
+          수집합니다. 서비스는 이를 이용자들이 어느 단계에서 학습을 중단하는지
+          파악하여 흐름을 개선하는 목적으로만 이용합니다.
+        </p>
+        <p>
+          Amplitude는 Clarity와 달리 화면을 녹화하지 않습니다. 어떤 기능이 언제
+          일어났는지만 기록하므로, 문항 내용과 이용자가 입력하거나 녹음한 답변,
+          채점 결과·피드백 문구는 Amplitude로 전송되지 않습니다. 서비스는 응시
+          식별자를 전송하지 않고, 접속 IP 주소와 광고 식별자(Android 광고 ID,
+          iOS IDFA)를 수집하지 않도록 설정하여 운영합니다.
+        </p>
+
+        <p className="font-semibold text-blue-950">3. 오류 진단 도구(Sentry)</p>
         <p>
           Sentry는 앱에서 오류가 발생한 시점에 한하여 기기·운영체제 정보, 앱
           버전, 오류 코드 및 발생 위치, 오류 발생 직전의 화면 이동 기록을
@@ -493,13 +542,14 @@ export default function AppPrivacyPolicyPage() {
           전송되지 않습니다.
         </p>
 
-        <p className="font-semibold text-blue-950">3. 수집 거부 방법</p>
+        <p className="font-semibold text-blue-950">4. 수집 거부 방법</p>
         <p>
           위 도구의 정보 수집을 원하지 않는 이용자는 제11조의 연락처로 수집
           중단을 요청할 수 있으며, 서비스는 지체 없이 조치합니다. 수집을
           중단하더라도 모의고사 응시 등 서비스의 핵심 기능 이용에는 제한이
-          없습니다. 각 도구의 데이터 처리에 관한 자세한 사항은 Microsoft 및
-          Sentry가 각각 공개한 개인정보처리방침을 통해 확인할 수 있습니다.
+          없습니다. 각 도구의 데이터 처리에 관한 자세한 사항은 Microsoft,
+          Amplitude 및 Sentry가 각각 공개한 개인정보처리방침을 통해 확인할 수
+          있습니다.
         </p>
       </LegalSection>
 
