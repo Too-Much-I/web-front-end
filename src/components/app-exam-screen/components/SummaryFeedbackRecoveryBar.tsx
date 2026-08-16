@@ -2,6 +2,7 @@
 
 import { LoaderCircle, RefreshCw, TriangleAlert } from "lucide-react";
 
+import { summaryFeedbackRecoveryCopy } from "@/components/app-exam-screen/copy";
 import type { SummaryFeedbackRecovery } from "@/features/exam/use-summary-feedback-retry";
 
 function RecoveryLoadingStatus({ children }: { children: React.ReactNode }) {
@@ -70,7 +71,7 @@ export function SummaryFeedbackRecoveryBar({
           className="mt-0.5 size-5 shrink-0 text-orange-600"
         />
         <p className="text-sm leading-5 text-blue-950">
-          앱을 업데이트하면 종합 피드백을 다시 생성할 수 있어요.
+          {summaryFeedbackRecoveryCopy.retryUnsupported}
         </p>
       </div>
     );

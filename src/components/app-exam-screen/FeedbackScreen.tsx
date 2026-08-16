@@ -12,6 +12,7 @@ import {
 
 import { AtAGlanceSection } from "@/components/app-exam-screen/components/AtAGlanceSection";
 import { FeedbackHeader } from "@/components/app-exam-screen/components/FeedbackHeader";
+import { FreeAccessNotice } from "@/components/app-exam-screen/components/FreeAccessNotice";
 import { PartFeedbackSection } from "@/components/app-exam-screen/components/PartFeedbackSection";
 import { PartScoreBoard } from "@/components/app-exam-screen/components/PartScoreBoard";
 import { ScoreSummaryCard } from "@/components/app-exam-screen/components/ScoreSummaryCard";
@@ -262,7 +263,13 @@ export function AppExamScreen({
           )}
 
           {currentStep === 2 && (
-            <PartFeedbackSection parts={parts} onOpenQuestion={openQuestion} />
+            <>
+              <PartFeedbackSection
+                parts={parts}
+                onOpenQuestion={openQuestion}
+              />
+              <FreeAccessNotice />
+            </>
           )}
         </div>
 
