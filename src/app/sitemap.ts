@@ -14,6 +14,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/contact",
     "/terms",
     "/privacy",
+    // Play 콘솔의 데이터 삭제 URL. 스토어 등록정보에 노출되는 링크이므로 색인을 막지 않는다.
+    "/data-deletion",
   ].map((route) => ({ url: `${SITE_URL}${route}` }));
 
   // 백엔드가 응답하지 않아도 정적 경로만이라도 사이트맵이 나가게 한다.
