@@ -1,3 +1,4 @@
+import { toExamTableContext } from "@/features/exam/map-exam-table-context";
 import type {
   ExamDetailedScores,
   ExamQuestionDetail,
@@ -122,7 +123,10 @@ export function mapExamQuestionDetail(
       audioUrl: question.questionInfo.audioUrl,
       guideAudioUrl: question.questionInfo.guideAudioUrl,
       imageUrl: question.questionInfo.imageUrl,
-      tableContext: question.questionInfo.tableContext,
+      tableContext: toExamTableContext(
+        question.questionInfo.tableContext,
+        `question detail ${question.questionNumber}`,
+      ),
       prepTimeSec: question.questionInfo.prepTimeSec,
       speakTimeSec: question.questionInfo.speakTimeSec,
     },

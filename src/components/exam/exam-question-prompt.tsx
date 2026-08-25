@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 
+import { ExamTable } from "@/components/exam/exam-table";
 import { jua } from "@/lib/fonts";
 import type { ExamQuestionInfo } from "@/types/exam";
 
@@ -111,41 +112,7 @@ export function ExamQuestionPrompt({
       )}
 
       {questionInfo.tableContext && (
-        <div className="w-full shrink-0 rounded-2xl border border-zinc-200">
-          <div className="border-b border-zinc-200 bg-zinc-50 px-4 py-3">
-            <p className="font-semibold text-blue-950 lg:text-lg">
-              {questionInfo.tableContext.title}
-            </p>
-            <p className="mt-0.5 text-xs text-zinc-500 lg:text-sm">
-              {questionInfo.tableContext.location} ·{" "}
-              {questionInfo.tableContext.date} · Fee:{" "}
-              {questionInfo.tableContext.fee}
-            </p>
-          </div>
-          <table className="w-full text-xs lg:text-sm">
-            <tbody>
-              {questionInfo.tableContext.items.map((item) => (
-                <tr
-                  key={item.time}
-                  className="border-b border-zinc-100 last:border-0"
-                >
-                  <td className="px-4 py-2 font-medium whitespace-nowrap text-zinc-500">
-                    {item.time}
-                  </td>
-                  <td className="px-4 py-2 text-zinc-800">
-                    {item.sessionTitle}
-                    {item.note && (
-                      <span className="block text-zinc-400">({item.note})</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-2 text-right text-zinc-500">
-                    {item.speaker ?? ""}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ExamTable table={questionInfo.tableContext} />
       )}
 
       {questionInfo.text && (

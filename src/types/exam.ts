@@ -1,16 +1,96 @@
-export interface ExamTableItem {
+/**
+ * 웹 응시 화면(/exam/session)이 쓰는 옛 표 모양. 서버 계약이 아래 ExamTableContext로
+ * 바뀌었지만 이 플로우는 앱으로 옮겨 가는 중이라 그대로 둔다 — 웹 응시 화면이 사라질 때
+ * 이 두 타입과 exam-session-screen의 표 블록을 함께 지우면 된다.
+ */
+export interface ExamSessionTableItem {
   time: string;
   sessionTitle: string;
   speaker?: string | null;
   note?: string;
 }
 
-export interface ExamTableContext {
+export interface ExamSessionTableContext {
   title: string;
   location: string;
   date: string;
   fee: string;
+  items: ExamSessionTableItem[];
+}
+
+export type ExamTableScalar = string | number | boolean | null;
+
+export interface RawExamTableMetadata {
+  key: string;
+  label: string;
+  value: ExamTableScalar;
+}
+
+export interface RawExamTableColumn {
+  key: string;
+  label: string;
+  value_type: string;
+}
+
+export interface RawExamTableItem {
+  cells: Record<string, ExamTableScalar>;
+  status: string;
+  status_note: string | null;
+  strike_through: boolean;
+}
+
+export interface RawExamTableNote {
+  scope: string;
+  text: string;
+}
+
+/** Part 4 public wire contract. 내부 필드는 서버 규격의 snake_case를 그대로 적는다. */
+export interface RawExamTableContext {
+  table_type: string;
+  title: string;
+  subtitles: string[];
+  metadata: RawExamTableMetadata[];
+  columns: RawExamTableColumn[];
+  items: RawExamTableItem[];
+  notes: RawExamTableNote[];
+}
+
+export interface ExamTableMetadata {
+  key: string;
+  label: string;
+  value: ExamTableScalar;
+}
+
+export interface ExamTableColumn {
+  key: string;
+  label: string;
+  valueType: string;
+}
+
+export interface ExamTableItem {
+  cells: Record<string, ExamTableScalar>;
+  status: string;
+  statusNote: string | null;
+  strikeThrough: boolean;
+}
+
+export interface ExamTableNote {
+  scope: string;
+  text: string;
+}
+
+/**
+ * 화면이 소비하는 Part 4 표. 표 종류마다 열 구성이 다르므로 고정 열을 가정하지 않고
+ * columns/cells 쌍으로만 그린다 — 종류·상태·키는 서버가 늘릴 수 있어 string으로 둔다.
+ */
+export interface ExamTableContext {
+  tableType: string;
+  title: string;
+  subtitles: string[];
+  metadata: ExamTableMetadata[];
+  columns: ExamTableColumn[];
   items: ExamTableItem[];
+  notes: ExamTableNote[];
 }
 
 export interface RawExamQuestion {
@@ -19,7 +99,7 @@ export interface RawExamQuestion {
   referenceText?: string;
   imageUrl?: string;
   text?: string;
-  tableContext?: ExamTableContext;
+  tableContext?: ExamSessionTableContext;
   audioUrl?: string;
   /** Part 3 setup narration text ("Imagine a cooking magazine..."), read once before the part's first question. */
   partIntroText?: string;
@@ -40,7 +120,7 @@ export interface ExamQuestion {
   imageUrl?: string;
   question?: string;
   audioUrl?: string;
-  tableContext?: ExamTableContext;
+  tableContext?: ExamSessionTableContext;
   /** Part 3 setup narration text ("Imagine a cooking magazine..."), read once before the part's first question. */
   partIntroText?: string;
   /** Narrated audio for partIntroText. */
@@ -273,7 +353,7 @@ export interface RawExamQuestionInfo {
   audioUrl?: string;
   guideAudioUrl?: string;
   imageUrl?: string;
-  tableContext?: ExamTableContext;
+  tableContext?: RawExamTableContext;
   prepTimeSec: number;
   speakTimeSec: number;
 }
