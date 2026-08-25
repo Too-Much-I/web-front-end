@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+
 import type { ExamTableContext, ExamTableScalar } from "@/types/exam";
 
 /** 열이 늘어나도 셀이 뭉개지지 않게 잡아 두는 최소 열 너비(px). 앱 렌더러와 같은 값. */
@@ -23,6 +27,9 @@ function formatStatus(status: string): string {
  * 열 이름(time/speaker 등)을 알고 있으면 그 종류의 표만 보이고 나머지는 빈칸이 된다.
  */
 export function ExamTable({ table }: { table: ExamTableContext }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const isScrollable = useHorizontalOverflow(scrollRef, table);
+
   return (
     <div className="flex w-full shrink-0 flex-col gap-4 text-left">
       <div className="flex flex-col gap-1">
@@ -55,13 +62,16 @@ export function ExamTable({ table }: { table: ExamTableContext }) {
         </ul>
       )}
 
-      {table.columns.length > 2 && (
+      {isScrollable && (
         <p className="text-xs text-zinc-500">
           표를 옆으로 밀어 모든 열을 확인하세요.
         </p>
       )}
 
-      <div className="w-full overflow-x-auto rounded-2xl ring-1 ring-zinc-200">
+      <div
+        ref={scrollRef}
+        className="w-full overflow-x-auto rounded-2xl ring-1 ring-zinc-200"
+      >
         <table className="w-full border-collapse text-xs sm:text-sm lg:text-base">
           <caption className="sr-only">{table.title}</caption>
           <thead>
@@ -123,6 +133,42 @@ export function ExamTable({ table }: { table: ExamTableContext }) {
       )}
     </div>
   );
+}
+
+/**
+ * 표가 지금 화면에서 실제로 잘려 있는지 본다.
+ *
+ * 열 개수만으로는 안내가 맞지 않는다 — 열이 많아도 넓은 화면에서는 다 보이고,
+ * 열이 적어도 좁은 화면에서는 잘린다. 그래서 화면 폭까지 반영된 결과인 스크롤
+ * 컨테이너의 넘침 여부를 직접 재고, 창 크기가 바뀌면 다시 잰다.
+ *
+ * 첫 페인트에는 안내가 없다가 마운트 후 나타나는데, 반대(항상 띄웠다가 지우는 것)보다
+ * 눈에 덜 띄고 서버 렌더 결과와도 어긋나지 않는다.
+ */
+function useHorizontalOverflow(
+  ref: React.RefObject<HTMLElement | null>,
+  table: ExamTableContext,
+): boolean {
+  const [isOverflowing, setIsOverflowing] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+
+    // 소수점 폭 차이로 1px 이내 넘침이 잡히는 경우가 있어 여유를 둔다.
+    const measure = () =>
+      setIsOverflowing(node.scrollWidth - node.clientWidth > 1);
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    // 폰트 로드처럼 컨테이너 폭은 그대로인데 내용만 넓어지는 경우까지 잡는다.
+    const content = node.firstElementChild;
+    if (content) observer.observe(content);
+    return () => observer.disconnect();
+  }, [ref, table]);
+
+  return isOverflowing;
 }
 
 /** 취소선·상태 메모처럼 행 단위로 붙는 표시까지 한 행에서 함께 그린다. */
