@@ -1,6 +1,7 @@
 import { mapExamQuestionDetail } from "@/features/exam/map-exam-question-feedback";
 import type {
   ExamQuestionDetail,
+  RawExamTableContext,
   RawExamQuestionDetailResult,
   RawExamRetryFeedbackScore,
   RawExamRetryScore,
@@ -18,6 +19,7 @@ import type {
  *  - Q11 (Part 5): 5회차. 점수가 오르다 한 번 떨어지고 다시 오른다. 내용 적합성은 계속 제자리.
  *  - Q2  (Part 1): 3회차. 낭독이라 내용 적합성이 null(미채점)이고, 2차에서 일부 지표가 하락한다.
  *  - Q6  (Part 3): 1회차. 아직 재도전이 없어 단일 회차 링이 나타난다.
+ *  - Q8  (Part 4): 2회차. 표를 보고 답하는 문제라 문제 원문 카드에 표가 함께 나온다.
  */
 
 function retryScores(list: number[]): RawExamRetryScore[] {
@@ -75,6 +77,12 @@ const Q2_FEEDBACK_SCORES = [
 // Part 3라 내용 적합성 만점은 2.5점 — 1.5점이면 60%다.
 const Q6_SCORES = [1];
 const Q6_FEEDBACK_SCORES = [feedbackScore(0, 58, 1.5, 60, 55, 57, 71)];
+
+const Q8_SCORES = [1, 2];
+const Q8_FEEDBACK_SCORES = [
+  feedbackScore(0, 64, 1.5, 66, 61, 63, 74),
+  feedbackScore(1, 74, 2, 77, 72, 71, 88),
+];
 
 const Q1_SCORES = [2];
 const Q1_FEEDBACK_SCORES = [feedbackScore(0, 76, null, 72, 81, 75, 96)];
@@ -205,6 +213,79 @@ function buildSpokenWords(
   });
 }
 
+/**
+ * Part 4 표 픽스처. 서버가 주는 wire 형태(snake_case) 그대로 두고 매퍼를 태운다.
+ *
+ * 표 종류마다 열 구성이 달라지는 계약을 확인하려는 픽스처라, 화면이 아는 열 이름 없이
+ * columns/cells 쌍만으로 그려지는지(취소된 세션의 취소선·상태 메모 포함) 함께 본다.
+ */
+const Q8_TABLE_CONTEXT: RawExamTableContext = {
+  table_type: "conference_schedule",
+  title: "Wilson Marketing Conference",
+  subtitles: ["Saturday, October 18", "Bayside Convention Center, Hall B"],
+  metadata: [
+    { key: "organizer", label: "Organizer", value: "Wilson Business Group" },
+    { key: "fee", label: "Registration Fee", value: "$45" },
+    { key: "lunch_included", label: "Lunch Included", value: true },
+  ],
+  columns: [
+    { key: "time", label: "Time", value_type: "time_range" },
+    { key: "session", label: "Session", value_type: "text" },
+    { key: "speaker", label: "Speaker", value_type: "text" },
+    { key: "room", label: "Room", value_type: "text" },
+  ],
+  items: [
+    {
+      cells: {
+        time: "9:00 A.M. - 9:30 A.M.",
+        session: "Registration and Coffee",
+        speaker: null,
+        room: "Lobby",
+      },
+      status: "scheduled",
+      status_note: null,
+      strike_through: false,
+    },
+    {
+      cells: {
+        time: "9:30 A.M. - 10:45 A.M.",
+        session: "Understanding Online Customers",
+        speaker: "Dr. Amelia Sato",
+        room: "Hall B",
+      },
+      status: "scheduled",
+      status_note: null,
+      strike_through: false,
+    },
+    {
+      cells: {
+        time: "11:00 A.M. - 12:00 P.M.",
+        session: "Social Media Budgeting",
+        speaker: "Marcus Reed",
+        room: "Room 204",
+      },
+      status: "cancelled",
+      status_note: "Replaced by an open Q&A session",
+      strike_through: true,
+    },
+    {
+      cells: {
+        time: "1:30 P.M. - 3:00 P.M.",
+        session: "Workshop: Writing Better Ads",
+        speaker: "Grace Lim",
+        room: "Room 204",
+      },
+      status: "scheduled",
+      status_note: null,
+      strike_through: false,
+    },
+  ],
+  notes: [
+    { scope: "table", text: "Workshop seats are limited to 30 participants." },
+    { scope: "table", text: "Parking is free for registered attendees." },
+  ],
+};
+
 const MOCK_QUESTIONS: Record<
   number,
   {
@@ -221,6 +302,8 @@ const MOCK_QUESTIONS: Record<
     wordSeconds?: number;
     summaries?: string[];
     recommendedAnswer?: string;
+    /** 표를 보고 답하는 문제(Part 4)에만 둔다. */
+    tableContext?: RawExamTableContext;
   }
 > = {
   1: {
@@ -275,6 +358,19 @@ const MOCK_QUESTIONS: Record<
     spokenWords: Q2_WORDS,
     recommendedAnswer:
       "**Welcome** ↑ ✓ to the Riverside Community **Center**. ↓ ✓✓ Our **fall** program includes ↑ ✓ yoga, ↑ ✓ painting, ↑ ✓ and cooking **classes** for all **ages**. ↓ ✓✓ Registration begins on **Monday**, ↑ ✓ and members receive a ten percent **discount**. ↓ ✓✓",
+  },
+  8: {
+    partNumber: 4,
+    maxScore: 3,
+    scores: Q8_SCORES,
+    feedbackScores: Q8_FEEDBACK_SCORES,
+    questionText:
+      "I heard there is a session about social media budgeting in the morning. Could you tell me who is leading it?",
+    tableContext: Q8_TABLE_CONTEXT,
+    transcripts: [
+      "Uh, the social media budgeting session is at eleven o'clock and, um, Marcus Reed is the speaker I think.",
+      "I'm sorry, but that session has been cancelled. It was scheduled for eleven A.M. with Marcus Reed, but it will be replaced by an open Q and A session instead.",
+    ],
   },
   6: {
     partNumber: 3,
@@ -412,6 +508,7 @@ function buildRaw(
         questionNumber,
         text: question.questionText || undefined,
         referenceText: question.referenceText,
+        tableContext: question.tableContext,
         prepTimeSec: isReadAloud ? 45 : 45,
         speakTimeSec: isReadAloud ? 45 : 60,
       },
