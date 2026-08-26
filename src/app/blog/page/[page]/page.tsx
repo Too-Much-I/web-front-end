@@ -12,6 +12,7 @@ import {
   getBlogPostsSafe,
 } from "@/features/blog/api/get-blog-posts";
 import { BLOG_REVALIDATE_SECONDS } from "@/features/blog/blog-cache";
+import { BLOG_NAME } from "@/features/blog/blog-json-ld";
 import { DEFAULT_OG_IMAGE } from "@/lib/site-config";
 
 // 세그먼트 설정은 정적으로 분석되므로 리터럴이어야 한다(BLOG_REVALIDATE_SECONDS와 동일 값).
@@ -57,7 +58,7 @@ export async function generateMetadata({
   const page = parsePage(rawPage);
   if (!page) return {};
 
-  const title = `토익 스피킹 학습 블로그 (${page}페이지) | 토선생`;
+  const title = `${BLOG_NAME} (${page}페이지) | 토선생`;
   const description = `토선생 블로그 글 목록 ${page}페이지입니다.`;
 
   return {

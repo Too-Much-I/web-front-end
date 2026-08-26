@@ -3,9 +3,9 @@ import { SITE_NAME, SITE_URL } from "@/lib/site-config";
 import type { BlogPostDetail, BlogPostSummary } from "@/types/blog";
 
 /** 목록 화면의 메타·본문과 Blog 구조화 데이터가 같은 문구를 쓰도록 여기서만 정의한다. */
-export const BLOG_NAME = "토익 스피킹 학습 블로그";
+export const BLOG_NAME = "토익 스피킹 정보랑 꿀팁 블로그";
 export const BLOG_DESCRIPTION =
-  "토익 스피킹 등급 기준부터 파트별 답변 전략까지, 실제 채점 데이터를 보며 정리한 학습 노트를 모았습니다.";
+  "토익 스피킹을 혼자 준비하는 초보자를 위한 블로그입니다. 파트별 답변 구조와 시간 관리, 자주 틀리는 문법과 발음, 녹음 셀프 점검법, 시험 전날 벼락치기 체크리스트까지 단기간에 점수를 올리는 실전 팁을 정리했습니다.";
 
 /** 블로그라는 콘텐츠 묶음 자체의 식별자. 목록 URL(`/blog`)이 가리키는 문서와는 다른 것이다. */
 export const BLOG_ID = `${SITE_URL}/blog#blog`;
