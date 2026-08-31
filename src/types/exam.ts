@@ -1,23 +1,3 @@
-/**
- * 웹 응시 화면(/exam/session)이 쓰는 옛 표 모양. 서버 계약이 아래 ExamTableContext로
- * 바뀌었지만 이 플로우는 앱으로 옮겨 가는 중이라 그대로 둔다 — 웹 응시 화면이 사라질 때
- * 이 두 타입과 exam-session-screen의 표 블록을 함께 지우면 된다.
- */
-export interface ExamSessionTableItem {
-  time: string;
-  sessionTitle: string;
-  speaker?: string | null;
-  note?: string;
-}
-
-export interface ExamSessionTableContext {
-  title: string;
-  location: string;
-  date: string;
-  fee: string;
-  items: ExamSessionTableItem[];
-}
-
 export type ExamTableScalar = string | number | boolean | null;
 
 export interface RawExamTableMetadata {
@@ -99,7 +79,7 @@ export interface RawExamQuestion {
   referenceText?: string;
   imageUrl?: string;
   text?: string;
-  tableContext?: ExamSessionTableContext;
+  tableContext?: RawExamTableContext;
   audioUrl?: string;
   /** Part 3 setup narration text ("Imagine a cooking magazine..."), read once before the part's first question. */
   partIntroText?: string;
@@ -120,7 +100,7 @@ export interface ExamQuestion {
   imageUrl?: string;
   question?: string;
   audioUrl?: string;
-  tableContext?: ExamSessionTableContext;
+  tableContext?: ExamTableContext;
   /** Part 3 setup narration text ("Imagine a cooking magazine..."), read once before the part's first question. */
   partIntroText?: string;
   /** Narrated audio for partIntroText. */

@@ -20,7 +20,8 @@ function formatStatus(status: string): string {
 
 /**
  * Part 4 표를 고정 열 가정 없이 그리는 공용 렌더러 — 앱(app-front-end)의 `Part4Table`과
- * 같은 계약을 웹에서 그대로 그린다.
+ * 같은 계약을 웹에서 그대로 그린다. 웹 응시 화면(/exam/session)과 문제별 피드백 화면이
+ * 같은 표를 봐야 하므로 두 화면 모두 이 컴포넌트 하나만 쓴다.
  *
  * 일정표·요금표·이력서처럼 표 종류(`tableType`)마다 열 구성이 달라지므로, 화면은
  * `columns`를 순서대로 돌며 각 행의 `cells[column.key]`만 찾아 쓴다. 여기서 특정

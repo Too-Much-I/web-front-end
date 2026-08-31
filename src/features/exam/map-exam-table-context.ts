@@ -300,8 +300,8 @@ export function reportExamTableContractIssues(
 
 /**
  * 표가 아예 없거나 계약을 못 지키면 표 없이 나머지 화면을 그린다 —
- * 앱은 Part 4에서 예외를 던지지만, 웹뷰 피드백은 이미 끝난 답변을 보여 주는 화면이라
- * 표 하나 때문에 피드백 전체를 못 보게 만들 이유가 없다.
+ * 앱은 Part 4에서 예외를 던지지만, 웹은 응시·피드백 어느 쪽에서도 표 하나 때문에
+ * 화면 전체를 못 보게 만들 이유가 없어 나머지를 그대로 그린다.
  */
 export function toExamTableContext(
   raw: unknown,
