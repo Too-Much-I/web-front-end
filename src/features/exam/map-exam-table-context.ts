@@ -5,6 +5,8 @@ import type {
   ExamTableMetadata,
   ExamTableNote,
   ExamTableScalar,
+  ExamTableSlot,
+  UnrenderableExamTable,
 } from "@/types/exam";
 
 export type ExamTableContractIssueCode =
@@ -298,17 +300,37 @@ export function reportExamTableContractIssues(
   console.warn("[ExamTable] public contract issue", { location, issues });
 }
 
+/** 계약 위반으로 못 그리는 표를 가리키는 단일 값. 매번 새 객체를 만들지 않는다. */
+export const UNRENDERABLE_EXAM_TABLE: UnrenderableExamTable = Object.freeze({
+  unrenderable: true,
+});
+
+export function isRenderableExamTable(
+  slot: ExamTableSlot,
+): slot is ExamTableContext {
+  return !("unrenderable" in slot);
+}
+
 /**
- * 표가 아예 없거나 계약을 못 지키면 표 없이 나머지 화면을 그린다 —
- * 앱은 Part 4에서 예외를 던지지만, 웹은 응시·피드백 어느 쪽에서도 표 하나 때문에
- * 화면 전체를 못 보게 만들 이유가 없어 나머지를 그대로 그린다.
+ * 표를 화면에 그릴 수 있는 상태로 바꾼다.
+ *
+ * 계약 위반은 **하나라도 있으면 전부 치명적으로 본다** — 표는 응시자가 답변 근거로
+ * 읽는 데이터라, 중복 열·누락 셀·계약에 없는 셀처럼 표시 결과가 서버 데이터와
+ * 달라질 수 있는 상태를 "복구했다"고 치고 그리면 잘못된 정보를 사실처럼 보여 준다.
+ * 그래서 매퍼가 fallback으로 채운 값(라벨 "—" 등)도 화면에 내보내지 않는다.
+ * 개별 fallback 자체는 mapExamTableContext에 그대로 남겨 둔다 — issue 목록으로
+ * 어디가 어떻게 어긋났는지 보고하려면 끝까지 매핑해 봐야 한다.
+ *
+ * 표가 없는 문제(undefined/null)와 못 그리는 표는 구분해서 돌려준다. 앞은 표 자리가
+ * 아예 없는 문제고, 뒤는 화면에 안내를 띄워야 하는 오류다.
  */
-export function toExamTableContext(
+export function toExamTableSlot(
   raw: unknown,
   location: string,
-): ExamTableContext | undefined {
+): ExamTableSlot | undefined {
   if (raw === undefined || raw === null) return undefined;
   const mapping = mapExamTableContext(raw);
   reportExamTableContractIssues(location, mapping.issues);
-  return mapping.ok ? mapping.value : undefined;
+  if (!mapping.ok || mapping.issues.length > 0) return UNRENDERABLE_EXAM_TABLE;
+  return mapping.value;
 }

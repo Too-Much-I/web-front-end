@@ -73,6 +73,23 @@ export interface ExamTableContext {
   notes: ExamTableNote[];
 }
 
+/**
+ * 계약을 못 지켜 그릴 수 없는 표. 중복 열·누락 셀처럼 화면에 보이는 표가 서버가 보낸
+ * 데이터와 달라질 수 있는 위반은 전부 이 상태로 떨어뜨리고, 표 대신 안내를 그린다.
+ */
+export interface UnrenderableExamTable {
+  unrenderable: true;
+}
+
+/**
+ * 화면의 표 자리 — 그릴 수 있는 표이거나, 계약 위반으로 못 그리는 표이거나.
+ * 표가 아예 없는 문제는 이 필드 자체가 undefined다.
+ *
+ * 앱(app-front-end)은 같은 위반에서 예외를 던져 Part 4 진입을 막지만, 웹은 표만
+ * 안내로 바꾸고 나머지 화면은 계속 그린다 — 그래서 이 타입만 앱과 다르다.
+ */
+export type ExamTableSlot = ExamTableContext | UnrenderableExamTable;
+
 export interface RawExamQuestion {
   part: number;
   questionNumber: number;
@@ -100,7 +117,7 @@ export interface ExamQuestion {
   imageUrl?: string;
   question?: string;
   audioUrl?: string;
-  tableContext?: ExamTableContext;
+  tableContext?: ExamTableSlot;
   /** Part 3 setup narration text ("Imagine a cooking magazine..."), read once before the part's first question. */
   partIntroText?: string;
   /** Narrated audio for partIntroText. */
@@ -455,7 +472,7 @@ export interface ExamQuestionInfo {
   audioUrl?: string;
   guideAudioUrl?: string;
   imageUrl?: string;
-  tableContext?: ExamTableContext;
+  tableContext?: ExamTableSlot;
   prepTimeSec: number;
   speakTimeSec: number;
 }
