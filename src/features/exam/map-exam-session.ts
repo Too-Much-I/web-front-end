@@ -1,3 +1,4 @@
+import { toExamTableSlot } from "@/features/exam/map-exam-table-context";
 import { getExamPartTiming } from "@/features/exam/part-meta";
 import type {
   ExamSession,
@@ -27,7 +28,10 @@ export function mapExamSession(raw: RawExamSession): ExamSession {
       imageUrl: q.imageUrl,
       question: q.text,
       audioUrl: q.audioUrl,
-      tableContext: q.tableContext,
+      tableContext: toExamTableSlot(
+        q.tableContext,
+        `mapExamSession.questions[${q.questionNumber}]`,
+      ),
       partIntroText: q.partIntroText,
       guideAudioUrl: q.guideAudioUrl,
       isFirstInPart,

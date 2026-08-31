@@ -2,7 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import type { ExamTableContext, ExamTableScalar } from "@/types/exam";
+import { isRenderableExamTable } from "@/features/exam/map-exam-table-context";
+import type {
+  ExamTableContext,
+  ExamTableScalar,
+  ExamTableSlot,
+} from "@/types/exam";
 
 /** 열이 늘어나도 셀이 뭉개지지 않게 잡아 두는 최소 열 너비(px). 앱 렌더러와 같은 값. */
 const MIN_COLUMN_WIDTH_CLASS = "min-w-36";
@@ -19,14 +24,43 @@ function formatStatus(status: string): string {
 }
 
 /**
- * Part 4 표를 고정 열 가정 없이 그리는 공용 렌더러 — 앱(app-front-end)의 `Part4Table`과
+ * 표 자리를 그리는 공용 진입점 — 웹 응시 화면(/exam/session)과 문제별 피드백 화면이
+ * 같은 표를 봐야 하므로 두 화면 모두 이 컴포넌트 하나만 쓴다.
+ *
+ * 계약을 못 지킨 표는 그리지 않고 안내로 바꾼다. 잘못된 표를 부분적으로라도 그리면
+ * 응시자가 그 내용을 사실로 읽기 때문에, 표가 안 보이는 편이 낫다.
+ */
+export function ExamTable({ table }: { table: ExamTableSlot }) {
+  if (!isRenderableExamTable(table)) return <ExamTableUnavailableNotice />;
+  return <RenderedExamTable table={table} />;
+}
+
+/** 표 데이터가 계약을 어겼을 때 표 자리에 대신 들어가는 안내. */
+function ExamTableUnavailableNotice() {
+  return (
+    <div
+      role="status"
+      className="flex w-full shrink-0 flex-col gap-1 rounded-2xl bg-zinc-50 p-6 text-center ring-1 ring-zinc-200"
+    >
+      <p className="text-sm text-blue-950 sm:text-base">
+        표를 불러오지 못했어요
+      </p>
+      <p className="text-xs text-zinc-500 sm:text-sm">
+        표 데이터가 올바르지 않아 표를 그릴 수 없습니다.
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Part 4 표를 고정 열 가정 없이 그리는 렌더러 — 앱(app-front-end)의 `Part4Table`과
  * 같은 계약을 웹에서 그대로 그린다.
  *
  * 일정표·요금표·이력서처럼 표 종류(`tableType`)마다 열 구성이 달라지므로, 화면은
  * `columns`를 순서대로 돌며 각 행의 `cells[column.key]`만 찾아 쓴다. 여기서 특정
  * 열 이름(time/speaker 등)을 알고 있으면 그 종류의 표만 보이고 나머지는 빈칸이 된다.
  */
-export function ExamTable({ table }: { table: ExamTableContext }) {
+function RenderedExamTable({ table }: { table: ExamTableContext }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const isScrollable = useHorizontalOverflow(scrollRef, table);
 

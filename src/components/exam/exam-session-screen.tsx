@@ -9,6 +9,7 @@ import { ExamDirectionsScreen } from "@/components/exam/exam-directions-screen";
 import { ExamExitConfirmPopup } from "@/components/exam/exam-exit-confirm-popup";
 import { ExamHeader } from "@/components/exam/exam-header";
 import { ExamPartIntroScreen } from "@/components/exam/exam-part-intro-screen";
+import { ExamTable } from "@/components/exam/exam-table";
 import { ExamTerminateConfirmPopup } from "@/components/exam/exam-terminate-confirm-popup";
 import {
   ExamAnswerUploadError,
@@ -462,39 +463,7 @@ export function ExamSessionScreen({
           </div>
         )}
 
-        {question.tableContext && (
-          <div className="w-full shrink-0 rounded-xl border border-zinc-200 text-left">
-            <div className="border-b border-zinc-200 bg-zinc-50 px-4 py-3">
-              <p className="font-semibold text-blue-950 sm:text-lg lg:text-xl">
-                {question.tableContext.title}
-              </p>
-              <p className="mt-0.5 text-xs text-zinc-500 sm:text-sm lg:text-base">
-                {question.tableContext.location} · {question.tableContext.date} · Fee:{" "}
-                {question.tableContext.fee}
-              </p>
-            </div>
-            <table className="w-full text-xs sm:text-sm lg:text-base">
-              <tbody>
-                {question.tableContext.items.map((item) => (
-                  <tr key={item.time} className="border-b border-zinc-100 last:border-0">
-                    <td className="px-4 py-2 font-medium whitespace-nowrap text-zinc-500">
-                      {item.time}
-                    </td>
-                    <td className="px-4 py-2 text-zinc-800">
-                      {item.sessionTitle}
-                      {item.note && (
-                        <span className="block text-zinc-400">({item.note})</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-2 text-right text-zinc-500">
-                      {item.speaker ?? ""}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        {question.tableContext && <ExamTable table={question.tableContext} />}
 
         {question.question && question.partNumber !== 4 && (
           <p className="text-lg leading-relaxed font-medium text-blue-950 sm:text-xl md:text-2xl lg:text-3xl">
