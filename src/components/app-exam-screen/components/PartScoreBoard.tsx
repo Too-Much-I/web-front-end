@@ -36,7 +36,7 @@ export function PartScoreBoard({
               : "칠판을 눌러 파트별 점수 보기"
           }
           aria-expanded={isRevealed}
-          className="w-full rounded-2xl border-2 p-5 text-left"
+          className="p-card w-full rounded-2xl border-2 text-left"
           style={{
             borderColor: feedbackColors.woodLight,
             backgroundColor: feedbackColors.chalkboard,

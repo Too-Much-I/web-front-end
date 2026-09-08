@@ -7,7 +7,7 @@ import type { SummaryFeedbackRecovery } from "@/features/exam/use-summary-feedba
 
 function RecoveryLoadingStatus({ children }: { children: React.ReactNode }) {
   return (
-    <div role="status" className="px-5 py-3">
+    <div role="status" className="px-screen py-3">
       <div className="flex items-center gap-3">
         <LoaderCircle
           aria-hidden

@@ -29,7 +29,7 @@ export function SummaryFeedbackRecoveryDialog({
       }}
     >
       <DialogContent className="w-[calc(100%-3rem)] max-w-xs border-none bg-transparent p-0 text-center ring-0 sm:max-w-xs">
-        <section className="flex flex-col items-center gap-4 rounded-2xl bg-white p-5 shadow-xl ring-1 ring-zinc-100">
+        <section className="p-card flex flex-col items-center gap-4 rounded-2xl bg-white shadow-xl ring-1 ring-zinc-100">
           <Image
             src="/mascots/scoring.png"
             alt="피드백을 작성하는 고양이 캐릭터"

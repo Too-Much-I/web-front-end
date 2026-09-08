@@ -80,7 +80,7 @@ export function QuestionFeedbackHeader({
           <div
             role="group"
             aria-label="회차 선택"
-            className="-mx-5 mt-3 flex [scrollbar-width:none] gap-1.5 overflow-x-auto px-5 [&::-webkit-scrollbar]:hidden"
+            className="-mx-screen px-screen mt-3 flex [scrollbar-width:none] gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden"
           >
             {attempts.map((retryCount) => {
               const isActive = retryCount === activeRetryCount;
