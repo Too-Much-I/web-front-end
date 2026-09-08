@@ -62,7 +62,8 @@ export const metadata: Metadata = {
  * (next-themes가 테마 적용에 쓰는 것과 같은 패턴이다).
  *
  * 기준이 16인 이유는 브라우저 기본 루트 font-size가 16px이기 때문이다.
- * 앱의 기준(14)과 숫자는 다르지만 각자 1.0에서 "현재와 동일"이라는 성질은 같다.
+ * app-front-end도 기준을 16으로 올려서(src/theme/rem-scale.ts의 BASE_REM) 이제 두 쪽이
+ * 같은 값이다. 그전에는 앱이 14였고, 각자 1.0에서 "현재와 동일"이라는 성질만 공유했다.
  *
  * 클램프 범위는 app-front-end의 src/theme/rem-scale.ts와 같아야 한다.
  * 쿼리는 신뢰할 수 없는 입력이므로 웹에서도 독립적으로 자른다.
