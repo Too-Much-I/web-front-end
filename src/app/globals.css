@@ -5,6 +5,30 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /*
+   * 간격 토큰 — 정본은 app-front-end의 `src/theme/tokens.js`(`layout`)다.
+   * 값을 바꿀 때는 두 저장소를 같이 고친다.
+   * (`app/layout.tsx`의 rem scale 클램프를 app과 맞춰 두는 것과 같은 관행이다.)
+   *
+   * `app-*` 라우트는 앱이 웹뷰로 띄우는 화면이라, 사용자는 앱 UI를 보다가
+   * 스크롤 한 번으로 여기로 넘어온다. 그 경계에서 좌우 정렬선과 카드 여백이
+   * 갈리면 한 화면이 두 개로 읽힌다. 그래서 앱과 같은 이름·같은 px를 쓴다.
+   *
+   * 브라우저 기본 rem이 16이라 tailwind 기본 스케일도 이름 그대로의 px가
+   * 나오지만(`p-4` = 16px), 그건 "어느 자리에 무엇을 쓰는지"를 말해주지 않는다.
+   * 이 토큰은 값이 아니라 역할을 고르기 위한 것이다.
+   * 역할 설명은 app-front-end의 `docs/design-system-spacing.md`에 있다.
+   *
+   * 주의: `app-*` 라우트 전용이다. 랜딩·블로그·`/exam/*`처럼 데스크톱 폭까지
+   * 열리는 화면은 반응형 여백이 필요하므로 여기 값을 쓰지 않는다.
+   */
+  --spacing-content: 8px;
+  --spacing-element: 12px;
+  --spacing-card: 16px;
+  --spacing-screen: 20px;
+  --spacing-section: 24px;
+  --spacing-section-lg: 32px;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);

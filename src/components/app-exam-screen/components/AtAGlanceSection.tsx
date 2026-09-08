@@ -29,7 +29,7 @@ function InsightCard({
 
   return (
     <article
-      className="min-w-[150px] flex-1 rounded-3xl border border-zinc-200 bg-white p-4"
+      className="p-card min-w-[150px] flex-1 rounded-3xl border border-zinc-200 bg-white"
       style={cardShadow}
     >
       <div className="flex flex-row items-center gap-2">

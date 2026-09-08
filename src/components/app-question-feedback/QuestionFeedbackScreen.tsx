@@ -151,7 +151,7 @@ export function QuestionFeedbackScreen({
       className="flex min-h-dvh flex-col overflow-x-clip"
       style={{ backgroundColor: feedbackColors.surfaceSubtle }}
     >
-      <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-1 flex-col px-5">
+      <div className="px-screen mx-auto flex min-h-dvh w-full max-w-3xl flex-1 flex-col">
         <QuestionFeedbackHeader
           partNumber={detail.partNumber}
           questionNumber={detail.questionNumber}
@@ -189,7 +189,7 @@ export function QuestionFeedbackScreen({
           className="fixed inset-x-0 bottom-0 z-20 border-t border-orange-100 bg-[#fff9f2]/95 backdrop-blur-sm"
         >
           <div
-            className="mx-auto w-full max-w-3xl px-5 pt-4"
+            className="px-screen mx-auto w-full max-w-3xl pt-4"
             style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
           >
             <button
@@ -256,7 +256,7 @@ function ScoreAndAnswerDeck({
         <ExamQuestionPrompt questionInfo={detail.questionInfo} />
       </div>
 
-      <div className="mt-6 rounded-3xl bg-white p-5" style={cardShadow}>
+      <div className="p-card mt-6 rounded-3xl bg-white" style={cardShadow}>
         <h2 className="text-lg text-blue-950">내 답변</h2>
 
         {detail.audioUrl && (
@@ -342,14 +342,14 @@ function FeedbackDeck({
       />
 
       <div
-        className="mt-8 flex flex-col gap-4 rounded-3xl bg-white p-5"
+        className="p-card mt-8 flex flex-col gap-4 rounded-3xl bg-white"
         style={cardShadow}
       >
         <h2 className="text-lg text-blue-950">세부 피드백</h2>
         {details.map(([title, body]) => (
           <div
             key={title}
-            className="rounded-2xl bg-sky-50 p-4 ring-1 ring-sky-100"
+            className="p-card rounded-2xl bg-sky-50 ring-1 ring-sky-100"
           >
             <p className="text-sm text-sky-700">{title}</p>
             <p className="mt-1.5 text-sm leading-relaxed text-sky-900">
@@ -391,7 +391,7 @@ function ReanswerCta({
   return (
     <section
       aria-label="다시 답변하기"
-      className="mt-6 overflow-hidden rounded-3xl bg-white p-5 ring-1 ring-orange-200"
+      className="p-card mt-6 overflow-hidden rounded-3xl bg-white ring-1 ring-orange-200"
     >
       <div className="flex items-center gap-3">
         <div className="relative h-16 w-16 shrink-0">

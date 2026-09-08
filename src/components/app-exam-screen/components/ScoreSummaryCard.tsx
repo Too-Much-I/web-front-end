@@ -40,7 +40,7 @@ export function ScoreSummaryCard({
       style={{ ...cardShadow, backgroundColor: feedbackColors.wood }}
     >
       <div
-        className="rounded-2xl border-2 p-5"
+        className="p-card rounded-2xl border-2"
         style={{
           borderColor: feedbackColors.woodLight,
           backgroundColor: feedbackColors.scoreSurface,

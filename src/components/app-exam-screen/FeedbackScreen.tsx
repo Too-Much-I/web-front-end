@@ -214,7 +214,7 @@ export function AppExamScreen({
       className="flex min-h-dvh flex-col overflow-x-clip"
       style={{ backgroundColor: feedbackColors.surfaceSubtle }}
     >
-      <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-1 flex-col px-5">
+      <div className="px-screen mx-auto flex min-h-dvh w-full max-w-3xl flex-1 flex-col">
         <FeedbackHeader
           currentStep={currentStep + 1}
           totalSteps={FEEDBACK_STEP_COUNT}
@@ -281,7 +281,7 @@ export function AppExamScreen({
             <SummaryFeedbackRecoveryBar recovery={recovery} />
             <nav
               aria-label="피드백 단계 이동"
-              className="flex gap-3 border-t border-orange-100 px-5 pt-4"
+              className="px-screen flex gap-3 border-t border-orange-100 pt-4"
               style={{
                 paddingBottom: "max(1rem, env(safe-area-inset-bottom))",
               }}

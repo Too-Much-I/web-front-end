@@ -38,7 +38,7 @@ export function PartFeedbackCard({
 
   return (
     <article
-      className="relative overflow-hidden rounded-3xl border p-4"
+      className="p-card relative overflow-hidden rounded-3xl border"
       style={{
         ...cardShadow,
         borderColor: feedbackColors.part.border,

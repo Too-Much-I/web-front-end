@@ -128,7 +128,7 @@ function AppQuestionFeedbackContent() {
 
   if (!hasValidParams) {
     return (
-      <p className="flex min-h-dvh items-center justify-center px-6 text-center text-sm leading-relaxed text-zinc-500">
+      <p className="px-screen flex min-h-dvh items-center justify-center text-center text-sm leading-relaxed text-zinc-500">
         잘못된 접근이에요. examId와 questionNumber(1 이상)가 필요해요.
         <br />
         서버 없이 화면만 보려면 ?mock=1&amp;questionNumber=

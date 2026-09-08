@@ -20,7 +20,7 @@ export function FreeAccessNotice() {
   return (
     <section
       aria-labelledby="app-feedback-free-access-heading"
-      className="mt-4 flex items-start gap-3 rounded-3xl border p-4"
+      className="p-card mt-4 flex items-start gap-3 rounded-3xl border"
       style={{
         backgroundColor: feedbackColors.cardTint,
         borderColor: feedbackColors.cardLine,

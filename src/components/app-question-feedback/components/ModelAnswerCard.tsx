@@ -91,7 +91,7 @@ export function ModelAnswerCard({
   return (
     <section
       aria-label={isReadAloud ? "추천답안 읽기 안내" : "모범·추천답안"}
-      className="flex flex-col gap-4 rounded-3xl bg-white p-5"
+      className="p-card flex flex-col gap-4 rounded-3xl bg-white"
       style={cardShadow}
     >
       {!isReadAloud && hasModel && hasRecommended && (
