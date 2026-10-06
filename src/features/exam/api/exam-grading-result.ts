@@ -54,20 +54,9 @@ export function createAppExamSummary(
   examId: string,
   dataSource: ExamSummaryDataSource = "native-bridge",
 ): AppExamSummaryData {
-  // API envelope는 두 전송 경로 모두 이미 벗겨졌다. 본문 검사보다 먼저 판별한다.
-  if (
-    typeof result === "object" &&
-    result !== null &&
-    "appUpdateRequired" in result &&
-    result.appUpdateRequired === true
-  ) {
-    return { appUpdateRequired: true, dataSource };
-  }
-
   const inspected = inspectExamSummary(result, examId);
 
   return {
-    appUpdateRequired: false,
     result: mapExamGradingResult(inspected.normalized, {
       preserveEmptyParts: true,
     }),

@@ -4,7 +4,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect } from "react";
 
-import { AppUpdateRequiredScreen } from "@/components/app-exam-screen/app-update-required-screen";
 import { AppExamScreen } from "@/components/app-exam-screen/FeedbackScreen";
 import { ErrorFallbackScreen } from "@/components/error-fallback-screen";
 import {
@@ -13,7 +12,7 @@ import {
 } from "@/features/exam/api/exam-grading-result";
 import { useSummaryFeedbackRetry } from "@/features/exam/use-summary-feedback-retry";
 import { postToNative } from "@/lib/native-bridge";
-import type { AppExamFeedbackData, AppExamSummaryData } from "@/types/exam";
+import type { AppExamSummaryData } from "@/types/exam";
 
 const FEEDBACK_STEP_COUNT = 3;
 const appExamSummaryQueryKey = (examId: string) =>
@@ -38,12 +37,7 @@ function parseInitialStep(raw: string | null): number {
 function AppExamScreenContent() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
-  const isUpdatePreview =
-    process.env.NODE_ENV === "development" &&
-    searchParams.get("preview") === "app-update";
-  const examId = isUpdatePreview
-    ? "preview-app-update"
-    : (searchParams.get("examId") ?? "");
+  const examId = searchParams.get("examId") ?? "";
   const initialStep = parseInitialStep(searchParams.get("step"));
   const {
     data: summaryData,
@@ -51,15 +45,8 @@ function AppExamScreenContent() {
     isPending,
     refetch,
   } = useQuery({
-    queryKey: [...appExamSummaryQueryKey(examId), isUpdatePreview],
-    queryFn: () =>
-      isUpdatePreview
-        ? createAppExamSummary(
-            { appUpdateRequired: true },
-            examId,
-            "direct-api",
-          )
-        : getAppExamSummary(examId),
+    queryKey: appExamSummaryQueryKey(examId),
+    queryFn: () => getAppExamSummary(examId),
     enabled: Boolean(examId),
     staleTime: Infinity,
     gcTime: Infinity,
@@ -67,13 +54,10 @@ function AppExamScreenContent() {
   const applyPushedSummary = useCallback(
     (rawSummary: unknown) => {
       const nextData = createAppExamSummary(rawSummary, examId);
-      queryClient.setQueryData(
-        [...appExamSummaryQueryKey(examId), isUpdatePreview],
-        nextData,
-      );
+      queryClient.setQueryData(appExamSummaryQueryKey(examId), nextData);
       return nextData;
     },
-    [examId, isUpdatePreview, queryClient],
+    [examId, queryClient],
   );
 
   useEffect(() => {
@@ -88,10 +72,6 @@ function AppExamScreenContent() {
         잘못된 접근이에요. examId가 없어요.
       </p>
     );
-  }
-
-  if (summaryData?.appUpdateRequired) {
-    return <AppUpdateRequiredScreen />;
   }
 
   if (error) {
@@ -128,7 +108,7 @@ function LoadedAppExamScreen({
   applyPushedSummary,
 }: {
   examId: string;
-  summaryData: AppExamFeedbackData;
+  summaryData: AppExamSummaryData;
   initialStep: number;
   applyPushedSummary: (rawSummary: unknown) => AppExamSummaryData;
 }) {
