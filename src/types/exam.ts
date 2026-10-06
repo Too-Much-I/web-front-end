@@ -189,6 +189,7 @@ export interface ExamPartScores {
 
 /** GET /api/v1/exams/{examId}/summary 의 result */
 export interface RawExamSummaryResult {
+  appUpdateRequired?: boolean;
   examId: string;
   totalScore: number;
   levelEstimate: string;
@@ -258,7 +259,13 @@ export interface ExamSummaryCompleteness {
 
 export type ExamSummaryDataSource = "native-bridge" | "direct-api";
 
-export interface AppExamSummaryData {
+/** 업데이트 응답에는 피드백 본문이 없어도 된다. */
+export type AppExamSummaryData =
+  | { appUpdateRequired: true; dataSource: ExamSummaryDataSource }
+  | AppExamFeedbackData;
+
+export interface AppExamFeedbackData {
+  appUpdateRequired: false;
   result: ExamGradingResult;
   completeness: ExamSummaryCompleteness;
   dataSource: ExamSummaryDataSource;
