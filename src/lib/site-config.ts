@@ -41,3 +41,15 @@ export const DEFAULT_OG_IMAGE = {
   width: 1200,
   height: 600,
 } as const;
+
+/**
+ * 앱 스토어 주소. 광고 브릿지(`src/app/google/*`)가 기기별 도착지로 쓴다.
+ *
+ * 위 SITE_SOCIAL_URLS(sameAs)에는 일부러 넣지 않았다. sameAs는 "이 계정의 주인이
+ * 우리다"라는 신원 주장이고, 스토어 등재 페이지는 그 성격이 달라 Organization이 아니라
+ * SoftwareApplication 구조화 데이터로 따로 다루는 편이 맞다.
+ */
+export const APP_STORE_URL =
+  "https://apps.apple.com/kr/app/%ED%86%A0%EC%84%A0%EC%83%9D-%ED%86%A0%EC%9D%B5%EC%8A%A4%ED%94%BC%ED%82%B9-ai-%EB%AA%A8%EC%9D%98%EA%B3%A0%EC%82%AC/id6803419955";
+export const PLAY_STORE_URL =
+  "https://play.google.com/store/apps/details?id=com.toteacher.app&hl=ko";

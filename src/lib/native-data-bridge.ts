@@ -26,6 +26,9 @@ type PendingRequest = {
 declare global {
   interface Window {
     __nativeCapabilities?: {
+      /** 신버전 앱의 선택적 스토어 안내 계약. 구버전은 두 스토어로 폴백한다. */
+      platform?: "ios" | "android";
+      storeUrl?: string;
       feedbackBridgeVersion?: number;
       /** 앱/웹 독립 배포 중 데이터 요청 호환성을 위한 이전 필드. */
       nativeDataRequestVersion?: number;

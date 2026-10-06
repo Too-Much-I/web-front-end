@@ -22,7 +22,7 @@ import {
   subscribeToSummaryFeedbackRetry,
   SummaryFeedbackRetryError,
 } from "@/lib/native-summary-feedback-retry";
-import type { AppExamSummaryData } from "@/types/exam";
+import type { AppExamFeedbackData, AppExamSummaryData } from "@/types/exam";
 
 const RETRY_STORAGE_PREFIX = "summary-feedback-retry:";
 const PROMPT_STORAGE_PREFIX = "summary-feedback-prompt-dismissed:";
@@ -98,7 +98,7 @@ export function useSummaryFeedbackRetry({
   applyPushedSummary,
 }: {
   examId: string;
-  summaryData: AppExamSummaryData;
+  summaryData: AppExamFeedbackData;
   applyPushedSummary: (rawSummary: unknown) => AppExamSummaryData;
 }): SummaryFeedbackRecovery {
   const isComplete = isExamSummaryComplete(summaryData.completeness);
@@ -182,7 +182,7 @@ export function useSummaryFeedbackRetry({
         | "poll-failed"
         | "poll-timeout"
         | "poll-incomplete",
-      data: AppExamSummaryData,
+      data: AppExamFeedbackData,
       stage: "retry-request" | "retry-polling",
     ) => {
       const requestId = requestIdRef.current ?? "unknown";
@@ -319,7 +319,10 @@ export function useSummaryFeedbackRetry({
       if (event.status === "completed") {
         try {
           const nextData = applyPushedSummary(event.result);
-          if (isExamSummaryComplete(nextData.completeness)) {
+          if (
+            nextData.appUpdateRequired ||
+            isExamSummaryComplete(nextData.completeness)
+          ) {
             clearPersistedRetry(examId);
             setState((current) =>
               transitionSummaryFeedbackRetryState(current, "completed"),
