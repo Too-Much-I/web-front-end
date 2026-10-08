@@ -98,9 +98,10 @@ export default function PrivacyPolicyPage() {
             참조)
           </li>
           <li>
-            쿠키 등 자동 수집된 행태정보(Google Analytics): 이용자 단위 이벤트
-            데이터는 최대 14개월간 보관하며, 이후 개인을 식별할 수 없는 집계
-            형태로만 유지(제10조 참조)
+            쿠키 등 자동 수집된 행태정보(Google Analytics): 이벤트 단위 데이터는
+            수집일로부터 2개월, 이용자 단위 데이터는 마지막 이용일로부터
+            14개월간 보관하며, 이후 개인을 식별할 수 없는 집계 형태로만
+            유지(제10조 참조)
           </li>
         </ul>
       </LegalSection>
