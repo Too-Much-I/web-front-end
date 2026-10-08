@@ -277,11 +277,14 @@ export default function DataDeletionPage() {
         <p>
           서비스가 처리하는 개인정보의 항목과 목적, 보유 기간, 위탁 및 국외
           이전에 관한 자세한 사항은{" "}
-          <Link href="/privacy" className="text-orange-500 hover:underline">
-            개인정보처리방침
+          <Link
+            href="/app-settings/privacy"
+            className="text-orange-500 hover:underline"
+          >
+            앱 개인정보처리방침
           </Link>
-          에서 확인할 수 있습니다. 앱 이용자는 앱의 설정 화면에서도 같은 내용을
-          볼 수 있습니다.
+          에서 확인할 수 있습니다. 같은 방침은 앱의 설정 화면에서도 볼 수
+          있습니다.
         </p>
       </LegalSection>
     </LegalPageLayout>
