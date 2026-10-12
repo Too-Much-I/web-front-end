@@ -1082,12 +1082,45 @@
 }
 .download-landing {
   background-color: #fffcf8;
+  /*
+   * The tile is the watercolor next to its mirror image, so the edges meet without a seam
+   * when it repeats sideways. Each half is --pattern-width wide and 1.78x as tall, so the
+   * fade finishes at 1.6x before the tile's bottom edge can show.
+   */
+  background-image:
+    linear-gradient(
+      #fffcf866 0,
+      #fffcf8a6 min(560px, calc(var(--pattern-width) * 0.8)),
+      #fffcf8 min(1000px, calc(var(--pattern-width) * 1.6))
+    ),
+    url("/download-landing/watercolor-orange-mirror.webp");
+  background-size:
+    auto,
+    calc(var(--pattern-width) * 2) auto;
+  background-position:
+    0 0,
+    top left;
+  background-repeat: no-repeat, repeat-x;
+}
+@media (max-width: 700px) {
+  .download-landing {
+    background-image:
+      linear-gradient(
+        #fffcf8a6 0,
+        #fffcf8cc calc(var(--pattern-width) * 0.8),
+        #fffcf8 calc(var(--pattern-width) * 1.5)
+      ),
+      url("/download-landing/watercolor-orange-mirror.webp");
+  }
+}
+.download-landing[data-background="original"] {
   background-image:
     linear-gradient(#fffcf8ad, #fffcf8ad),
     url("/download-landing/watercolor-check.png");
   background-size:
     auto,
     var(--pattern-width) auto;
+  background-position: 0 0;
   background-repeat: repeat;
 }
 .download-landing .wrap {
