@@ -9,6 +9,7 @@ import { ExamDirectionsScreen } from "@/components/exam/exam-directions-screen";
 import { ExamExitConfirmPopup } from "@/components/exam/exam-exit-confirm-popup";
 import { ExamHeader } from "@/components/exam/exam-header";
 import { ExamPartIntroScreen } from "@/components/exam/exam-part-intro-screen";
+import { ExamStopTalkingNotice } from "@/components/exam/exam-stop-talking-notice";
 import { ExamTable } from "@/components/exam/exam-table";
 import { ExamTerminateConfirmPopup } from "@/components/exam/exam-terminate-confirm-popup";
 import {
@@ -37,9 +38,12 @@ type Phase =
   | "prep-cue"
   | "prep"
   | "speak-cue"
-  | "speaking";
+  | "speaking"
+  | "stop-talking";
 
 const CUE_FALLBACK_MS = 2000;
+// 응답 시간이 끝난 뒤 "Stop Talking" 안내를 보여 주는 시간.
+const STOP_TALKING_MS = 2000;
 // Part 4는 Q8 오디오가 나오기 전, 표/일정 정보를 읽을 45초를 별도로 준다.
 const PART4_READING_TIME_SEC = 45;
 
@@ -124,17 +128,22 @@ export function ExamSessionScreen({
       setPhase("speaking");
       return;
     }
-    // phase === "speaking"
-    if (question) {
-      trackEvent("question_complete", {
-        exam_mode: examMode,
-        part: question.partNumber,
-        question_number: question.questionNumber,
-      });
-      if (index + 1 >= total) {
-        trackEvent("exam_complete", { exam_mode: examMode });
+    if (phase === "speaking") {
+      if (question) {
+        trackEvent("question_complete", {
+          exam_mode: examMode,
+          part: question.partNumber,
+          question_number: question.questionNumber,
+        });
+        if (index + 1 >= total) {
+          trackEvent("exam_complete", { exam_mode: examMode });
+        }
       }
+      // speaking을 벗어나는 순간 녹음 effect의 cleanup이 녹음을 멈추고 업로드를 시작한다.
+      setPhase("stop-talking");
+      return;
     }
+    // phase === "stop-talking"
     if (index + 1 < total) {
       const nextQuestion = questions[index + 1];
       const isNewPart = nextQuestion.partNumber !== questions[index].partNumber;
@@ -161,7 +170,7 @@ export function ExamSessionScreen({
   const isCounting =
     (phase === "prep" || phase === "speaking" || isReadingTime) && !isAnyDialogOpen;
   const isPrepGroup = phase === "prep-cue" || phase === "prep";
-  const isSpeakGroup = phase === "speak-cue" || phase === "speaking";
+  const isSpeakGroup = phase === "speak-cue" || phase === "speaking" || phase === "stop-talking";
   const isListeningPhase =
     phase === "question-audio" || phase === "repeat-cue" || phase === "question-audio-repeat";
 
@@ -229,6 +238,12 @@ export function ExamSessionScreen({
     `${question?.questionNumber}-speak-cue`,
     phase === "speak-cue" && !isAnyDialogOpen,
   );
+
+  useEffect(() => {
+    if (phase !== "stop-talking" || isAnyDialogOpen) return;
+    const timer = setTimeout(handlePhaseComplete, STOP_TALKING_MS);
+    return () => clearTimeout(timer);
+  }, [phase, isAnyDialogOpen, handlePhaseComplete]);
 
   useEffect(() => {
     // 💡 녹음 시작 시점의 questionNumber를 변수에 고정해둡니다.
@@ -326,8 +341,8 @@ export function ExamSessionScreen({
     router.replace("/exam/prepare");
   }, [router, examMode, question]);
 
-  // 현재 index의 문제는 directions~speaking 전 구간에서 아직 "응시 완료"가 아니다.
-  // (녹음/제출은 speaking이 끝나야 이루어지고, 그래야 index가 다음으로 넘어간다.)
+  // 현재 index의 문제는 directions~stop-talking 전 구간에서 아직 "응시 완료"가 아니다.
+  // (녹음/제출은 speaking이 끝나야 이루어지고, stop-talking까지 끝나야 index가 다음으로 넘어간다.)
   // 그래서 팝업에는 index 이전까지, 즉 실제로 답변을 마친 마지막 문제를 보여준다.
   const lastAnsweredQuestion = index > 0 ? questions[index - 1] : null;
 
@@ -345,7 +360,8 @@ export function ExamSessionScreen({
   );
 
   const handleStopClick = useCallback(() => {
-    if (phase === "speaking") {
+    // stop-talking 동안은 방금 녹음한 문제가 아직 index에 반영되지 않아 응시 수에서 빠진다.
+    if (phase === "speaking" || phase === "stop-talking") {
       toast.error("답변을 녹음하는 중에는 중단할 수 없어요. 녹음이 끝난 후 시도해주세요.");
       return;
     }
@@ -355,7 +371,7 @@ export function ExamSessionScreen({
   const handleConfirmTerminate = useCallback(async () => {
     setIsTerminating(true);
     try {
-      // 현재 index의 문제는 아직 답변 제출 전이라(directions~speaking 어느 단계든) 카운트에서 제외하고,
+      // 현재 index의 문제는 아직 답변 제출 전이라(directions~stop-talking 어느 단계든) 카운트에서 제외하고,
       // 실제로 제출까지 끝난 마지막 문제 번호만 보낸다.
       await terminateExam(session.examId, lastAnsweredQuestion?.questionNumber ?? 0);
       trackEvent("exam_terminate", {
@@ -428,9 +444,11 @@ export function ExamSessionScreen({
   const partMeta = getExamPartMeta(question.partNumber);
   const frozenMs = isReadingTime
     ? PART4_READING_TIME_SEC * 1000
-    : isPrepGroup
-      ? question.prepTimeSec * 1000
-      : question.speakTimeSec * 1000;
+    : phase === "stop-talking"
+      ? 0
+      : isPrepGroup
+        ? question.prepTimeSec * 1000
+        : question.speakTimeSec * 1000;
 
   return (
     <div className="flex flex-1 flex-col bg-white">
@@ -583,6 +601,7 @@ export function ExamSessionScreen({
         </p>
       </footer>
 
+      {phase === "stop-talking" && <ExamStopTalkingNotice />}
       {exitConfirmDialog}
       {terminateConfirmDialog}
     </div>
