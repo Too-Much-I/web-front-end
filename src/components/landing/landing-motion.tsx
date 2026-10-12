@@ -8,6 +8,13 @@ export function LandingMotion() {
     if (!element) return;
     const root: HTMLElement = element;
 
+    if (process.env.NODE_ENV === "development") {
+      const background = new URLSearchParams(window.location.search).get(
+        "background",
+      );
+      if (background === "original") root.dataset.background = "original";
+    }
+
     const observers: IntersectionObserver[] = [];
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     if ("IntersectionObserver" in window) {
