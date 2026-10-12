@@ -38,7 +38,7 @@ import {
 } from "@/features/exam/score-scale";
 import { useReanswerSubmission } from "@/features/exam/use-reanswer-submission";
 import { useRevealOnScroll } from "@/features/exam/use-reveal-on-scroll";
-import { jua } from "@/lib/fonts";
+import { siteFont } from "@/lib/fonts";
 import type { ExamQuestionDetail, ExamQuestionFeedback } from "@/types/exam";
 
 function clampPercent(ratio: number): number {
@@ -225,7 +225,7 @@ function ScoreCircleStat({
 function DetailBlock({ title, body }: { title: string; body: string }) {
   return (
     <div className="rounded-2xl bg-sky-50 p-4 ring-1 ring-sky-100 lg:p-5">
-      <p className={`${jua.className} text-sm text-sky-700 lg:text-base`}>
+      <p className={`${siteFont.className} text-sm text-sky-700 lg:text-base`}>
         {title}
       </p>
       <p className="mt-1.5 text-sm leading-relaxed text-sky-900 lg:text-base">
@@ -294,7 +294,9 @@ function ExamModelAnswerTab({ feedback }: { feedback: ExamQuestionFeedback }) {
         </div>
       )}
       {hasModel && hasRecommended && (
-        <p className={`${jua.className} text-sm text-orange-500 lg:text-base`}>
+        <p
+          className={`${siteFont.className} text-sm text-orange-500 lg:text-base`}
+        >
           모범답안은 문제에 맞춰 미리 준비된 예시 답변이고, 추천답안은 내가
           답변한 내용을 다듬어 만든 답변이에요.
         </p>
@@ -320,7 +322,7 @@ function ExamModelAnswerTab({ feedback }: { feedback: ExamQuestionFeedback }) {
         >
           <div className="absolute bottom-3 -left-2.5 h-3 w-2.5 bg-orange-50 [clip-path:polygon(100%_0%,100%_100%,0%_100%)]" />
           <span
-            className={`${jua.className} text-sm text-orange-600 lg:text-base`}
+            className={`${siteFont.className} text-sm text-orange-600 lg:text-base`}
           >
             {active === "model" ? "토선생의 모범답안" : "토선생의 추천답안"}
           </span>
@@ -531,7 +533,7 @@ export function ExamQuestionFeedbackScreen({
               Part {detail.partNumber} · {partMeta.titleKo}
             </p>
             <h1
-              className={`${jua.className} mt-1 text-3xl text-blue-950 sm:text-4xl lg:text-5xl`}
+              className={`${siteFont.className} mt-1 text-3xl text-blue-950 sm:text-4xl lg:text-5xl`}
             >
               문제 {detail.questionNumber}번 피드백
             </h1>
@@ -555,7 +557,7 @@ export function ExamQuestionFeedbackScreen({
         <div className="relative rounded-3xl border-[10px] border-amber-900 bg-emerald-950 px-5 py-6 pb-14 shadow-xl sm:pr-6 sm:pb-6 sm:pl-36 lg:p-10 lg:pl-40">
           <div className="absolute -top-5 left-4 z-20 -rotate-3 rounded-lg bg-amber-400 px-4 py-2 shadow-md">
             <span
-              className={`${jua.className} text-lg text-emerald-950 lg:text-xl`}
+              className={`${siteFont.className} text-lg text-emerald-950 lg:text-xl`}
             >
               이 문제 점수
             </span>
@@ -588,12 +590,12 @@ export function ExamQuestionFeedbackScreen({
                 />
                 <div className="absolute flex flex-col items-center">
                   <span
-                    className={`${jua.className} text-4xl text-amber-50 lg:text-5xl`}
+                    className={`${siteFont.className} text-4xl text-amber-50 lg:text-5xl`}
                   >
                     {detail.score}
                   </span>
                   <span
-                    className={`${jua.className} text-sm text-white/60 lg:text-base`}
+                    className={`${siteFont.className} text-sm text-white/60 lg:text-base`}
                   >
                     / {detail.maxScore}
                   </span>
@@ -687,7 +689,7 @@ export function ExamQuestionFeedbackScreen({
                   세부 지표 토글과 무관하게 항상 보인다. */}
               {scoreDeltaNote && (
                 <span
-                  className={`${jua.className} text-sm lg:text-base ${scoreDeltaNote.className}`}
+                  className={`${siteFont.className} text-sm lg:text-base ${scoreDeltaNote.className}`}
                 >
                   ★ {scoreDeltaNote.text}
                 </span>
@@ -697,7 +699,7 @@ export function ExamQuestionFeedbackScreen({
               >
                 <HintArrow className="h-8 w-10 shrink-0 text-amber-300" />
                 <span
-                  className={`${jua.className} max-w-32 text-sm leading-tight text-amber-200`}
+                  className={`${siteFont.className} max-w-32 text-sm leading-tight text-amber-200`}
                 >
                   그래프를 클릭하면 세부 평가 지표가 보여요
                 </span>
@@ -707,7 +709,7 @@ export function ExamQuestionFeedbackScreen({
 
           <TypedText
             text={detail.feedback.summary}
-            className={`${jua.className} mt-6 text-center text-base leading-relaxed text-white/90 lg:text-lg`}
+            className={`${siteFont.className} mt-6 text-center text-base leading-relaxed text-white/90 lg:text-lg`}
           />
         </div>
       </div>
@@ -755,7 +757,7 @@ export function ExamQuestionFeedbackScreen({
 
             <div className="rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
               <span
-                className={`${jua.className} text-base text-blue-950 lg:text-lg`}
+                className={`${siteFont.className} text-base text-blue-950 lg:text-lg`}
               >
                 내 답변
               </span>
@@ -838,7 +840,7 @@ export function ExamQuestionFeedbackScreen({
         <div className="relative rounded-3xl bg-white p-6 lg:p-8">
           <SketchyDashBorder />
           <span
-            className={`${jua.className} inline-flex items-center gap-1.5 text-base text-blue-950 lg:text-lg`}
+            className={`${siteFont.className} inline-flex items-center gap-1.5 text-base text-blue-950 lg:text-lg`}
           >
             <ThumbsUp className="size-4 text-orange-500" aria-hidden />
             강점
@@ -858,7 +860,7 @@ export function ExamQuestionFeedbackScreen({
         <div className="relative rounded-3xl bg-white p-6 lg:p-8">
           <SketchyDashBorder />
           <span
-            className={`${jua.className} inline-flex items-center gap-1.5 text-base text-blue-950 lg:text-lg`}
+            className={`${siteFont.className} inline-flex items-center gap-1.5 text-base text-blue-950 lg:text-lg`}
           >
             <TriangleAlert className="size-4 text-orange-500" aria-hidden />
             보완 필요
@@ -877,7 +879,9 @@ export function ExamQuestionFeedbackScreen({
       </div>
 
       <div className="mt-6 flex flex-col gap-4 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
-        <span className={`${jua.className} text-base text-blue-950 lg:text-lg`}>
+        <span
+          className={`${siteFont.className} text-base text-blue-950 lg:text-lg`}
+        >
           세부 피드백
         </span>
         <DetailBlock title="발음" body={detail.feedback.pronunciation} />
@@ -894,7 +898,9 @@ export function ExamQuestionFeedbackScreen({
       </div>
 
       <div className="mt-6 rounded-3xl bg-orange-50 p-6 ring-1 ring-orange-100 lg:p-8">
-        <span className={`${jua.className} text-base text-blue-950 lg:text-lg`}>
+        <span
+          className={`${siteFont.className} text-base text-blue-950 lg:text-lg`}
+        >
           실천 과제
         </span>
         <ol className="mt-4 flex flex-col gap-3">

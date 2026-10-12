@@ -5,7 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { jua } from "@/lib/fonts";
+import { siteFont } from "@/lib/fonts";
 import type { ExamCorrectionItem } from "@/types/exam";
 
 type MarkKind = "box" | "underline" | "underline-dashed" | "triangle";
@@ -265,7 +265,7 @@ export function ExamMarkedTranscript({
   return (
     <>
       {correctionItems.length > 0 && (
-        <p className={`${jua.className} text-base text-orange-500`}>
+        <p className={`${siteFont.className} text-base text-orange-500`}>
           형광펜으로 칠해진 부분을 클릭하면 감점 이유를 확인할 수 있어요.
         </p>
       )}
@@ -288,7 +288,7 @@ export function ExamMarkedTranscript({
           className="pointer-events-none absolute top-0 bottom-0 left-8 w-px bg-red-300/60"
         />
         <p
-          className={`${jua.className} relative p-4 pl-4 text-base leading-7 text-zinc-800 sm:text-lg lg:text-xl`}
+          className={`${siteFont.className} relative p-4 pl-4 text-base leading-7 text-zinc-800 sm:text-lg lg:text-xl`}
         >
           {marked}
         </p>

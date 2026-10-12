@@ -13,7 +13,7 @@ import {
 } from "recharts";
 
 import { SketchyDashBorder } from "@/components/exam/sketchy-dash-border";
-import { jua } from "@/lib/fonts";
+import { siteFont } from "@/lib/fonts";
 import { useCountUp } from "@/lib/use-count-up";
 
 const WAVE_BARS = [18, 32, 24, 40, 28, 20, 36, 26, 42, 22, 34, 18];
@@ -209,13 +209,13 @@ export function PhoneDemo() {
                     <div className="flex items-center gap-1">
                       <span className="text-[10px] text-amber-300">★</span>
                       <span
-                        className={`${jua.className} text-xs text-amber-100`}
+                        className={`${siteFont.className} text-xs text-amber-100`}
                       >
                         예상 총점
                       </span>
                     </div>
                     <p
-                      className={`${jua.className} mt-1.5 text-3xl text-amber-50`}
+                      className={`${siteFont.className} mt-1.5 text-3xl text-amber-50`}
                     >
                       {displayScore}
                       <span className="text-sm text-white/50">
@@ -224,7 +224,7 @@ export function PhoneDemo() {
                       </span>
                     </p>
                     <p
-                      className={`${jua.className} mt-0.5 text-[10px] text-amber-200`}
+                      className={`${siteFont.className} mt-0.5 text-[10px] text-amber-200`}
                     >
                       Intermediate High
                     </p>
@@ -240,7 +240,7 @@ export function PhoneDemo() {
                     <div className="mt-3 flex items-center gap-1">
                       <span className="text-[10px] text-amber-300">★</span>
                       <span
-                        className={`${jua.className} text-xs text-amber-100`}
+                        className={`${siteFont.className} text-xs text-amber-100`}
                       >
                         파트별 세부 점수
                       </span>
