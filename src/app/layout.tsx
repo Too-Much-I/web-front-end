@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Jua } from "next/font/google";
+import { siteFont } from "@/lib/fonts";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { AnalyticsGate } from "@/components/analytics-gate";
@@ -10,22 +10,6 @@ import {
   SITE_DESCRIPTION,
   SITE_URL,
 } from "@/lib/site-config";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const jua = Jua({
-  variable: "--font-jua-kr",
-  weight: "400",
-  subsets: ["latin"],
-});
 
 const TITLE = "토선생 - 토익 스피킹 AI 모의고사 채점";
 // 구조화 데이터의 Organization 설명과 같은 문구를 써야 해서 site-config에서 가져온다.
@@ -85,7 +69,7 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
-      className={`${geistSans.variable} ${geistMono.variable} ${jua.variable} h-full antialiased`}
+      className={`${siteFont.variable} ${siteFont.className} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         <script dangerouslySetInnerHTML={{ __html: REM_SCALE_SCRIPT }} />

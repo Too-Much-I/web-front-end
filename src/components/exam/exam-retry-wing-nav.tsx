@@ -3,7 +3,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { jua } from "@/lib/fonts";
+import { siteFont } from "@/lib/fonts";
 
 /** 비교 힌트(pulse + 말풍선)가 자동으로 사라지기까지의 시간. */
 const COMPARE_HINT_DURATION_MS = 8000;
@@ -82,7 +82,7 @@ export function ExamRetryWingNav({
           </div>
           {isHintVisible && (
             <span
-              className={`${jua.className} animate-[hint-pop-in_240ms_ease-out] rounded-xl bg-blue-950 px-3 py-2 text-xs whitespace-nowrap text-white shadow-lg motion-reduce:animate-none lg:text-sm`}
+              className={`${siteFont.className} animate-[hint-pop-in_240ms_ease-out] rounded-xl bg-blue-950 px-3 py-2 text-xs whitespace-nowrap text-white shadow-lg motion-reduce:animate-none lg:text-sm`}
             >
               이전 답변과 비교해 보세요
             </span>

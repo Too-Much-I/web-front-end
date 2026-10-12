@@ -12,7 +12,7 @@ import {
 } from "recharts";
 
 import { getExamPartMeta } from "@/features/exam/part-meta";
-import { jua } from "@/lib/fonts";
+import { siteFont } from "@/lib/fonts";
 import type { ExamPartScores } from "@/types/exam";
 
 const ACCENT = "#fcd34d";
@@ -37,13 +37,17 @@ interface PartScoreDatum {
 function buildChartData(partScores: ExamPartScores): PartScoreDatum[] {
   return ([1, 2, 3, 4, 5] as const).map((partNumber) => {
     const maxScore = PART_MAX_SCORES[partNumber];
-    const score = partScores[`part${partNumber}` as keyof ExamPartScores] ?? null;
+    const score =
+      partScores[`part${partNumber}` as keyof ExamPartScores] ?? null;
     return {
       partNumber,
       partLabel: `Part ${partNumber}`,
       score,
       maxScore,
-      percent: score === null ? 0 : Math.min(100, Math.max(0, (score / maxScore) * 100)),
+      percent:
+        score === null
+          ? 0
+          : Math.min(100, Math.max(0, (score / maxScore) * 100)),
     };
   });
 }
@@ -75,7 +79,9 @@ function AngleTick(chartData: PartScoreDatum[]) {
           fontSize={11}
           fill="#a1a1aa"
         >
-          {datum.score === null ? "미채점" : `${datum.score} / ${datum.maxScore}점`}
+          {datum.score === null
+            ? "미채점"
+            : `${datum.score} / ${datum.maxScore}점`}
         </text>
       </g>
     );
@@ -121,7 +127,9 @@ function RadarTooltip({
     <div className="rounded-lg bg-white px-3 py-2 text-xs shadow-md ring-1 ring-zinc-200">
       <p className="font-semibold text-blue-950">{datum.partLabel}</p>
       <p className="mt-0.5 text-zinc-500">
-        {datum.score === null ? "아직 채점되지 않았어요" : `${datum.score} / ${datum.maxScore}점`}
+        {datum.score === null
+          ? "아직 채점되지 않았어요"
+          : `${datum.score} / ${datum.maxScore}점`}
       </p>
     </div>
   );
@@ -137,8 +145,10 @@ function buildStrengthWeakness(chartData: PartScoreDatum[]) {
     data.map((d) => getExamPartMeta(d.partNumber).titleKo);
 
   return {
-    strengths: highlightCount > 0 ? toLabels(sorted.slice(0, highlightCount)) : [],
-    weaknesses: highlightCount > 0 ? toLabels(sorted.slice(-highlightCount)) : [],
+    strengths:
+      highlightCount > 0 ? toLabels(sorted.slice(0, highlightCount)) : [],
+    weaknesses:
+      highlightCount > 0 ? toLabels(sorted.slice(-highlightCount)) : [],
   };
 }
 
@@ -184,7 +194,7 @@ export function ExamPartScoreRadar({
       {(strengths.length > 0 || weaknesses.length > 0) && (
         <div className="mt-4 grid grid-cols-2 gap-3 rounded-2xl bg-white/10 p-4 ring-1 ring-white/10">
           <div>
-            <p className={`${jua.className} text-xs text-emerald-300`}>
+            <p className={`${siteFont.className} text-xs text-emerald-300`}>
               강점
             </p>
             <p className="mt-1 text-sm font-medium text-white/90">
@@ -192,7 +202,7 @@ export function ExamPartScoreRadar({
             </p>
           </div>
           <div className="border-l border-white/15 pl-3">
-            <p className={`${jua.className} text-xs text-rose-300`}>
+            <p className={`${siteFont.className} text-xs text-rose-300`}>
               보완 필요
             </p>
             <p className="mt-1 text-sm font-medium text-white/90">

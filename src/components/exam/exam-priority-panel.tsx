@@ -4,7 +4,7 @@ import {
   normalizeSeverity,
   type Severity,
 } from "@/components/exam/exam-marked-transcript";
-import { jua } from "@/lib/fonts";
+import { siteFont } from "@/lib/fonts";
 import type { ExamCorrectionItem } from "@/types/exam";
 
 const SEVERITY_ORDER: Severity[] = ["high", "medium", "low"];
@@ -54,7 +54,7 @@ export function ExamPriorityPanel({
   return (
     <div className="flex h-full flex-col gap-4 rounded-3xl bg-white p-5 shadow-md ring-1 ring-zinc-100">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <span className={`${jua.className} text-base text-blue-950`}>
+        <span className={`${siteFont.className} text-base text-blue-950`}>
           {hasIssues ? "수정이 필요해요" : "고칠 부분이 없어요"}
         </span>
         {hasIssues && (
@@ -87,7 +87,7 @@ export function ExamPriorityPanel({
           </div>
           <div className="relative flex-1 rounded-2xl bg-orange-50 p-4 ring-1 ring-orange-100">
             <div className="absolute bottom-3 -left-2.5 h-3 w-2.5 bg-orange-50 [clip-path:polygon(100%_0%,100%_100%,0%_100%)]" />
-            <span className={`${jua.className} text-sm text-orange-600`}>
+            <span className={`${siteFont.className} text-sm text-orange-600`}>
               토선생의 한마디
             </span>
             <p className="mt-1 text-sm leading-relaxed text-zinc-700">

@@ -2,7 +2,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 
 import { ExamTable } from "@/components/exam/exam-table";
-import { jua } from "@/lib/fonts";
+import { siteFont } from "@/lib/fonts";
 import type { ExamQuestionInfo } from "@/types/exam";
 
 /**
@@ -43,13 +43,13 @@ function GridPaperNote({
   return (
     <div>
       {label && (
-        <p className={`${jua.className} mb-2 text-sm lg:text-base ${t.label}`}>
+        <p
+          className={`${siteFont.className} mb-2 text-sm lg:text-base ${t.label}`}
+        >
           {label}
         </p>
       )}
-      <div
-        className={`relative overflow-hidden rounded-2xl ring-1 ${t.box}`}
-      >
+      <div className={`relative overflow-hidden rounded-2xl ring-1 ${t.box}`}>
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -71,7 +71,9 @@ export function ExamQuestionPrompt({
 }) {
   return (
     <div className="mt-6 flex flex-col gap-4 rounded-3xl bg-white p-6 shadow-md ring-1 ring-zinc-100 lg:p-8">
-      <span className={`${jua.className} text-base text-blue-950 lg:text-lg`}>
+      <span
+        className={`${siteFont.className} text-base text-blue-950 lg:text-lg`}
+      >
         문제
       </span>
 
@@ -119,7 +121,7 @@ export function ExamQuestionPrompt({
         <div className="border-l-4 border-orange-400 py-0.5 pl-3.5">
           <p className="text-base leading-relaxed font-medium text-blue-950 lg:text-lg">
             <span
-              className={`${jua.className} mr-1.5 text-lg text-orange-500 lg:text-xl`}
+              className={`${siteFont.className} mr-1.5 text-lg text-orange-500 lg:text-xl`}
             >
               Q.
             </span>

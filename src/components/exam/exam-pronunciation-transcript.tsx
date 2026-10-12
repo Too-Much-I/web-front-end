@@ -9,7 +9,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { jua } from "@/lib/fonts";
+import { siteFont } from "@/lib/fonts";
 import type { SpokenWord } from "@/types/exam";
 
 type WordSeverity = Severity;
@@ -123,7 +123,7 @@ function ScoredWord({
         {errorMeta && (
           <span
             aria-hidden
-            className={`${jua.className} absolute -top-3 -right-1.5 rotate-12 text-sm leading-none`}
+            className={`${siteFont.className} absolute -top-3 -right-1.5 rotate-12 text-sm leading-none`}
             style={{ color: color ?? undefined }}
           >
             {errorMeta.mark}
@@ -156,7 +156,7 @@ export function ExamPronunciationTranscript({
   return (
     <>
       {onWordClick && (
-        <p className={`${jua.className} text-base text-orange-500`}>
+        <p className={`${siteFont.className} text-base text-orange-500`}>
           단어를 클릭하면 그 부분부터 다시 들을 수 있어요.
         </p>
       )}
@@ -179,7 +179,7 @@ export function ExamPronunciationTranscript({
           className="pointer-events-none absolute top-0 bottom-0 left-8 w-px bg-red-300/60"
         />
         <p
-          className={`${jua.className} relative p-4 pl-4 text-base leading-8 text-zinc-800 sm:text-lg lg:text-xl`}
+          className={`${siteFont.className} relative p-4 pl-4 text-base leading-8 text-zinc-800 sm:text-lg lg:text-xl`}
         >
           {spokenWordSequence.map((word, i) => (
             <Fragment key={i}>

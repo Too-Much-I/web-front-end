@@ -31,7 +31,7 @@ import {
   type TargetGradeOption,
 } from "@/features/exam/target-grade";
 import { trackEvent } from "@/lib/analytics";
-import { jua } from "@/lib/fonts";
+import { siteFont } from "@/lib/fonts";
 import { useCountUp } from "@/lib/use-count-up";
 import type { ExamGradingResult } from "@/types/exam";
 
@@ -202,14 +202,14 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
                 <div className="flex items-center gap-1.5">
                   <span className="text-amber-300">★</span>
                   <span
-                    className={`${jua.className} text-xl text-amber-100 lg:text-2xl`}
+                    className={`${siteFont.className} text-xl text-amber-100 lg:text-2xl`}
                   >
                     예상 총점
                   </span>
                 </div>
 
                 <p
-                  className={`${jua.className} mt-4 text-5xl text-amber-50 sm:text-6xl lg:text-7xl`}
+                  className={`${siteFont.className} mt-4 text-5xl text-amber-50 sm:text-6xl lg:text-7xl`}
                 >
                   {displayScore}
                   <span className="text-2xl text-white/50 lg:text-3xl">
@@ -218,7 +218,7 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
                   </span>
                 </p>
                 <p
-                  className={`${jua.className} mt-2 text-base text-amber-200 lg:text-lg`}
+                  className={`${siteFont.className} mt-2 text-base text-amber-200 lg:text-lg`}
                 >
                   {result.levelEstimate}
                 </p>
@@ -233,7 +233,7 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
                 <TypedText
                   text={result.summary}
                   enabled={isBetaNoticeClosed}
-                  className={`${jua.className} mt-6 text-base leading-relaxed text-white/90 lg:text-lg`}
+                  className={`${siteFont.className} mt-6 text-base leading-relaxed text-white/90 lg:text-lg`}
                 />
               </div>
 
@@ -241,7 +241,7 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
                 <div className="flex items-center gap-1.5">
                   <span className="text-amber-300">★</span>
                   <span
-                    className={`${jua.className} text-xl text-amber-100 lg:text-2xl`}
+                    className={`${siteFont.className} text-xl text-amber-100 lg:text-2xl`}
                   >
                     파트별 세부 점수
                   </span>
