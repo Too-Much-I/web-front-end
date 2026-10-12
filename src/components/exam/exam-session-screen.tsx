@@ -239,9 +239,20 @@ export function ExamSessionScreen({
     phase === "speak-cue" && !isAnyDialogOpen,
   );
 
+  // 다이얼로그로 멈췄다가 닫혀도 안내 시간을 처음부터 다시 세지 않도록, 처음 진입한 시각 기준의
+  // 마감 시각을 기억해 두고 남은 시간만큼만 다시 예약한다.
+  const stopTalkingDeadlineRef = useRef<number | null>(null);
+
   useEffect(() => {
-    if (phase !== "stop-talking" || isAnyDialogOpen) return;
-    const timer = setTimeout(handlePhaseComplete, STOP_TALKING_MS);
+    if (phase !== "stop-talking") {
+      stopTalkingDeadlineRef.current = null;
+      return;
+    }
+    stopTalkingDeadlineRef.current ??= Date.now() + STOP_TALKING_MS;
+    if (isAnyDialogOpen) return;
+
+    const remainingMs = Math.max(0, stopTalkingDeadlineRef.current - Date.now());
+    const timer = setTimeout(handlePhaseComplete, remainingMs);
     return () => clearTimeout(timer);
   }, [phase, isAnyDialogOpen, handlePhaseComplete]);
 
@@ -341,10 +352,12 @@ export function ExamSessionScreen({
     router.replace("/exam/prepare");
   }, [router, examMode, question]);
 
-  // 현재 index의 문제는 directions~stop-talking 전 구간에서 아직 "응시 완료"가 아니다.
-  // (녹음/제출은 speaking이 끝나야 이루어지고, stop-talking까지 끝나야 index가 다음으로 넘어간다.)
-  // 그래서 팝업에는 index 이전까지, 즉 실제로 답변을 마친 마지막 문제를 보여준다.
-  const lastAnsweredQuestion = index > 0 ? questions[index - 1] : null;
+  // 현재 index의 문제는 directions~speaking 구간에서 아직 "응시 완료"가 아니다.
+  // (녹음/제출은 speaking이 끝나야 이루어진다.) 그래서 팝업에는 index 이전까지, 즉 실제로
+  // 답변을 마친 마지막 문제를 보여준다. 단 stop-talking은 speaking이 끝난 뒤라 현재 문제까지
+  // 답변을 마친 상태다. (index는 stop-talking까지 끝나야 다음으로 넘어간다.)
+  const lastAnsweredQuestion =
+    phase === "stop-talking" ? questions[index] : index > 0 ? questions[index - 1] : null;
 
   const exitConfirmDialog = showExitConfirm && (
     <ExamExitConfirmPopup
