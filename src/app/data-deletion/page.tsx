@@ -39,7 +39,7 @@ const PRIVACY_OFFICER_NAME = "송성환";
 
 // 앱 방침(`src/app/app-settings/privacy/page.tsx`)의 시행일과 별개로 관리한다.
 // 본문이 다른 문서이므로 방침 개정일에 자동으로 끌려가지 않게 한다.
-const EFFECTIVE_DATE = "2026년 10월 8일";
+const EFFECTIVE_DATE = "2026년 10월 21일";
 
 // 앱 방침 제2조·제10조의 같은 이름 상수와 반드시 같은 값이어야 하고, 그 값은
 // 각 프로젝트 콘솔의 데이터 보존 설정과 같아야 한다. 셋 중 하나만 고치면
@@ -47,6 +47,8 @@ const EFFECTIVE_DATE = "2026년 10월 8일";
 const AMPLITUDE_RETENTION = "24개월";
 const FIREBASE_EVENT_RETENTION = "2개월";
 const FIREBASE_USER_RETENTION = "14개월";
+// 앱 방침 제2조의 결제 기록 보관 기간(전자상거래법 시행령 제6조)과 같은 값이어야 한다.
+const PAYMENT_RECORD_RETENTION = "5년";
 
 // 앱 설정 화면의 실제 섹션·버튼 문구. 라벨이 바뀌면 이 페이지의 안내가 곧바로
 // 틀린 말이 되므로(사용자가 그 문구를 화면에서 찾지 못한다) 앱과 함께 고친다.
@@ -225,6 +227,19 @@ export default function DataDeletionPage() {
             요청·완료 시각): 동의 및 삭제 처리 사실 확인을 위해 탈퇴일부터 3년
           </li>
           <li>
+            법령에 따라 보존해야 하는 결제·재화 공급 등의 최소 거래 기록(구매
+            계정 연결 ID, 구매한 이용권, 스토어 거래 식별자, 결제·환불 시각):
+            「전자상거래 등에서의 소비자보호에 관한 법률」에 따라 탈퇴일부터{" "}
+            {PAYMENT_RECORD_RETENTION}
+          </li>
+          <li>
+            인앱 결제 검증을 맡은 RevenueCat에 보낸 결제·기기 정보(구매 계정
+            연결 ID, 구매한 이용권, 결제 금액 및 통화, 스토어 거래 식별자와
+            영수증 정보, 결제·환불 시각, 기기·운영체제 정보, 앱 버전, 접속 IP
+            주소): 탈퇴 후 미처리 결제·환불 등 필요한 확인을 마치면 삭제하며,
+            최대 90일 이내
+          </li>
+          <li>
             로그인 인증 정보 정리 작업 기록(Firebase UID 포함): 정리 완료 후
             30일 이내 제거
           </li>
@@ -252,11 +267,11 @@ export default function DataDeletionPage() {
             식별자로만 집계됩니다.
           </li>
           <li>
-            광고 성과 측정 기록(Firebase Analytics: 회원가입 완료·모의고사 완료
-            등의 발생 시점, Android 광고 ID): 이벤트 단위 데이터는 수집일로부터{" "}
-            {FIREBASE_EVENT_RETENTION}, 사용자 단위 데이터는 마지막 이용일로부터{" "}
-            {FIREBASE_USER_RETENTION}. 이 기록은 회원 정보와 연결하여 보내지
-            않습니다.
+            광고 성과 측정 기록(Firebase Analytics: 회원가입 완료·모의고사
+            완료·이용권 결제 완료 등의 발생 시점과 결제 금액, Android 광고 ID):
+            이벤트 단위 데이터는 수집일로부터 {FIREBASE_EVENT_RETENTION}, 사용자
+            단위 데이터는 마지막 이용일로부터 {FIREBASE_USER_RETENTION}. 이
+            기록은 회원 정보와 연결하여 보내지 않습니다.
           </li>
           <li>
             채점 과정에서 외부 사업자(Azure AI Speech, OpenAI)에게 전송된 음성
