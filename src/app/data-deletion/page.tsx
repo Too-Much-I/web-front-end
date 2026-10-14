@@ -49,7 +49,6 @@ const FIREBASE_EVENT_RETENTION = "2개월";
 const FIREBASE_USER_RETENTION = "14개월";
 // 앱 방침 제2조의 결제 기록 보관 기간(전자상거래법 시행령 제6조)과 같은 값이어야 한다.
 const PAYMENT_RECORD_RETENTION = "5년";
-const PAYMENT_DISPUTE_RETENTION = "3년";
 
 // 앱 설정 화면의 실제 섹션·버튼 문구. 라벨이 바뀌면 이 페이지의 안내가 곧바로
 // 틀린 말이 되므로(사용자가 그 문구를 화면에서 찾지 못한다) 앱과 함께 고친다.
@@ -228,12 +227,14 @@ export default function DataDeletionPage() {
             요청·완료 시각): 동의 및 삭제 처리 사실 확인을 위해 탈퇴일부터 3년
           </li>
           <li>
-            이용권 결제 기록(구매 계정 연결 ID, 구매한 이용권, 스토어 거래
-            식별자, 결제·환불 시각, 이용권 이용 기간): 「전자상거래 등에서의
-            소비자보호에 관한 법률」에 따라 대금결제·재화 공급 및 청약철회에
-            관한 기록은 {PAYMENT_RECORD_RETENTION}, 소비자 불만·분쟁처리에 관한
-            기록은 {PAYMENT_DISPUTE_RETENTION}. 인앱 결제 검증을 맡은
-            RevenueCat에 보낸 같은 결제 기록도 이 기간 동안 보관 후 삭제합니다.
+            법령에 따라 보존해야 하는 결제·재화 공급 등의 최소 거래 기록(구매
+            계정 연결 ID, 구매한 이용권, 스토어 거래 식별자, 결제·환불 시각):
+            「전자상거래 등에서의 소비자보호에 관한 법률」에 따라 탈퇴일부터{" "}
+            {PAYMENT_RECORD_RETENTION}
+          </li>
+          <li>
+            인앱 결제 검증을 맡은 RevenueCat의 고객 정보: 탈퇴 후 미처리
+            결제·환불 등 필요한 확인을 마치면 삭제
           </li>
           <li>
             로그인 인증 정보 정리 작업 기록(Firebase UID 포함): 정리 완료 후
