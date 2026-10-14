@@ -233,8 +233,10 @@ export default function DataDeletionPage() {
             {PAYMENT_RECORD_RETENTION}
           </li>
           <li>
-            인앱 결제 검증을 맡은 RevenueCat의 고객 정보: 탈퇴 후 미처리
-            결제·환불 등 필요한 확인을 마치면 삭제
+            인앱 결제 검증을 맡은 RevenueCat에 보낸 결제·기기 정보(구매 계정
+            연결 ID, 구매한 이용권, 결제 금액 및 통화, 스토어 거래 식별자와
+            영수증 정보, 결제·환불 시각, 기기·운영체제 정보, 앱 버전, 접속 IP
+            주소): 탈퇴 후 미처리 결제·환불 등 필요한 확인을 마치면 삭제
           </li>
           <li>
             로그인 인증 정보 정리 작업 기록(Firebase UID 포함): 정리 완료 후
