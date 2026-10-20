@@ -51,6 +51,13 @@ const nextConfig: NextConfig = {
     const noIndex = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
 
     return [
+      // public/ 이미지는 30일 동안 서버에 다시 묻지 않고 브라우저 캐시를 쓴다(기본값은 max-age=0).
+      // 그래서 이미지를 바꿀 땐 파일 이름도 바꿔야 하고, scripts/check-images.mjs가 PR에서 이를 검사한다.
+      // /_next/static/은 Next가 이미 1년 immutable로 내려주므로 제외한다.
+      {
+        source: "/:path((?!_next/).+\\.(?:png|jpe?g|webp|avif|gif|svg))",
+        headers: [{ key: "Cache-Control", value: "public, max-age=2592000" }],
+      },
       {
         source: "/exam/:path*",
         headers: noIndex,
