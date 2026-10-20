@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { ExamStartButton } from "@/components/exam/exam-start-button";
 
 const NAV_LINKS = [
   { href: "/guide/toeic-speaking-parts", label: "토익 스피킹 가이드" },
@@ -47,10 +46,6 @@ export function SiteHeader({ activePath }: { activePath?: string }) {
           );
         })}
       </nav>
-
-      <ExamStartButton className="h-11 shrink-0 rounded-full bg-orange-500 px-6 text-base text-white hover:bg-orange-600 lg:h-12 lg:px-7 lg:text-lg">
-        시작하기
-      </ExamStartButton>
     </header>
   );
 }

@@ -30,6 +30,23 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // 웹 모의고사는 더 이상 지원하지 않는다. 응시는 앱에서 회원가입·이용권으로만 하므로
+  // 예전 링크·북마크로 들어온 사람을 앱 다운로드 안내가 있는 랜딩으로 돌려보낸다.
+  // 다시 열 가능성을 남기려고 영구(308)가 아닌 임시(307) 리다이렉트로 둔다.
+  async redirects() {
+    return [
+      {
+        source: "/exam",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/exam/:path*",
+        destination: "/",
+        permanent: false,
+      },
+    ];
+  },
   async headers() {
     const noIndex = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
 
