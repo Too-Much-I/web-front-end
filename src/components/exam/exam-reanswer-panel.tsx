@@ -103,7 +103,7 @@ export function ExamReanswerPanel({
       {!isRecording && !recordedBlob && (
         <div className="flex items-center gap-1">
           <Image
-            src="/mascots/rabbit_face.png"
+            src="/mascots/rabbit_face.webp"
             alt=""
             width={36}
             height={36}

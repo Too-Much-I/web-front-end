@@ -41,7 +41,7 @@ export default function ToeicSpeakingPartsGuidePage() {
     <GuidePageLayout>
       <section className="flex flex-col items-center gap-4 text-center">
         <Image
-          src="/mascots/rabbit_teacher.png"
+          src="/mascots/rabbit_teacher.webp"
           alt="토선생 캐릭터"
           width={128}
           height={128}

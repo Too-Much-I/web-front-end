@@ -102,7 +102,7 @@ export function NewsletterPopup() {
       {/* 카드 위로 빼꼼 올라온 편지 든 토끼 */}
       <div className="pointer-events-none absolute -top-11 right-5 h-20 w-20 animate-[mascot-bob_2.8s_ease-in-out_infinite] motion-reduce:animate-none sm:-top-12 sm:h-24 sm:w-24">
         <Image
-          src="/mascots/mail.png"
+          src="/mascots/mail.webp"
           alt="편지를 든 토선생 캐릭터"
           fill
           sizes="96px"

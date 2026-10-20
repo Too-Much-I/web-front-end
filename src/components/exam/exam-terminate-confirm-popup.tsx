@@ -40,7 +40,7 @@ export function ExamTerminateConfirmPopup({
 
         <div className="relative h-28 w-28 shrink-0">
           <Image
-            src="/mascots/scoring.png"
+            src="/mascots/scoring.webp"
             alt="필기하는 고양이 캐릭터"
             fill
             sizes="112px"

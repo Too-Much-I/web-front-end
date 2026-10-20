@@ -14,7 +14,7 @@ export default function AppContactPage() {
     <main className="px-screen mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-6 py-12 text-center">
       <div className="relative h-40 w-40 sm:h-48 sm:w-48">
         <Image
-          src="/mascots/mail.png"
+          src="/mascots/mail.webp"
           alt="편지를 든 토선생 캐릭터"
           fill
           sizes="200px"

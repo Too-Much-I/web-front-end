@@ -119,7 +119,7 @@ export function ExamFeedbackSurvey({
         className: "toast-face-icon",
         icon: (
           <Image
-            src="/mascots/rabbit_face.png"
+            src="/mascots/rabbit_face.webp"
             alt=""
             width={40}
             height={40}
@@ -181,7 +181,7 @@ export function ExamFeedbackSurvey({
             )}
           >
             <Image
-              src={isPopping ? "/mascots/pop_gift.png" : "/mascots/gift.png"}
+              src={isPopping ? "/mascots/pop_gift.png" : "/mascots/gift.webp"}
               alt="선물 상자"
               fill
               sizes={isPopping ? "208px" : "96px"}
@@ -222,7 +222,7 @@ export function ExamFeedbackSurvey({
 
         <div className="relative mx-auto mt-2 h-16 w-full max-w-md sm:h-24 lg:h-28 lg:max-w-lg">
           <Image
-            src={submitted ? "/mascots/smile.png" : "/mascots/please.png"}
+            src={submitted ? "/mascots/smile.webp" : "/mascots/please.webp"}
             alt={
               submitted
                 ? "웃고 있는 토선생 캐릭터들"

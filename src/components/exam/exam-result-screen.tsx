@@ -41,11 +41,11 @@ const TOTAL_QUESTION_COUNT = [1, 2, 3, 4, 5].flatMap(
 ).length;
 
 const PART_MASCOTS = [
-  { src: "/mascots/rabbit.png", alt: "토끼 캐릭터" },
-  { src: "/mascots/book.png", alt: "책을 든 거북이 캐릭터" },
-  { src: "/mascots/mike.png", alt: "마이크를 든 앵무새 캐릭터" },
-  { src: "/mascots/scoring.png", alt: "필기하는 고양이 캐릭터" },
-  { src: "/mascots/books.png", alt: "쌓여있는 책들" },
+  { src: "/mascots/rabbit.webp", alt: "토끼 캐릭터" },
+  { src: "/mascots/book.webp", alt: "책을 든 거북이 캐릭터" },
+  { src: "/mascots/mike.webp", alt: "마이크를 든 앵무새 캐릭터" },
+  { src: "/mascots/scoring.webp", alt: "필기하는 고양이 캐릭터" },
+  { src: "/mascots/books.webp", alt: "쌓여있는 책들" },
 ];
 
 export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
@@ -101,8 +101,8 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
     .filter((part) => part.solvedQuestionNumbers.length > 0);
   const mascot =
     scorePercent > 50
-      ? { src: "/mascots/good_rabbit.png", alt: "만족스러워하는 토끼 캐릭터" }
-      : { src: "/mascots/hmm_rabbit.png", alt: "고민하는 토끼 캐릭터" };
+      ? { src: "/mascots/good_rabbit.webp", alt: "만족스러워하는 토끼 캐릭터" }
+      : { src: "/mascots/hmm_rabbit.webp", alt: "고민하는 토끼 캐릭터" };
 
   // 모바일 등 지원 환경에서는 OS 공유 시트를 띄우고, 미지원 환경에서는 링크를 복사한다.
   // 링크에 examId가 담기므로 받은 사람은 이 리포트를 그대로 볼 수 있다.
@@ -153,7 +153,7 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
                 aria-label="BETA 안내 보기"
               >
                 <Image
-                  src="/mascots/beta.png"
+                  src="/mascots/beta.webp"
                   alt="BETA"
                   width={88}
                   height={88}
@@ -422,7 +422,7 @@ export function ExamResultScreen({ result }: { result: ExamGradingResult }) {
 
             <div className="relative h-16 w-16 animate-[gift-wiggle_2.4s_ease-in-out_infinite] motion-reduce:animate-none sm:h-20 sm:w-20">
               <Image
-                src="/mascots/gift.png"
+                src="/mascots/gift.webp"
                 alt="선물 상자"
                 fill
                 sizes="80px"

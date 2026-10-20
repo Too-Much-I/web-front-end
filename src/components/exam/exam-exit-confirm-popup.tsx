@@ -35,7 +35,7 @@ export function ExamExitConfirmPopup({
 
         <div className="relative h-28 w-28 shrink-0">
           <Image
-            src="/mascots/shocked_rabbit.png"
+            src="/mascots/shocked_rabbit.webp"
             alt="놀란 토끼 캐릭터"
             fill
             sizes="112px"

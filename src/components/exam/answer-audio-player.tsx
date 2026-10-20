@@ -327,7 +327,7 @@ export function AnswerAudioPlayer({
 
         {currentTime > 0 && (
           <Image
-            src="/mascots/speaking_rabbit_v2.png"
+            src="/mascots/speaking_rabbit_v2.webp"
             alt="말하는 토끼 캐릭터"
             width={rabbitSize}
             height={rabbitSize}

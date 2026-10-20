@@ -42,7 +42,7 @@ export function AppUpdateRequiredScreen() {
       >
         <div className="mb-7 flex size-44 items-center justify-center rounded-full bg-orange-100/70 sm:size-48 md:size-52 lg:size-56 xl:size-60">
           <Image
-            src="/mascots/hmm_rabbit_tight.png"
+            src="/mascots/hmm_rabbit_tight.webp"
             alt="땀을 흘리는 토끼 선생님"
             width={311}
             height={512}

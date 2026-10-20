@@ -53,7 +53,7 @@ export function ErrorFallbackScreen({
 
       <div className="relative z-10 -mt-2 w-[130px] sm:-mt-4 sm:w-[160px] md:w-[180px] lg:w-[200px]">
         <Image
-          src="/mascots/error.png"
+          src="/mascots/error.webp"
           alt="눈이 핑핑 도는 토끼 캐릭터"
           width={800}
           height={1372}
