@@ -375,7 +375,7 @@ export function MicTestPanel({ onVerified }: { onVerified: () => void }) {
         {phase === "reviewing" ? (
           <div className="flex flex-col items-center gap-3">
             <Image
-              src="/mascots/mike_test_ok.png"
+              src="/mascots/mike_test_ok.webp"
               alt="마이크 테스트 성공"
               width={320}
               height={176}

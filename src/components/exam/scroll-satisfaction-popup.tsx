@@ -59,7 +59,7 @@ export function ScrollSatisfactionPopup({
         >
           <div className="relative h-12 w-12 shrink-0 animate-[gift-wiggle_2.4s_ease-in-out_infinite]">
             <Image
-              src="/mascots/gift.png"
+              src="/mascots/gift.webp"
               alt="선물 상자"
               fill
               sizes="48px"

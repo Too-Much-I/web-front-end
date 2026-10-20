@@ -31,10 +31,10 @@ const SPEAKING_TIPS = [
 ];
 
 const MASCOTS = [
-  { src: "/mascots/waiting_rabbit.png", alt: "말풍선을 든 토끼 캐릭터" },
-  { src: "/mascots/waiting_cat.png", alt: "시계를 든 고양이 캐릭터" },
-  { src: "/mascots/waiting_turtle.png", alt: "달력을 든 거북이 캐릭터" },
-  { src: "/mascots/waiting_bird.png", alt: "TOEIC Speaking 팻말을 든 앵무새 캐릭터" },
+  { src: "/mascots/waiting_rabbit.webp", alt: "말풍선을 든 토끼 캐릭터" },
+  { src: "/mascots/waiting_cat.webp", alt: "시계를 든 고양이 캐릭터" },
+  { src: "/mascots/waiting_turtle.webp", alt: "달력을 든 거북이 캐릭터" },
+  { src: "/mascots/waiting_bird.webp", alt: "TOEIC Speaking 팻말을 든 앵무새 캐릭터" },
 ];
 
 /**

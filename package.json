@@ -10,7 +10,9 @@
     "test": "vitest run",
     "lint": "eslint",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "images:webp": "node scripts/images-to-webp.mjs",
+    "images:check": "node scripts/check-images.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -44,6 +46,7 @@
     "eslint-config-next": "16.2.9",
     "prettier": "^3.9.4",
     "prettier-plugin-tailwindcss": "^0.8.0",
+    "sharp": "0.34.5",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "3.2.4",

@@ -304,7 +304,7 @@ function ExamModelAnswerTab({ feedback }: { feedback: ExamQuestionFeedback }) {
       <div className="flex items-end gap-3">
         <div className="relative h-20 w-20 shrink-0 sm:h-24 sm:w-24">
           <Image
-            src="/mascots/rabbit_teacher.png"
+            src="/mascots/rabbit_teacher.webp"
             alt="토선생 캐릭터"
             fill
             sizes="96px"
@@ -364,8 +364,8 @@ export function ExamQuestionFeedbackScreen({
   );
   const isAboveHalf = scorePercent > 50;
   const mascot = isAboveHalf
-    ? { src: "/mascots/good_rabbit.png", alt: "만족스러워하는 토끼 캐릭터" }
-    : { src: "/mascots/hmm_rabbit.png", alt: "고민하는 토끼 캐릭터" };
+    ? { src: "/mascots/good_rabbit.webp", alt: "만족스러워하는 토끼 캐릭터" }
+    : { src: "/mascots/hmm_rabbit.webp", alt: "고민하는 토끼 캐릭터" };
   const [isBetaTooltipOpen, setIsBetaTooltipOpen] = useState(false);
   const [answerPlaybackTime, setAnswerPlaybackTime] = useState(0);
   const [showSubScores, setShowSubScores] = useState(false);
@@ -511,7 +511,7 @@ export function ExamQuestionFeedbackScreen({
               aria-label="BETA 안내 보기"
             >
               <Image
-                src="/mascots/beta.png"
+                src="/mascots/beta.webp"
                 alt="BETA"
                 width={72}
                 height={72}
@@ -796,7 +796,7 @@ export function ExamQuestionFeedbackScreen({
                   <div className="flex flex-col items-center justify-center gap-2 rounded-2xl bg-zinc-50 p-6 text-center ring-1 ring-zinc-100">
                     <div className="relative h-16 w-16 shrink-0">
                       <Image
-                        src="/mascots/hmm_rabbit.png"
+                        src="/mascots/hmm_rabbit.webp"
                         alt="응답이 감지되지 않았음을 안내하는 캐릭터"
                         fill
                         sizes="64px"

@@ -1,0 +1,35 @@
+name: Image Check
+
+# public/에 PNG·JPG가 새로 들어오거나 용량이 큰 이미지가 들어오면 PR을 실패시킨다.
+# 규칙은 scripts/image-policy.mjs, 고치는 방법은 `pnpm images:webp`.
+on:
+  pull_request:
+    paths:
+      - "public/**"
+
+# 저장소를 읽기만 하므로 토큰 권한을 최소로 둔다.
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # git과 파일 시스템만 쓰므로 의존성 설치가 필요 없다.
+      - name: Check images
+        # 브랜치 이름을 셸 스크립트에 직접 끼워 넣지 않고 환경 변수로 넘긴다.
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: node scripts/check-images.mjs "origin/$BASE_REF"

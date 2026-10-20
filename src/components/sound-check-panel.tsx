@@ -97,7 +97,7 @@ export function SoundCheckPanel({ onCompleted }: { onCompleted: () => void }) {
           className="flex items-center justify-center"
         >
           <Image
-            src={showQuietNotice ? "/mascots/shh.png" : "/mascots/sound_check.png"}
+            src={showQuietNotice ? "/mascots/shh.webp" : "/mascots/sound_check.webp"}
             alt={showQuietNotice ? "조용한 환경에서 응시해주세요" : "사운드 체크"}
             width={400}
             height={208}

@@ -18,7 +18,7 @@ export default function NotFound() {
 
       <div className="relative z-10 -mt-4 w-[150px] sm:-mt-6 sm:w-[180px] md:w-[210px] lg:w-[240px]">
         <Image
-          src="/mascots/404.png"
+          src="/mascots/404.webp"
           alt="지도를 보며 길을 찾는 토끼 캐릭터"
           width={800}
           height={1281}

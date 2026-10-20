@@ -99,7 +99,7 @@ export function BetaNoticePopup({
         </button>
 
         <Image
-          src="/mascots/beta.png"
+          src="/mascots/beta.webp"
           alt="BETA"
           width={112}
           height={112}

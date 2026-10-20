@@ -293,7 +293,7 @@ function ScoreAndAnswerDeck({
             <div className="flex flex-col items-center gap-2 rounded-2xl bg-zinc-50 p-6 text-center ring-1 ring-zinc-100">
               <div className="relative h-16 w-16">
                 <Image
-                  src="/mascots/hmm_rabbit.png"
+                  src="/mascots/hmm_rabbit.webp"
                   alt=""
                   aria-hidden
                   fill
@@ -396,7 +396,7 @@ function ReanswerCta({
       <div className="flex items-center gap-3">
         <div className="relative h-16 w-16 shrink-0">
           <Image
-            src="/mascots/rabbit_face.png"
+            src="/mascots/rabbit_face.webp"
             alt=""
             aria-hidden
             fill

@@ -131,7 +131,7 @@ export function PhoneDemo() {
       >
         <div className="relative z-10 hidden w-36 shrink-0 -translate-y-6 -scale-x-100 sm:block md:w-44 lg:w-52">
           <Image
-            src="/mascots/rabbit.png"
+            src="/mascots/rabbit.webp"
             alt="토선생 토끼가 핸드폰을 가리키고 있어요"
             width={496}
             height={743}
@@ -347,7 +347,7 @@ export function PhoneDemo() {
                       </div>
                       <div className="absolute -top-2 right-1.5 z-10 size-9">
                         <Image
-                          src="/mascots/mike.png"
+                          src="/mascots/mike.webp"
                           alt="마이크를 든 앵무새 캐릭터"
                           fill
                           sizes="36px"

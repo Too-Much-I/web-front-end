@@ -78,7 +78,7 @@ export function ExamPriorityPanel({
         <div className="flex items-end gap-3">
           <div className="relative h-20 w-20 shrink-0 sm:h-24 sm:w-24">
             <Image
-              src="/mascots/rabbit_teacher.png"
+              src="/mascots/rabbit_teacher.webp"
               alt="토선생 캐릭터"
               fill
               sizes="96px"

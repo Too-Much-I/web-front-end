@@ -374,7 +374,7 @@ export function ExamTutorialPanel({
       {stage === "intro" && (
         <div className="flex flex-col items-center gap-5 py-2 text-center">
           <Image
-            src="/mascots/rabbit_teacher.png"
+            src="/mascots/rabbit_teacher.webp"
             alt=""
             width={240}
             height={240}
@@ -481,7 +481,7 @@ export function ExamTutorialPanel({
       {stage === "done" && (
         <div className="flex flex-col items-center gap-5 py-2 text-center">
           <Image
-            src="/mascots/good_rabbit.png"
+            src="/mascots/good_rabbit.webp"
             alt=""
             width={240}
             height={240}
