@@ -29,11 +29,10 @@ const newRasterFiles = () => {
   const onMain = new Set(
     execFileSync(
       "git",
-      ["ls-tree", "-r", "--name-only", "origin/main", "public"],
-      {
-        encoding: "utf8",
-      },
-    ).split("\n"),
+      // -z: 한글 등 비ASCII 경로를 따옴표로 감싸지 않고 그대로 받는다.
+      ["ls-tree", "-r", "-z", "--name-only", "origin/main", "public"],
+      { encoding: "utf8" },
+    ).split("\0"),
   );
   return walk("public").filter(
     (path) =>

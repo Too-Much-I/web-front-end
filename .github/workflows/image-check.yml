@@ -7,6 +7,10 @@ on:
     paths:
       - "public/**"
 
+# 저장소를 읽기만 하므로 토큰 권한을 최소로 둔다.
+permissions:
+  contents: read
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -25,4 +29,7 @@ jobs:
 
       # git과 파일 시스템만 쓰므로 의존성 설치가 필요 없다.
       - name: Check images
-        run: node scripts/check-images.mjs "origin/${{ github.base_ref }}"
+        # 브랜치 이름을 셸 스크립트에 직접 끼워 넣지 않고 환경 변수로 넘긴다.
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: node scripts/check-images.mjs "origin/$BASE_REF"

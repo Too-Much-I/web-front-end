@@ -20,6 +20,8 @@ const diff = execFileSync(
     "diff",
     "--name-status",
     "--diff-filter=AMR",
+    // -z: 한글 등 비ASCII 경로를 따옴표·8진수로 감싸지 않고 그대로 받는다.
+    "-z",
     `${base}...HEAD`,
     "--",
     "public",
@@ -27,13 +29,15 @@ const diff = execFileSync(
   { encoding: "utf8" },
 );
 
-const changed = diff
-  .split("\n")
-  .filter(Boolean)
-  .map((line) => {
-    const [status, ...paths] = line.split("\t");
-    return { status: status[0], path: paths.at(-1) };
-  });
+// -z 출력은 "상태\0경로\0"이고, 이름 변경(R)만 "상태\0옛 경로\0새 경로\0"이다.
+const fields = diff.split("\0").filter(Boolean);
+const changed = [];
+for (let i = 0; i < fields.length;) {
+  const status = fields[i][0];
+  const width = status === "R" ? 2 : 1;
+  changed.push({ status, path: fields[i + width] });
+  i += width + 1;
+}
 
 const errors = [];
 
@@ -47,7 +51,8 @@ const usedOnBase = (path) =>
 for (const { status, path } of changed) {
   if (!IMAGE_EXT.test(path)) continue;
 
-  if (status === "M" || (status === "A" && usedOnBase(path))) {
+  // 추가(A)나 이름 변경(R)이라도 예전에 쓰던 이름이면 같은 문제가 생긴다.
+  if (status === "M" || usedOnBase(path)) {
     errors.push(
       `${path}: 이미 쓰던 이름이에요. 브라우저 캐시 때문에 옛 이미지가 보일 수 있으니 새 이름(예: -v2)으로 올리고 참조 경로도 바꿔 주세요.`,
     );
