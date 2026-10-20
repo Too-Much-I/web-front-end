@@ -7,7 +7,7 @@ export interface ExamPartDirections {
 
 export const EXAM_PART_DIRECTIONS: Record<number, ExamPartDirections> = {
   1: {
-    title: "Questions 1–2 : Read a text aloud",
+    title: "Questions 1-2 : Read a text aloud",
     lines: [
       "Directions: In this part of the test, you will read aloud the text on the screen.",
       "You will have 45 seconds to prepare.",
@@ -16,7 +16,7 @@ export const EXAM_PART_DIRECTIONS: Record<number, ExamPartDirections> = {
     audioUrl: "/assets/audio/Part1_Directions.wav",
   },
   2: {
-    title: "Questions 3–4 : Describe a picture",
+    title: "Questions 3-4 : Describe a picture",
     lines: [
       "Directions: In this part of the test, you will describe the picture on your screen in as much detail as you can. You will have 45 seconds to prepare your response.",
       "Then you will have 30 seconds to speak about the picture.",
