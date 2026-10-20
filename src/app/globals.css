@@ -378,6 +378,19 @@
   html {
     @apply font-sans;
   }
+  /*
+   * 페이지 스크롤바만 OS 기본 색으로 튀어서 화면 톤과 어긋나 보인다.
+   * 스크롤 자체는 그대로 두고 막대만 숨긴다.
+   */
+  html,
+  body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /**

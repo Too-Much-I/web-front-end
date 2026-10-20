@@ -15,7 +15,7 @@ interface PartGuideCopy {
 
 const PART_GUIDE_COPY: Record<number, PartGuideCopy> = {
   1: {
-    questionRange: "1–2번",
+    questionRange: "1~2번",
     typeNameKo: "지문 소리 내어 읽기",
     prepTimeLabel: "45초",
     answerTimeLabel: "45초",
@@ -24,7 +24,7 @@ const PART_GUIDE_COPY: Record<number, PartGuideCopy> = {
     tip: "발음·억양·강세만 평가하니, 빠르게 읽기보다 끊어 읽기와 문장 끝 억양에 집중하세요.",
   },
   2: {
-    questionRange: "3–4번",
+    questionRange: "3~4번",
     typeNameKo: "사진 묘사하기",
     prepTimeLabel: "45초",
     answerTimeLabel: "30초",
@@ -33,7 +33,7 @@ const PART_GUIDE_COPY: Record<number, PartGuideCopy> = {
     tip: "확신 없는 세부 묘사에 매달리기보다, 문장을 이어 붙일 수 있는 부분부터 말하는 게 유리해요.",
   },
   3: {
-    questionRange: "5–7번",
+    questionRange: "5~7번",
     typeNameKo: "듣고 질문에 답하기",
     prepTimeLabel: "3초",
     answerTimeLabel: "15초 (5·6번) · 30초 (7번)",
@@ -42,7 +42,7 @@ const PART_GUIDE_COPY: Record<number, PartGuideCopy> = {
     tip: "5·6번은 한두 문장으로 짧게, 7번은 이유와 예시를 붙여 30초를 채우는 구성이 무난해요.",
   },
   4: {
-    questionRange: "8–10번",
+    questionRange: "8~10번",
     typeNameKo: "제공된 정보로 답하기",
     prepTimeLabel: "45초 (자료 읽기) + 3초",
     answerTimeLabel: "15초 (8·9번) · 30초 (10번)",
