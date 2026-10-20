@@ -64,7 +64,7 @@ export function DownloadLanding() {
       <header className="site-header" id="top">
         <div className="header wrap">
           <a className="brand" href="#top" aria-label="토선생 처음으로">
-            <img src="/download-landing/logo.png" alt="" />
+            <img src="/download-landing/logo.webp" alt="" />
             토선생
           </a>
           <nav className="nav" aria-label="주 메뉴">
@@ -130,7 +130,9 @@ export function DownloadLanding() {
             </div>
             <div className="hero-art">
               <img
-                src="/download-landing/phones-light.svg"
+                src="/download-landing/hero-phones-1030.webp"
+                srcSet="/download-landing/hero-phones-600.webp 600w, /download-landing/hero-phones-800.webp 800w, /download-landing/hero-phones-1030.webp 1030w"
+                sizes="(max-width: 700px) 100vw, 510px"
                 alt="토선생 앱의 모의고사 홈과 파트별 점수 분석을 보여주는 두 대의 휴대폰"
                 width="1030"
                 height="1090"
@@ -180,7 +182,7 @@ export function DownloadLanding() {
                 <span className="scene-orbit" aria-hidden="true"></span>
                 <div className="scene-phone">
                   <img
-                    src="/download-landing/score.png"
+                    src="/download-landing/score.webp"
                     width="780"
                     height="1475"
                     alt="토선생 내 실력 확인 실제 앱 화면"
@@ -189,7 +191,7 @@ export function DownloadLanding() {
                 </div>
                 <div className="scene-detail" aria-hidden="true">
                   <img
-                    src="/download-landing/score-detail.svg"
+                    src="/download-landing/score-detail.webp"
                     width="730"
                     height="900"
                     alt=""
@@ -230,7 +232,7 @@ export function DownloadLanding() {
                 <span className="scene-orbit" aria-hidden="true"></span>
                 <div className="scene-phone">
                   <img
-                    src="/download-landing/feedback.png"
+                    src="/download-landing/feedback.webp"
                     width="780"
                     height="1536"
                     alt="토선생 파트별 피드백 실제 앱 화면"
@@ -239,7 +241,7 @@ export function DownloadLanding() {
                 </div>
                 <div className="scene-detail" aria-hidden="true">
                   <img
-                    src="/download-landing/feedback-detail.svg"
+                    src="/download-landing/feedback-detail.webp"
                     width="710"
                     height="425"
                     alt=""
@@ -280,7 +282,7 @@ export function DownloadLanding() {
                 <span className="scene-orbit" aria-hidden="true"></span>
                 <div className="scene-phone">
                   <img
-                    src="/download-landing/pronunciation.png"
+                    src="/download-landing/pronunciation.webp"
                     width="780"
                     height="1341"
                     alt="토선생 발음 분석 실제 앱 화면"
@@ -289,7 +291,7 @@ export function DownloadLanding() {
                 </div>
                 <div className="scene-detail" aria-hidden="true">
                   <img
-                    src="/download-landing/pronunciation-detail.svg"
+                    src="/download-landing/pronunciation-detail.webp"
                     width="627"
                     height="390"
                     alt=""
@@ -330,7 +332,7 @@ export function DownloadLanding() {
                 <span className="scene-orbit" aria-hidden="true"></span>
                 <div className="scene-phone">
                   <img
-                    src="/download-landing/retry.png"
+                    src="/download-landing/retry.webp"
                     width="780"
                     height="1454"
                     alt="토선생 재답변 비교 실제 앱 화면"
@@ -339,7 +341,7 @@ export function DownloadLanding() {
                 </div>
                 <div className="scene-detail" aria-hidden="true">
                   <img
-                    src="/download-landing/retry-detail.svg"
+                    src="/download-landing/retry-detail.webp"
                     width="715"
                     height="330"
                     alt=""
@@ -380,7 +382,7 @@ export function DownloadLanding() {
                 <span className="scene-orbit" aria-hidden="true"></span>
                 <div className="scene-phone">
                   <img
-                    src="/download-landing/history.png"
+                    src="/download-landing/history.webp"
                     width="780"
                     height="1475"
                     alt="토선생 모의고사 기록 실제 앱 화면"
@@ -389,7 +391,7 @@ export function DownloadLanding() {
                 </div>
                 <div className="scene-detail" aria-hidden="true">
                   <img
-                    src="/download-landing/history-detail.svg"
+                    src="/download-landing/history-detail.webp"
                     width="730"
                     height="470"
                     alt=""
