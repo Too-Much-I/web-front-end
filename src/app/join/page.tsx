@@ -13,8 +13,8 @@ const DESCRIPTION =
 /**
  * 앱의 '공유하기'로만 들어오는 친구 초대 페이지. 웹 메뉴에서는 링크하지 않는다.
  *
- * 앱은 짧은 링크 /i/<추천 코드>를 공유하고, 그 라우트가 UTM을 붙여 이 페이지로 리다이렉트한다
- * (src/app/i/[code]/route.ts). 도착 주소: /invite?code=<추천 코드>&utm_source=native_share&...
+ * 앱은 /invite/<추천 코드>를 공유하고, 그 라우트가 UTM을 붙여 이 페이지로 리다이렉트한다
+ * (src/app/invite/[code]/route.ts). 도착 주소: /join?code=<추천 코드>&utm_source=native_share&...
  *
  * 사람마다 코드만 다른 같은 화면이라 색인할 이유가 없다. 사이트맵에도 넣지 않는다.
  * openGraph를 직접 정의하면 루트 레이아웃의 값이 통째로 교체되므로 이미지도 여기서 넣는다
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
-    url: `${SITE_URL}/invite`,
+    url: `${SITE_URL}/join`,
     siteName: "토선생",
     images: [{ ...DEFAULT_OG_IMAGE, alt: TITLE }],
     locale: "ko_KR",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function InvitePage({
+export default async function JoinPage({
   searchParams,
 }: {
   searchParams: Promise<{ code?: string | string[] }>;

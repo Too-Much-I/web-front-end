@@ -40,7 +40,7 @@ export function InviteLanding({
   const qr = isDesktop ? (
     <div className="qr">
       <img
-        src="/invite/download-qr.svg"
+        src="/qr/download-app.svg"
         width="104"
         height="104"
         alt="토선생 앱 다운로드 QR 코드"

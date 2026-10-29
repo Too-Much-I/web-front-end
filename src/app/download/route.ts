@@ -4,8 +4,8 @@ import { detectMobilePlatform } from "@/lib/mobile-platform";
 import { APP_STORE_URL, PLAY_STORE_URL, SITE_URL } from "@/lib/site-config";
 
 /**
- * 기기에 맞는 스토어로 보내는 고정 주소. 친구 초대 페이지(/invite)를 노트북에서 열었을 때
- * 보여주는 QR이 이 주소를 담는다(public/invite/download-qr.svg).
+ * 기기에 맞는 스토어로 보내는 고정 주소. 친구 초대 페이지(/join)를 노트북에서 열었을 때
+ * 보여주는 QR이 이 주소를 담는다(public/qr/download-app.svg).
  *
  * QR에는 추천 코드를 넣지 않는다. 코드는 노트북 화면에 그대로 보이니 앱을 받은 뒤 보고
  * 입력하면 되고, 덕분에 QR은 사람마다 새로 그릴 필요 없이 이미지 한 장으로 끝난다.
