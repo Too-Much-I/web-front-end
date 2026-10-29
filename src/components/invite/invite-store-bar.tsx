@@ -35,6 +35,7 @@ export function InviteStoreBar({
 }) {
   const primary = STORES[platform];
   const other = STORES[platform === "ios" ? "android" : "ios"];
+  const label = code ? "코드 복사하고 앱 받기" : "앱 받기";
 
   function handlePrimaryClick() {
     trackEvent("invite_store_click", { store: primary.event });
@@ -53,13 +54,14 @@ export function InviteStoreBar({
           href={primary.url}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label={`${primary.name}에서 토선생 다운로드 (새 탭)`}
+          // 보이는 문구로 시작해야 음성 제어("코드 복사하고 앱 받기")로도 선택된다(WCAG 2.5.3).
+          aria-label={`${label}, ${primary.name} (새 탭)`}
           onClick={handlePrimaryClick}
         >
           <svg aria-hidden="true">
             <use href={primary.icon} />
           </svg>
-          <span>{code ? "코드 복사하고 앱 받기" : "앱 받기"}</span>
+          <span>{label}</span>
         </a>
         <p className="other">
           {platform === "ios" ? "Android는" : "iPhone은"}{" "}
