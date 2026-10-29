@@ -1,0 +1,543 @@
+/*
+ * 친구 초대 페이지(/invite). 토큰·폰트·버튼은 메인 랜딩(landing/landing.css)과 맞춘다.
+ *
+ * 레이아웃: 아랫단이 둥근 연주황 패널(그리드 무늬)이 히어로다. 넓은 화면은 왼쪽에 문구와
+ * 추천 코드, 오른쪽에 노트북 토끼. 좁아지면 1단으로 접히고 장식 → 앱 화면 섹션 순으로 빠진다.
+ * 토끼(특히 왼쪽 아래 노트북)가 잘리지 않도록 패널 밖으로 밀어내지 않는다.
+ */
+.invite-page {
+  --orange: #f97316;
+  --orange-hover: #ea580c;
+  --orange-soft: #fff7ed;
+  --orange-wash: #ffedd5;
+  --peach: #ffdcbc;
+  --cream: #fffcf8;
+  --ink: #27272a;
+  --body: #52525b;
+  --muted: #71717a;
+  --line: #fed7aa;
+  --grid: rgba(249, 115, 22, 0.08);
+  --frame: #1f1f23;
+  --star-blue: #7cc4f4;
+  --star-yellow: #fbbf24;
+
+  min-height: 100dvh;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-site), sans-serif;
+  font-weight: 400;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+  overflow-x: hidden;
+}
+.invite-page * {
+  box-sizing: border-box;
+}
+.invite-page a {
+  color: inherit;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.invite-page button {
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.invite-page a:focus-visible,
+.invite-page button:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 4px;
+}
+.invite-page h1,
+.invite-page h2,
+.invite-page strong {
+  font-weight: 400;
+}
+.invite-page em {
+  font-style: normal;
+  color: var(--orange);
+}
+.invite-page .invite-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.invite-page .tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: white;
+  font-size: 13px;
+}
+.invite-page .tag.soft {
+  background: var(--orange-wash);
+  color: var(--orange-hover);
+}
+
+/* ── 히어로 패널 ── */
+.invite-page .hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    var(--peach) 0%,
+    var(--orange-soft) 70%,
+    var(--cream) 100%
+  );
+  border-radius: 0 0 40px 40px;
+  padding-inline: 20px;
+}
+.invite-page .hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask: linear-gradient(#000 30%, transparent 95%);
+}
+.invite-page .hero-inner {
+  position: relative;
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.invite-page .topline {
+  position: relative;
+  z-index: 2;
+  align-self: stretch;
+  display: flex;
+  padding-top: 22px;
+}
+.invite-page .brand {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 20px;
+  letter-spacing: -1px;
+  color: var(--orange);
+}
+.invite-page .brand img {
+  width: 28px;
+  height: 28px;
+}
+.invite-page .copy-col {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+  padding-top: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.invite-page h1 {
+  margin: 18px 0 0;
+  font-size: 34px;
+  line-height: 1.18;
+  letter-spacing: -0.05em;
+  text-wrap: balance;
+}
+.invite-page .lede {
+  margin: 16px 0 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--body);
+}
+
+.invite-page .rabbit {
+  position: relative;
+  z-index: 1;
+  width: 250px;
+  max-width: 80%;
+  margin: 24px auto 0;
+  padding-bottom: 28px;
+  pointer-events: none;
+}
+.invite-page .rabbit img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 20px 24px rgba(154, 52, 18, 0.18));
+}
+.invite-page .star {
+  position: absolute;
+  z-index: 1;
+  display: none;
+  pointer-events: none;
+}
+.invite-page .star svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+/* ── 추천 코드 쿠폰 ── */
+.invite-page .invite {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: 420px;
+  display: grid;
+  gap: 10px;
+}
+.invite-page .invite-wide,
+.invite-page .qr-wide {
+  display: none;
+}
+.invite-page .below {
+  max-width: 420px;
+  margin: 24px auto 0;
+  padding: 0 20px 140px;
+  display: grid;
+  gap: 12px;
+}
+.invite-page.is-desktop .below {
+  padding-bottom: 64px;
+}
+.invite-page .ticket {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  text-align: left;
+  background: white;
+  border-radius: 22px;
+  box-shadow: 0 20px 40px -24px rgba(154, 52, 18, 0.35);
+  --notch: 12px;
+  --cut: 104px;
+  /* 절취선 양 끝의 반원 홈 */
+  mask:
+    radial-gradient(
+        circle var(--notch) at calc(100% - var(--cut)) 0,
+        #0000 98%,
+        #000
+      )
+      top / 100% 51% no-repeat,
+    radial-gradient(
+        circle var(--notch) at calc(100% - var(--cut)) 100%,
+        #0000 98%,
+        #000
+      )
+      bottom / 100% 51% no-repeat;
+}
+.invite-page .ticket-main {
+  min-width: 0;
+  padding: 18px 20px;
+  display: grid;
+  gap: 4px;
+}
+.invite-page .ticket-main small {
+  font-size: 12px;
+  color: var(--muted);
+}
+.invite-page .ticket-main strong {
+  font-size: 24px;
+  letter-spacing: 0.12em;
+  user-select: all;
+  -webkit-user-select: all;
+}
+.invite-page .ticket-stub {
+  width: var(--cut);
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  border-left: 2px dashed var(--line);
+}
+.invite-page .copy {
+  border: 0;
+  border-radius: 999px;
+  min-height: 44px;
+  padding: 11px 18px;
+  background: var(--orange-soft);
+  color: var(--orange-hover);
+  font-size: 14px;
+  transition: background 0.2s;
+}
+.invite-page .copy:hover {
+  background: var(--orange-wash);
+}
+.invite-page .copy.done {
+  background: var(--orange);
+  color: white;
+}
+.invite-page .hint {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ── 노트북: QR ── */
+.invite-page .qr {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  align-items: center;
+  text-align: left;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 16px;
+  max-width: 420px;
+}
+.invite-page .qr img {
+  display: block;
+  width: 104px;
+  height: 104px;
+}
+.invite-page .qr strong {
+  display: block;
+  font-size: 16px;
+  letter-spacing: -0.03em;
+}
+.invite-page .qr p {
+  margin: 6px 0 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* ── 앱 화면 섹션 (768 이상) ── */
+.invite-page .feature {
+  display: none;
+}
+.invite-page .feature-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 96px 20px 112px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 48px;
+  align-items: center;
+}
+.invite-page .phone {
+  width: 260px;
+  border-radius: 46px;
+  padding: 9px;
+  background: var(--frame);
+  box-shadow: 0 30px 60px -30px rgba(154, 52, 18, 0.4);
+}
+.invite-page .phone img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 38px;
+}
+.invite-page .feature h2 {
+  margin: 16px 0 0;
+  font-size: 34px;
+  line-height: 1.3;
+  letter-spacing: -0.04em;
+}
+.invite-page .feature p {
+  max-width: 30em;
+  margin: 16px 0 0;
+  font-size: 17px;
+  line-height: 1.8;
+  color: var(--body);
+}
+
+/* ── 휴대폰 하단 고정 스토어 버튼 ── */
+.invite-page .bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  padding: 12px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+  background: #fffcf8ee;
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--line);
+}
+.invite-page .bar-inner {
+  max-width: 420px;
+  margin: 0 auto;
+  display: grid;
+  gap: 8px;
+}
+.invite-page .store {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 56px;
+  border-radius: 999px;
+  background: var(--orange);
+  color: white;
+  font-size: 16px;
+  transition:
+    background 0.2s,
+    transform 0.1s;
+}
+.invite-page .store:hover {
+  background: var(--orange-hover);
+}
+.invite-page .store:active {
+  transform: scale(0.98);
+}
+.invite-page .store svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  fill: currentColor;
+}
+.invite-page .other {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+.invite-page .other a {
+  color: var(--orange-hover);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .invite-page .rabbit {
+    animation: invite-drift 5s ease-in-out infinite;
+  }
+}
+@keyframes invite-drift {
+  50% {
+    translate: 0 -8px;
+  }
+}
+
+/* ── 폭별 ── */
+@media (min-width: 640px) {
+  .invite-page h1 {
+    font-size: 44px;
+  }
+  .invite-page .lede {
+    font-size: 16px;
+  }
+  .invite-page .rabbit {
+    width: 300px;
+  }
+}
+@media (min-width: 768px) {
+  .invite-page .hero {
+    border-radius: 0 0 56px 56px;
+  }
+  .invite-page h1 {
+    font-size: 52px;
+  }
+  .invite-page .rabbit {
+    width: 340px;
+  }
+  .invite-page .feature {
+    display: block;
+  }
+  .invite-page .star {
+    display: block;
+  }
+  .invite-page .s1 {
+    left: 8%;
+    top: 150px;
+    width: 22px;
+    height: 22px;
+    color: var(--star-blue);
+  }
+  .invite-page .s2 {
+    right: 10%;
+    top: 120px;
+    width: 16px;
+    height: 16px;
+    color: var(--star-yellow);
+  }
+  .invite-page .s3 {
+    display: none;
+  }
+}
+/* 1024 이상: 2단. 문구·쿠폰(·QR)은 왼쪽, 토끼는 오른쪽 */
+@media (min-width: 1024px) {
+  .invite-page .hero-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    min-height: 640px;
+    text-align: left;
+  }
+  .invite-page .topline {
+    grid-column: 1 / -1;
+  }
+  .invite-page .copy-col {
+    align-items: flex-start;
+    padding: 64px 0 88px;
+  }
+  .invite-page h1 {
+    font-size: 60px;
+  }
+  .invite-page .lede {
+    font-size: 18px;
+  }
+  .invite-page .invite-wide {
+    display: grid;
+    margin-top: 32px;
+  }
+  .invite-page .invite-wide.hint,
+  .invite-page .invite-wide .hint {
+    text-align: left;
+  }
+  .invite-page .qr-wide {
+    display: block;
+    margin-top: 12px;
+  }
+  .invite-page .below {
+    display: none;
+  }
+  .invite-page .rabbit {
+    position: absolute;
+    right: 0;
+    bottom: 40px;
+    width: clamp(380px, 36vw, 480px);
+    max-width: 46%;
+    margin: 0;
+    padding: 0;
+  }
+  .invite-page .s1 {
+    left: 46%;
+    top: 110px;
+  }
+  .invite-page .s2 {
+    right: 6%;
+    top: 96px;
+  }
+  .invite-page .s3 {
+    display: block;
+    left: 52%;
+    top: 420px;
+    width: 18px;
+    height: 18px;
+    color: var(--orange);
+  }
+  .invite-page .feature-inner {
+    gap: 96px;
+  }
+  .invite-page .phone {
+    width: 300px;
+  }
+  .invite-page .feature h2 {
+    font-size: 40px;
+  }
+}
+@media (min-width: 1280px) {
+  .invite-page h1 {
+    font-size: 68px;
+  }
+  .invite-page .feature h2 {
+    font-size: 44px;
+  }
+}

@@ -11,7 +11,8 @@ import { sendGAEvent } from "@next/third-parties/google";
  * definitions)"에 같은 이름으로 등록되어야 한다. 현재 사용 중인 파라미터:
  * exam_mode("trial"|"full"), target_grade(등급 id), part, question_number,
  * last_question_number, satisfaction, retry_count, grading_type,
- * step(튜토리얼 단계 번호, 0=인트로), share_method("native"|"clipboard")
+ * step(튜토리얼 단계 번호, 0=인트로), share_method("native"|"clipboard"),
+ * copy_trigger("copy_button"|"store_button"), store("app_store"|"play_store")
  */
 export type AnalyticsEventName =
   | "target_grade_select"
@@ -29,7 +30,9 @@ export type AnalyticsEventName =
   | "grading_fail"
   | "reanswer_submit"
   | "result_share"
-  | "survey_submit";
+  | "survey_submit"
+  | "invite_code_copy"
+  | "invite_store_click";
 
 export function trackEvent(
   name: AnalyticsEventName,
